@@ -1,19 +1,21 @@
-# Changelog
+# CHANGELOG.md
 
 ## Unreleased
 
 ### Added
-- Khởi tạo project PhotoConnect
-- Cấu hình Java 26
-- Cấu hình Maven
-- Cấu hình Apache Tomcat 10.1
-- Tạo cấu trúc tài liệu dự án
+- Initial PhotoConnect project specification
+- Solo 8-week roadmap
+- SQL Server architecture
+- Booking workflow
+- WebSocket chat contract
+- Security rules
 
 ### Planned
 - Authentication
 - Photographer profile
 - Portfolio
+- Service package
 - Booking
-- WebSocket chat
+- Realtime chat
 - Review
 - Admin dashboard

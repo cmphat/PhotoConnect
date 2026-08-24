@@ -14,6 +14,10 @@ target/
 # VS Code
 .vscode/
 
+# Build
+bin/
+out/
+
 # Logs
 *.log
 logs/
@@ -22,16 +26,12 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-
 # Secrets
 .env
 application-local.properties
 application-secret.properties
 secrets.properties
 
-# Build output
-bin/
-out/
+# Temporary
+*.tmp
+*.temp
