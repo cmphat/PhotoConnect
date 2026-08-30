@@ -1,0 +1,38 @@
+# PhotoConnect — Git Ignore
+
+# ── Build output ──────────────────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# ── Maven wrapper ─────────────────────────────────────────────────────────────
+.mvn/wrapper/maven-wrapper.jar
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/settings.json
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Spring Boot dev ───────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── !! CREDENTIALS — NEVER COMMIT !! ─────────────────────────────────────────
+# Cloudinary, database, and all other secrets must use environment variables.
+# If you ever use a local properties file for secrets, list it here.
+application-local.properties
+application-secret.properties
+.env
+.env.*
+*.env.local
+cloudinary.properties
+secrets.properties

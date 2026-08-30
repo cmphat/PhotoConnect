@@ -1,0 +1,345 @@
+/* ==========================================================================
+   PhotoConnect – Editorial Design System
+   Aesthetic: Contemporary Photography Platform, Magazine Layout
+   ========================================================================== */
+
+:root {
+    /* Palette */
+    --bg-dark: #0a0a0a;
+    --bg-dark-secondary: #121212;
+    
+    --bg-light: #f4f2ed;
+    --bg-light-secondary: #e9e6df;
+    
+    --text-on-dark: #f5f5f2;
+    --text-on-light: #111111;
+    --text-muted: #7c7c78;
+    
+    --border-dark: rgba(255, 255, 255, 0.15);
+    --border-light: rgba(17, 17, 17, 0.15);
+    
+    /* Typography */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Animation */
+    --transition-fast: 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-slow: 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-on-dark);
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    line-height: 1.5;
+}
+
+main { flex: 1; }
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+/* ── Typography Hierarchy ──────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    margin-top: 0;
+    letter-spacing: -0.03em;
+}
+
+.hero-display {
+    font-size: clamp(4rem, 10vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.editorial-heading {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+}
+
+.section-index {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* ── Navigation ────────────────────────────────────────────────────────── */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    border-bottom: 1px solid var(--border-dark);
+    position: relative;
+    z-index: 1000;
+}
+
+.nav-container.transparent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-brand {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+    margin-left: 2.5rem;
+}
+
+.nav-link {
+    font-size: 0.9rem;
+    color: var(--text-on-dark);
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+}
+
+.nav-link:hover {
+    opacity: 1;
+}
+
+/* ── Links & Buttons ───────────────────────────────────────────────────── */
+.primary-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--text-on-dark);
+    padding-bottom: 4px;
+    transition: opacity var(--transition-fast);
+}
+
+.primary-link:hover {
+    opacity: 0.6;
+}
+
+.text-link {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color var(--transition-fast);
+}
+
+.text-link:hover {
+    color: var(--text-on-dark);
+}
+
+.submit-btn {
+    background-color: var(--text-on-dark);
+    color: var(--bg-dark);
+    border: none;
+    padding: 1.25rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.submit-btn:hover {
+    opacity: 0.8;
+}
+
+/* ── Layout & Containers ───────────────────────────────────────────────── */
+.editorial-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 3rem;
+}
+
+/* ── Authentication Layout (60/40 Split) ───────────────────────────────── */
+.auth-layout {
+    display: flex;
+    flex: 1;
+}
+
+.auth-visual {
+    flex: 0 0 55%;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-dark-secondary);
+}
+
+.auth-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+}
+
+.auth-brand-overlay {
+    position: absolute;
+    top: 3rem;
+    left: 3rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    z-index: 10;
+}
+
+.auth-form-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    background-color: var(--bg-dark);
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 440px;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-dark);
+    color: var(--text-on-dark);
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
+    font-family: var(--font-primary);
+    transition: border-color var(--transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--text-on-dark);
+}
+
+/* ── Photo Frame & Grid ────────────────────────────────────────────────── */
+.photo-frame {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-dark-secondary);
+}
+
+.photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.photo-frame:hover img {
+    transform: scale(1.03);
+}
+
+.photographer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 4rem 2rem;
+}
+
+.photographer-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.photographer-card .photo-frame {
+    aspect-ratio: 4/5;
+    margin-bottom: 1.5rem;
+}
+
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.card-name {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.card-arrow {
+    transition: transform var(--transition-fast);
+}
+
+.photographer-card:hover .card-arrow {
+    transform: translateX(4px);
+}
+
+/* ── Three.js Hook ─────────────────────────────────────────────────────── */
+#three-hero-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 991px) {
+    .auth-layout {
+        flex-direction: column;
+    }
+    .auth-visual {
+        flex: none;
+        height: 30vh;
+    }
+    .editorial-heading {
+        font-size: clamp(2rem, 8vw, 3rem);
+    }
+    .nav-container {
+        padding: 1.25rem 1.5rem;
+    }
+    .editorial-container {
+        padding: 0 1.5rem;
+    }
+    .photographer-grid {
+        grid-template-columns: 1fr;
+    }
+}
