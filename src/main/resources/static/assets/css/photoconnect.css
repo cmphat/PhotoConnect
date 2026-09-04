@@ -343,3 +343,41 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Badges ────────────────────────────────────────────────────────────── */
+.pc-badge-pending,
+.pc-badge-accepted,
+.pc-badge-rejected,
+.pc-badge-cancelled,
+.pc-badge-completed {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+}
+
+.pc-badge-pending {
+    color: #ffc107;
+    border-color: rgba(255,193,7,0.3);
+}
+
+.pc-badge-accepted {
+    color: #28a745;
+    border-color: rgba(40,167,69,0.3);
+}
+
+.pc-badge-rejected,
+.pc-badge-cancelled {
+    color: #dc3545;
+    border-color: rgba(220,53,69,0.3);
+}
+
+.pc-badge-completed {
+    color: #17a2b8;
+    border-color: rgba(23,162,184,0.3);
+}
+

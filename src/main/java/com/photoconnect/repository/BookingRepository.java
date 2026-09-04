@@ -12,9 +12,25 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE b.customer.id = :customerId
+            ORDER BY b.createdAt DESC
+            """)
+    List<Booking> findByCustomerIdWithDetails(@Param("customerId") Long customerId);
 
-    List<Booking> findByPhotographerProfileIdOrderByCreatedAtDesc(Long photographerProfileId);
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE p.user.id = :photographerUserId
+            ORDER BY b.createdAt DESC
+            """)
+    List<Booking> findByPhotographerUserIdWithDetails(@Param("photographerUserId") Long photographerUserId);
 
     @Query("""
             SELECT b FROM Booking b

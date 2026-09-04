@@ -106,4 +106,85 @@ public class BookingServiceImpl implements BookingService {
 
         return booking;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<Booking> getCustomerBookings(Long customerUserId) {
+        return bookingRepository.findByCustomerIdWithDetails(customerUserId);
+    }
+
+    @Override
+    public void cancelBooking(Long bookingId, Long customerUserId) {
+        Booking booking = getBookingForCustomer(bookingId, customerUserId);
+
+        if (booking.getStatus() == BookingStatus.PENDING || booking.getStatus() == BookingStatus.ACCEPTED) {
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
+        } else {
+            throw new InvalidBookingException("Cannot cancel booking in current state: " + booking.getStatus());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Booking getBookingForPhotographer(Long bookingId, Long photographerUserId) {
+        Booking booking = bookingRepository.findByIdWithDetails(bookingId)
+                .orElseThrow(() -> new InvalidBookingException("Booking not found."));
+
+        if (booking.getPhotographerProfile() == null || 
+            booking.getPhotographerProfile().getUser() == null || 
+            !booking.getPhotographerProfile().getUser().getId().equals(photographerUserId)) {
+            throw new InvalidBookingException("You are not authorized to view this booking.");
+        }
+
+        return booking;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<Booking> getPhotographerBookings(Long photographerUserId) {
+        return bookingRepository.findByPhotographerUserIdWithDetails(photographerUserId);
+    }
+
+    @Override
+    public void acceptBooking(Long bookingId, Long photographerUserId) {
+        Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
+
+        // Validate photographer status
+        if (booking.getPhotographerProfile().getVerificationStatus() != PhotographerVerificationStatus.APPROVED ||
+            booking.getPhotographerProfile().getUser().getStatus() != UserStatus.ACTIVE) {
+            throw new InvalidBookingException("Only active and approved photographers can accept bookings.");
+        }
+
+        if (booking.getStatus() == BookingStatus.PENDING) {
+            booking.setStatus(BookingStatus.ACCEPTED);
+            bookingRepository.save(booking);
+        } else {
+            throw new InvalidBookingException("Only PENDING bookings can be accepted.");
+        }
+    }
+
+    @Override
+    public void rejectBooking(Long bookingId, Long photographerUserId) {
+        Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
+
+        if (booking.getStatus() == BookingStatus.PENDING) {
+            booking.setStatus(BookingStatus.REJECTED);
+            bookingRepository.save(booking);
+        } else {
+            throw new InvalidBookingException("Only PENDING bookings can be rejected.");
+        }
+    }
+
+    @Override
+    public void completeBooking(Long bookingId, Long photographerUserId) {
+        Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
+
+        if (booking.getStatus() == BookingStatus.ACCEPTED) {
+            booking.setStatus(BookingStatus.COMPLETED);
+            bookingRepository.save(booking);
+        } else {
+            throw new InvalidBookingException("Only ACCEPTED bookings can be marked as completed.");
+        }
+    }
 }

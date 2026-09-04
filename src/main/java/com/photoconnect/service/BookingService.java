@@ -20,10 +20,41 @@ public interface BookingService {
 
     /**
      * Retrieves a booking and verifies customer ownership.
-     *
-     * @param bookingId      the booking ID
-     * @param customerUserId the authenticated customer user ID
-     * @return the Booking entity
      */
     Booking getBookingForCustomer(Long bookingId, Long customerUserId);
+
+    /**
+     * Retrieves all bookings for a customer.
+     */
+    java.util.List<Booking> getCustomerBookings(Long customerUserId);
+
+    /**
+     * Customer cancels a booking.
+     */
+    void cancelBooking(Long bookingId, Long customerUserId);
+
+    /**
+     * Retrieves a booking and verifies photographer ownership.
+     */
+    Booking getBookingForPhotographer(Long bookingId, Long photographerUserId);
+
+    /**
+     * Retrieves all bookings for a photographer.
+     */
+    java.util.List<Booking> getPhotographerBookings(Long photographerUserId);
+
+    /**
+     * Photographer accepts a booking.
+     */
+    void acceptBooking(Long bookingId, Long photographerUserId);
+
+    /**
+     * Photographer rejects a booking.
+     */
+    void rejectBooking(Long bookingId, Long photographerUserId);
+
+    /**
+     * Photographer completes a booking.
+     */
+    void completeBooking(Long bookingId, Long photographerUserId);
 }

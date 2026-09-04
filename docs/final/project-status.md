@@ -41,13 +41,16 @@
 - **Premium Photographer Marketplace + Search & Filter (TASK-012)**: Upgraded `/photographers` with dynamic search by keyword (name, bio, city), filter by city, minimum/maximum starting price, and minimum experience. Enforced strict server-side `APPROVED`-only visibility at the JPQL query layer. Implemented cover image resolution using Cloudinary portfolio assets with an elegant dark editorial fallback. Completely redesigned marketplace UI with a dark editorial aesthetic, custom shared design system (`photoconnect.css`), responsive filter panel, interactive cards with hover lift, and refined empty states.
 - **Premium Photographer Booking Flow (TASK-013)**: Implemented customer-to-photographer booking creation flow. Allows an authenticated `CUSTOMER` to request a photoshoot session with an `APPROVED` photographer via `GET /photographers/{id}/book` and `POST /photographers/{id}/book`. Enforces price snapshotting (`agreedPrice` locked in from photographer's `priceFrom`), prevents self-booking (`customer.id != photographer.user.id`), blocks non-approved/inactive accounts, strictly isolates customer identity to server-side session `userId`, sets initial status `PENDING`, and provides a dark editorial confirmation page (`/bookings/{id}/success`) with ownership verification.
 
+- **Booking Management & Status Workflow (TASK-014)**: Completed full customer and photographer booking management panels. Photographers can view and manage inbound booking requests, accepting, rejecting, or completing them. Customers can view their bookings and cancel pending/accepted bookings. Added a centralized state machine protecting transitions in the Service layer (e.g. `PENDING` -> `ACCEPTED`) and fixed N+1 issues using `JOIN FETCH` repository queries. All repository legacy test calls were updated accordingly.
+- **Deposit and Payment Foundation (TASK-015)**: Introduced `Deposit` entity (`@OneToOne` mapped to `Booking`) and `DepositStatus` to secure `ACCEPTED` bookings. Added a simulated development payment flow that automatically calculates a 30% deposit requirement, protects route authorization, and idempotently updates `Deposit` status to `PAID` with a fake reference. Controlled by `photoconnect.payment.simulation-enabled` flag. **Note**: Real payment gateway integration is NOT IMPLEMENTED.
+
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
-- `users`, `photographer_profiles`, `portfolio_images`, and `bookings` tables mapped with foreign keys.
-- **Verification**: `users`, `photographer_profiles`, and `bookings` table definitions match JPA entity models.
+- `users`, `photographer_profiles`, `portfolio_images`, `bookings`, and `deposits` tables mapped with foreign keys.
+- **Verification**: Database schemas accurately reflect JPA entity models.
 
 ## Test Status
-- 135 automated unit, service, controller, and DTO tests pass with 0 failures, 0 errors, and 0 skipped (2026-08-30).
+- 175 automated unit, service, controller, and repository tests pass with 0 failures, 0 errors, and 0 skipped.
 - TDD approach strictly followed.
 
 ## How to Run the Project
@@ -56,9 +59,9 @@
 - Set `DB_USERNAME` and `DB_PASSWORD` before database-backed commands. Set the three Cloudinary environment variables documented in `docs/SETUP.md` before real uploads.
 
 ## Known Issues
-- Real Cloudinary upload/delete browser verification is pending because credentials were unavailable.
-- Runtime approved-photographer detail verification is pending because no approved profile existed in the local database.
-- Human visual verification for marketplace search & filter and booking flow is pending.
+- Real Cloudinary upload/delete browser verification is pending.
+- Real payment gateway is not integrated; simulation is used.
+- Human visual verification for deposit payment flow is pending.
 
 ## Next Task
-- TASK-014: Booking Management & Photographer Accept/Reject Flow (not started).
+- TASK-016: Photographer Availability and Scheduling (not started).

@@ -72,10 +72,10 @@ public class BookingRepositoryIntegrationTests {
     @AfterEach
     void tearDown() {
         // Clean up child bookings first, then profile, then users
-        List<Booking> customerBookings = bookingRepository.findByCustomerIdOrderByCreatedAtDesc(customerUser.getId());
+        List<Booking> customerBookings = bookingRepository.findByCustomerIdWithDetails(customerUser.getId());
         bookingRepository.deleteAll(customerBookings);
 
-        List<Booking> profileBookings = bookingRepository.findByPhotographerProfileIdOrderByCreatedAtDesc(photographerProfile.getId());
+        List<Booking> profileBookings = bookingRepository.findByPhotographerUserIdWithDetails(photographerUser.getId());
         bookingRepository.deleteAll(profileBookings);
 
         photographerProfileRepository.delete(photographerProfile);
@@ -117,7 +117,7 @@ public class BookingRepositoryIntegrationTests {
         Booking booking2 = new Booking(customerUser, photographerProfile, LocalDate.now().plusDays(4), LocalTime.of(14, 0), "Loc 2", null, new BigDecimal("1800000.00"));
         bookingRepository.save(booking2);
 
-        List<Booking> results = bookingRepository.findByCustomerIdOrderByCreatedAtDesc(customerUser.getId());
+        List<Booking> results = bookingRepository.findByCustomerIdWithDetails(customerUser.getId());
         assertThat(results).hasSize(2);
         assertThat(results.get(0).getCustomer().getId()).isEqualTo(customerUser.getId());
     }

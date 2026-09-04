@@ -45,6 +45,9 @@ class BookingControllerTest {
     @MockBean
     private PublicPhotographerService publicPhotographerService;
 
+    @MockBean
+    private com.photoconnect.service.DepositService depositService;
+
     private PhotographerPublicDto samplePhotographer;
     private MockHttpSession session;
 

@@ -261,4 +261,127 @@ class BookingServiceTest {
                 .isInstanceOf(InvalidBookingException.class)
                 .hasMessageContaining("Booking not found");
     }
+
+    // --- State Transition Tests ---
+
+    @Test
+    void cancelBooking_whenPending_shouldSucceed() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.cancelBooking(50L, 1L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void cancelBooking_whenAccepted_shouldSucceed() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.ACCEPTED);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.cancelBooking(50L, 1L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void cancelBooking_whenCompleted_shouldFail() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.cancelBooking(50L, 1L))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("Cannot cancel booking");
+    }
+
+    @Test
+    void acceptBooking_whenPending_shouldSucceed() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.acceptBooking(50L, 2L); // Photographer user ID is 2L
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void acceptBooking_whenRejected_shouldFail() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.REJECTED);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.acceptBooking(50L, 2L))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("Only PENDING bookings can be accepted");
+    }
+
+    @Test
+    void rejectBooking_whenPending_shouldSucceed() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.rejectBooking(50L, 2L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.REJECTED);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void completeBooking_whenAccepted_shouldSucceed() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.ACCEPTED);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.completeBooking(50L, 2L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.COMPLETED);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void completeBooking_whenPending_shouldFail() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.completeBooking(50L, 2L))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("Only ACCEPTED bookings can be marked as completed");
+    }
+
+    @Test
+    void getBookingForPhotographer_wrongPhotographer_shouldFail() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.getBookingForPhotographer(50L, 99L))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("You are not authorized to view this booking");
+    }
 }

@@ -26,11 +26,14 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final PublicPhotographerService publicPhotographerService;
+    private final com.photoconnect.service.DepositService depositService;
 
     public BookingController(BookingService bookingService,
-                             PublicPhotographerService publicPhotographerService) {
+                             PublicPhotographerService publicPhotographerService,
+                             com.photoconnect.service.DepositService depositService) {
         this.bookingService = bookingService;
         this.publicPhotographerService = publicPhotographerService;
+        this.depositService = depositService;
     }
 
     /**
@@ -121,5 +124,64 @@ public class BookingController {
         } catch (InvalidBookingException ex) {
             return "redirect:/photographers";
         }
+    }
+
+    /**
+     * List customer bookings.
+     */
+    @GetMapping("/bookings")
+    public String listCustomerBookings(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        java.util.List<Booking> bookings = bookingService.getCustomerBookings(userId);
+        model.addAttribute("bookings", bookings.stream().map(com.photoconnect.dto.BookingViewDto::from).toList());
+        return "bookings";
+    }
+
+    /**
+     * View customer booking details.
+     */
+    @GetMapping("/bookings/{id}")
+    public String viewCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Booking booking = bookingService.getBookingForCustomer(bookingId, userId);
+            model.addAttribute("booking", com.photoconnect.dto.BookingViewDto.from(booking));
+            
+            // Add deposit information
+            com.photoconnect.dto.DepositViewDto deposit = depositService.getCustomerDeposit(bookingId, userId);
+            model.addAttribute("deposit", deposit);
+            
+            return "booking-detail";
+        } catch (InvalidBookingException ex) {
+            return "redirect:/bookings";
+        }
+    }
+
+    /**
+     * Cancel customer booking.
+     */
+    @PostMapping("/bookings/{id}/cancel")
+    public String cancelCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            bookingService.cancelBooking(bookingId, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Booking cancelled successfully.");
+        } catch (InvalidBookingException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
     }
 }
