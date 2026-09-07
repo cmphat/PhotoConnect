@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="en_US" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,12 +162,7 @@
 </head>
 <body>
 
-    <nav class="nav-container transparent">
-        <a class="nav-brand" style="color: white;" href="/">PhotoConnect</a>
-        <div class="nav-links">
-            <a class="nav-link" style="color: white;" href="/photographers">← Directory</a>
-        </div>
-    </nav>
+    <jsp:include page="fragments/navbar.jsp" />
 
     <main>
         <!-- ── Cover Region ────────────────────────────────────────────── -->

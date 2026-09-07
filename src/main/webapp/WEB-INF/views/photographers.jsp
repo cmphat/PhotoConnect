@@ -2,66 +2,20 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="en_US" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Discover and connect with top-tier verified professional photographers on PhotoConnect. Search by location, style, price, and experience.">
-    <title>Curated Photographers – PhotoConnect</title>
+    <title>Discover Photographers – PhotoConnect</title>
     
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- PhotoConnect Custom Design System -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-    
-    <style>
-        .filter-panel {
-            padding: 3rem 0;
-            border-bottom: 1px solid var(--border-dark);
-            margin-bottom: 4rem;
-        }
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            align-items: flex-end;
-        }
-        .filter-btn {
-            background-color: var(--text-on-dark);
-            color: var(--bg-dark);
-            border: none;
-            padding: 0.65rem 1.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity var(--transition-fast);
-            display: inline-flex;
-            justify-content: center;
-        }
-        .filter-btn:hover { opacity: 0.8; }
-        .filter-btn-outline {
-            background: transparent;
-            color: var(--text-on-dark);
-            border: 1px solid var(--border-dark);
-            padding: 0.65rem 1.5rem;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-flex;
-            justify-content: center;
-            transition: border-color var(--transition-fast);
-        }
-        .filter-btn-outline:hover { border-color: var(--text-on-dark); }
-        .results-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-    </style>
 </head>
 <body>
 
@@ -71,10 +25,9 @@
         <!-- ── Editorial Hero ────────────────────────────────────────── -->
         <section style="padding: 6rem 0 2rem 0;">
             <div class="editorial-container">
-                <span class="section-index">Verified Directory</span>
-                <h1 class="editorial-heading" style="margin-bottom: 1.5rem;">Curated Visual Artists</h1>
-                <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 700px; font-weight: 300;">
-                    Explore an exclusive selection of vetted professional photographers specializing in editorial, portrait, wedding, and commercial storytelling.
+                <h1 class="hero-display" style="margin-bottom: 1rem; font-size: clamp(3rem, 6vw, 6rem);">Discover<br>Photographers</h1>
+                <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 600px; font-weight: 300;">
+                    Explore a curated selection of professional visual artists specializing in editorial, portrait, and commercial storytelling.
                 </p>
             </div>
         </section>
@@ -203,3 +156,4 @@
 
 </body>
 </html>
+

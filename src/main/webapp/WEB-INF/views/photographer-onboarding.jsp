@@ -6,99 +6,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Become a Photographer – PhotoConnect</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Join the Roster – PhotoConnect</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PhotoConnect Custom Design System -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    
+    <style>
+        /* Specific page tweaks can go here if absolutely necessary, but we try to keep it in photoconnect.css */
+        .onboarding-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #ff6b6b;
+            padding: 1rem;
+            border-left: 2px solid #dc3545;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .onboarding-info {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 2px solid var(--text-on-dark);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">PhotoConnect</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.userId}">
-                            <li class="nav-item">
-                                <span class="nav-link">Hello, <c:out value="${sessionScope.userFullName}"/></span>
-                            </li>
-                            <c:if test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
-                                <li class="nav-item"><a class="nav-link" href="/photographer/onboarding-status">Photographer Status</a></li>
-                            </c:if>
-                            <li class="nav-item">
-                                <form action="/logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
-                                </form>
-                            </li>
-                        </c:when>
-                        <c:otherwise>
-                            <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-                        </c:otherwise>
-                    </c:choose>
-                </ul>
-            </div>
+
+    <jsp:include page="fragments/navbar.jsp" />
+
+    <main class="auth-layout">
+        <div class="auth-visual">
+            <div class="auth-brand-overlay">PhotoConnect<br><span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Creator Network</span></div>
+            <img src="https://images.unsplash.com/photo-1554046920-90dc5f3ac6ed?q=80&w=2000&auto=format&fit=crop" alt="Editorial Photographer in Studio">
         </div>
-    </nav>
-
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Apply to Become a Photographer</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-info">
-                            <strong>Please note:</strong> Your photographer profile will be reviewed by our team before it becomes publicly visible. You will receive a status of <em>Pending Review</em> after submission.
-                        </div>
-
-                        <c:if test="${not empty onboardingError}">
-                            <div class="alert alert-danger">
-                                <c:out value="${onboardingError}"/>
-                            </div>
-                        </c:if>
-
-                        <form:form action="/become-photographer" method="post" modelAttribute="profileRequest">
-                            <div class="mb-3">
-                                <label for="displayName" class="form-label fw-semibold">Display Name <span class="text-danger">*</span></label>
-                                <form:input path="displayName" id="displayName" cssClass="form-control" placeholder="e.g. Jane Doe Photography"/>
-                                <form:errors path="displayName" cssClass="text-danger small"/>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="bio" class="form-label fw-semibold">Bio <span class="text-danger">*</span></label>
-                                <form:textarea path="bio" id="bio" cssClass="form-control" rows="5" placeholder="Tell clients about your photography style, experience, and specialties..."/>
-                                <form:errors path="bio" cssClass="text-danger small"/>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="city" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
-                                <form:input path="city" id="city" cssClass="form-control" placeholder="e.g. Ho Chi Minh City"/>
-                                <form:errors path="city" cssClass="text-danger small"/>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="experienceYears" class="form-label fw-semibold">Years of Experience <span class="text-danger">*</span></label>
-                                    <form:input path="experienceYears" id="experienceYears" type="number" cssClass="form-control" placeholder="e.g. 3"/>
-                                    <form:errors path="experienceYears" cssClass="text-danger small"/>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="priceFrom" class="form-label fw-semibold">Starting Price (VND) <span class="text-danger">*</span></label>
-                                    <form:input path="priceFrom" id="priceFrom" type="number" cssClass="form-control" placeholder="e.g. 1500000"/>
-                                    <form:errors path="priceFrom" cssClass="text-danger small"/>
-                                </div>
-                            </div>
-
-                            <div class="d-grid mt-3">
-                                <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
-                            </div>
-                        </form:form>
-                    </div>
+        
+        <div class="auth-form-container">
+            <div class="auth-form">
+                <h1 class="editorial-heading" style="font-size: 2.5rem; margin-bottom: 2rem;">Join the Roster</h1>
+                
+                <div class="onboarding-info">
+                    Your photographer profile will be reviewed by our team before it becomes publicly visible. You will receive a status of <strong>Pending Review</strong> after submission.
                 </div>
+
+                <c:if test="${not empty onboardingError}">
+                    <div class="onboarding-error">
+                        <c:out value="${onboardingError}"/>
+                    </div>
+                </c:if>
+
+                <form:form action="/become-photographer" method="post" modelAttribute="profileRequest">
+                    <div class="form-group">
+                        <label for="displayName" class="form-label">Display Name *</label>
+                        <form:input path="displayName" id="displayName" cssClass="form-input" placeholder="e.g. Jane Doe Photography"/>
+                        <form:errors path="displayName" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio" class="form-label">Bio *</label>
+                        <form:textarea path="bio" id="bio" cssClass="form-input" rows="4" placeholder="Tell clients about your photography style..."/>
+                        <form:errors path="bio" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city" class="form-label">City *</label>
+                        <form:input path="city" id="city" cssClass="form-input" placeholder="e.g. Ho Chi Minh City"/>
+                        <form:errors path="city" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="experienceYears" class="form-label">Years of Experience *</label>
+                            <form:input path="experienceYears" id="experienceYears" type="number" cssClass="form-input" placeholder="e.g. 3"/>
+                            <form:errors path="experienceYears" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="priceFrom" class="form-label">Starting Price (VND) *</label>
+                            <form:input path="priceFrom" id="priceFrom" type="number" cssClass="form-input" placeholder="e.g. 1500000"/>
+                            <form:errors path="priceFrom" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" style="margin-top: 1.5rem;">Submit Application</button>
+                </form:form>
             </div>
         </div>
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

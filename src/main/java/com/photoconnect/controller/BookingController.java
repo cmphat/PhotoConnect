@@ -97,7 +97,7 @@ public class BookingController {
             Booking booking = bookingService.createBooking(userId, photographerId, bookingRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Your booking request has been submitted successfully!");
             return "redirect:/bookings/" + booking.getId() + "/success";
-        } catch (SelfBookingNotAllowedException | InvalidBookingException ex) {
+        } catch (SelfBookingNotAllowedException | InvalidBookingException | com.photoconnect.exception.PhotographerUnavailableException ex) {
             model.addAttribute("photographer", photographer);
             model.addAttribute("minBookingDate", LocalDate.now().toString());
             model.addAttribute("errorMessage", ex.getMessage());

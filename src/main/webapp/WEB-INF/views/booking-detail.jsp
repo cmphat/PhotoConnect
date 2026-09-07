@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="en_US" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,79 +17,93 @@
 <body>
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 4rem 3rem;">
-        <div style="max-width: 800px; margin: 0 auto;">
-            <a href="/bookings" style="display: inline-block; margin-bottom: 2rem; font-size: 0.9rem; text-decoration: none;">&larr; Back to My Bookings</a>
+    <main style="padding: 6rem 0; min-height: 80vh;">
+        <div class="editorial-container" style="max-width: 800px;">
+            <div style="margin-bottom: 2rem;">
+                <a href="/bookings" class="text-link" style="font-size: 0.9rem;">&larr; Back to My Bookings</a>
+            </div>
             
-            <h1 class="editorial-title" style="font-size: 2.5rem; margin-bottom: 1rem;">Booking Details</h1>
+            <h1 class="editorial-title" style="margin-bottom: 1rem;">Booking Details</h1>
 
             <c:if test="${not empty successMessage}">
-                <div class="pc-alert-warning" style="background: rgba(40, 167, 69, 0.1); border-color: rgba(40, 167, 69, 0.2); color: #28a745;">
+                <div style="color: #34d399; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(52, 211, 153, 0.2);">
                     ${successMessage}
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
-                <div class="pc-alert-warning" style="color: #dc3545; border-color: rgba(220,53,69,0.2);">
+                <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
                     ${errorMessage}
                 </div>
             </c:if>
 
-            <div class="pc-content-section">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
+            <div style="border: 1px solid var(--border); padding: 3rem; border-radius: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-dark);">
                     <div>
-                        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Session with ${booking.photographerName}</h2>
-                        <p style="color: var(--text-muted);">Created on ${booking.createdAt}</p>
+                        <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Session with ${booking.photographerName}</h2>
+                        <c:if test="${not empty booking.createdAt}">
+                            <fmt:parseDate value="${fn:substring(booking.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedCreatedAt" type="date" />
+                            <p style="color: var(--text-muted);">Created on <fmt:formatDate value="${parsedCreatedAt}" pattern="MMM d, yyyy" /></p>
+                        </c:if>
                     </div>
-                    <span class="pc-badge-${fn:toLowerCase(booking.status)}">${booking.status}</span>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;">
+                        <span style="font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted);">
+                            Status: <strong style="color: var(--text-color);">${booking.status}</strong>
+                        </span>
+                        <a href="/bookings/${booking.id}/chat" class="pc-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            💬 Open Chat
+                        </a>
+                    </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
                     <div>
-                        <span class="pc-label">Date & Time</span>
-                        <div style="font-size: 1.1rem;">${booking.bookingDate} at ${booking.bookingTime}</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Date & Time</div>
+                        <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
+                        <div style="font-size: 1.1rem;"><fmt:formatDate value="${parsedBookingDate}" pattern="MMM d, yyyy" /> at ${booking.bookingTime}</div>
                     </div>
                     <div>
-                        <span class="pc-label">Agreed Price</span>
-                        <div style="font-size: 1.1rem;">$<fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0.00" /></div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Agreed Rate</div>
+                        <div style="font-size: 1.1rem;"><fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND</div>
                     </div>
                     <div style="grid-column: span 2;">
-                        <span class="pc-label">Location</span>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Shoot Location</div>
                         <div style="font-size: 1.1rem;">${booking.location}</div>
                     </div>
                     <c:if test="${not empty booking.notes}">
                         <div style="grid-column: span 2;">
-                            <span class="pc-label">Additional Notes</span>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Additional Notes</div>
                             <div style="font-size: 1rem; color: var(--text-muted); line-height: 1.6;">${booking.notes}</div>
                         </div>
                     </c:if>
                 </div>
 
                 <c:if test="${booking.status == 'ACCEPTED'}">
-                    <div style="margin-top: 2rem; padding: 2rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px;">
-                        <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-color);">Deposit Information</h3>
+                    <div style="margin-top: 3rem; padding: 2.5rem; border: 1px solid var(--border); background: var(--bg-dark-secondary);">
+                        <h3 class="editorial-heading" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Deposit Information</h3>
                         <c:choose>
                             <c:when test="${deposit == null || deposit.status == 'PENDING'}">
-                                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                                <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
                                     A 30% deposit is required to secure this booking.
                                     <c:if test="${deposit != null}">
-                                        <br><strong>Deposit Amount: $<fmt:formatNumber value="${deposit.amount}" pattern="#,##0.00" /></strong>
+                                        <br><span style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Deposit Amount: <fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</span>
                                     </c:if>
                                 </p>
-                                <a href="/bookings/${booking.id}/deposit" class="pc-btn-primary" style="display: inline-block;">Pay Deposit</a>
+                                <a href="/bookings/${booking.id}/deposit" class="pc-btn-primary" style="display: inline-block; padding: 1rem 2rem;">Pay Deposit</a>
                             </c:when>
                             <c:when test="${deposit.status == 'PAID'}">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                                     <div>
-                                        <span class="pc-label">Deposit Paid</span>
-                                        <div style="font-size: 1.1rem; color: #28a745;">$<fmt:formatNumber value="${deposit.amount}" pattern="#,##0.00" /></div>
+                                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Deposit Paid</div>
+                                        <div style="font-size: 1.1rem;"><fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</div>
                                     </div>
                                     <div>
-                                        <span class="pc-label">Payment Reference</span>
+                                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Reference</div>
                                         <div style="font-size: 1.1rem;">${deposit.paymentReference}</div>
                                     </div>
-                                    <div>
-                                        <span class="pc-label">Paid At</span>
-                                        <div style="font-size: 1.1rem;">${deposit.paidAt}</div>
+                                    <div style="grid-column: span 2;">
+                                        <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Paid At</div>
+                                        <fmt:parseDate value="${fn:substring(deposit.paidAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedPaidAt" type="date" />
+                                        <div style="font-size: 1.1rem;"><fmt:formatDate value="${parsedPaidAt}" pattern="MMM d, yyyy" /></div>
                                     </div>
                                 </div>
                             </c:when>
@@ -97,9 +112,9 @@
                 </c:if>
 
                 <c:if test="${booking.status == 'PENDING' || booking.status == 'ACCEPTED'}">
-                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark);">
                         <form action="/bookings/${booking.id}/cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
-                            <button type="submit" class="pc-btn-outline" style="color: #dc3545 !important; border-color: rgba(220,53,69,0.5);">Cancel Booking</button>
+                            <button type="submit" class="pc-btn-outline" style="border: none; padding-left: 0; padding-right: 0; color: var(--text-muted);">Cancel Booking</button>
                         </form>
                     </div>
                 </c:if>

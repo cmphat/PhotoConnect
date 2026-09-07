@@ -56,3 +56,15 @@ The foundation is prepared for future rules:
 - `DepositServiceTest`: Validates 30% calculation, status transitions, idempotency, and authorization rules using Mockito.
 - `DepositRepositoryIntegrationTests`: Validates database constraints and the `@OneToOne` mapping using an H2/SQLServer integration test.
 - `DepositControllerTest`: Verifies web layer routing and authorization using `MockMvc`.
+
+## Runtime Verification (Status: PASS)
+
+Manual runtime verification has confirmed:
+- [x] **Deposit Access**: Authenticated `CUSTOMER` can access the deposit page for an `ACCEPTED` booking (`GET /bookings/{id}/deposit`).
+- [x] **30% Calculation**: Deposit amount is exactly 30% of `Booking.agreedPrice`, calculated server-side.
+  - Verified example: `agreedPrice = 10,000,000 VND` -> `deposit = 3,000,000 VND`.
+- [x] **Simulated Payment**: Development payment action (`POST /bookings/{id}/deposit/simulate-payment`) succeeds.
+- [x] **Status Update**: Deposit status transitions to `PAID`.
+- [x] **Reference Generation**: A `DEV-...` payment reference is generated and persisted.
+- [x] **Confirmation**: Deposit paid details and reference code are displayed on the booking detail page.
+

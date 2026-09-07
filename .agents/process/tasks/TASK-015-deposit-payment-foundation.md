@@ -37,22 +37,31 @@ This task will NOT integrate a real payment gateway. We are building the data mo
 - Only the authenticated Customer who owns the Booking can view or pay the deposit.
 
 ## 6. Implementation Checklist
-- `[ ]` inspect current booking flow
-- `[ ]` design Deposit entity
-- `[ ]` create DepositStatus enum
-- `[ ]` create Deposit entity
-- `[ ]` create DepositRepository
-- `[ ]` create DepositService
-- `[ ]` calculate deposit server-side
-- `[ ]` prevent duplicate deposit
-- `[ ]` prevent deposit before ACCEPTED
-- `[ ]` create customer deposit page
-- `[ ]` create development simulated payment action
-- `[ ]` protect ownership
-- `[ ]` add tests
-- `[ ]` integration tests
-- `[ ]` regression tests
-- `[ ]` build
-- `[ ]` runtime verify
-- `[ ]` documentation
-- `[ ]` human verification
+- `[x]` inspect current booking flow
+- `[x]` design Deposit entity
+- `[x]` create DepositStatus enum
+- `[x]` create Deposit entity
+- `[x]` create DepositRepository
+- `[x]` create DepositService
+- `[x]` calculate deposit server-side
+- `[x]` prevent duplicate deposit
+- `[x]` prevent deposit before ACCEPTED
+- `[x]` create customer deposit page
+- `[x]` create development simulated payment action
+- `[x]` protect ownership
+- `[x]` add tests
+- `[x]` integration tests
+- `[x]` regression tests
+- `[x]` build
+- `[x]` runtime verify
+- `[x]` documentation
+- `[x]` human verification (Status: PASS)
+
+## 7. Human Verification Results (Status: PASS)
+- CUSTOMER creates booking (starts as PENDING).
+- PHOTOGRAPHER accepts booking (transitions to ACCEPTED).
+- CUSTOMER accesses `/bookings/{id}/deposit`.
+- 30% calculation verified: `agreedPrice = 10,000,000 VND` -> `deposit = 3,000,000 VND`.
+- Simulated development payment succeeds.
+- Deposit status becomes `PAID`.
+- DEV reference code generated and displayed.

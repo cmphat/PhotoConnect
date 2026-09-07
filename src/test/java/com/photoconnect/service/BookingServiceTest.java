@@ -9,6 +9,7 @@ import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.InvalidBookingException;
+import com.photoconnect.exception.PhotographerUnavailableException;
 import com.photoconnect.exception.SelfBookingNotAllowedException;
 import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.PhotographerProfileRepository;
@@ -43,6 +44,9 @@ class BookingServiceTest {
 
     @Mock
     private PhotographerProfileRepository photographerProfileRepository;
+
+    @Mock
+    private ScheduleService scheduleService;
 
     @InjectMocks
     private BookingServiceImpl bookingService;
@@ -90,6 +94,7 @@ class BookingServiceTest {
     void createBooking_success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(true);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking b = invocation.getArgument(0);
             b.setId(100L);
@@ -118,6 +123,7 @@ class BookingServiceTest {
         photographerProfile.setPriceFrom(null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(true);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Booking result = bookingService.createBooking(1L, 10L, validRequest);
@@ -134,6 +140,19 @@ class BookingServiceTest {
         assertThatThrownBy(() -> bookingService.createBooking(2L, 10L, validRequest))
                 .isInstanceOf(SelfBookingNotAllowedException.class)
                 .hasMessageContaining("You cannot book your own photographer profile");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void createBooking_photographerUnavailable_shouldThrowException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(false);
+
+        assertThatThrownBy(() -> bookingService.createBooking(1L, 10L, validRequest))
+                .isInstanceOf(PhotographerUnavailableException.class)
+                .hasMessageContaining("The photographer is not available on this date.");
 
         verify(bookingRepository, never()).save(any());
     }

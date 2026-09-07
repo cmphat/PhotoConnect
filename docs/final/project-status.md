@@ -16,12 +16,12 @@
 - Microsoft SQL Server JDBC Driver
 - SQL Server connectivity
 - Cloudinary Java SDK
+- Spring WebSocket + STOMP (SockJS)
 
 ## Planned Technologies
 - Spring Security
 - JWT
-- WebSocket
-- payment integration
+- payment gateway sandbox integration
 - advanced UI animation
 - AI functionality
 
@@ -41,16 +41,19 @@
 - **Premium Photographer Marketplace + Search & Filter (TASK-012)**: Upgraded `/photographers` with dynamic search by keyword (name, bio, city), filter by city, minimum/maximum starting price, and minimum experience. Enforced strict server-side `APPROVED`-only visibility at the JPQL query layer. Implemented cover image resolution using Cloudinary portfolio assets with an elegant dark editorial fallback. Completely redesigned marketplace UI with a dark editorial aesthetic, custom shared design system (`photoconnect.css`), responsive filter panel, interactive cards with hover lift, and refined empty states.
 - **Premium Photographer Booking Flow (TASK-013)**: Implemented customer-to-photographer booking creation flow. Allows an authenticated `CUSTOMER` to request a photoshoot session with an `APPROVED` photographer via `GET /photographers/{id}/book` and `POST /photographers/{id}/book`. Enforces price snapshotting (`agreedPrice` locked in from photographer's `priceFrom`), prevents self-booking (`customer.id != photographer.user.id`), blocks non-approved/inactive accounts, strictly isolates customer identity to server-side session `userId`, sets initial status `PENDING`, and provides a dark editorial confirmation page (`/bookings/{id}/success`) with ownership verification.
 
-- **Booking Management & Status Workflow (TASK-014)**: Completed full customer and photographer booking management panels. Photographers can view and manage inbound booking requests, accepting, rejecting, or completing them. Customers can view their bookings and cancel pending/accepted bookings. Added a centralized state machine protecting transitions in the Service layer (e.g. `PENDING` -> `ACCEPTED`) and fixed N+1 issues using `JOIN FETCH` repository queries. All repository legacy test calls were updated accordingly.
-- **Deposit and Payment Foundation (TASK-015)**: Introduced `Deposit` entity (`@OneToOne` mapped to `Booking`) and `DepositStatus` to secure `ACCEPTED` bookings. Added a simulated development payment flow that automatically calculates a 30% deposit requirement, protects route authorization, and idempotently updates `Deposit` status to `PAID` with a fake reference. Controlled by `photoconnect.payment.simulation-enabled` flag. **Note**: Real payment gateway integration is NOT IMPLEMENTED.
+- **Booking Management & Status Workflow (TASK-014)**: Completed full customer and photographer booking management panels. Photographers can view and manage inbound booking requests, accepting, rejecting, or completing them. Customers can view their bookings and cancel pending/accepted bookings. Added a centralized state machine protecting transitions in the Service layer (e.g. `PENDING` -> `ACCEPTED`) and fixed N+1 issues using `JOIN FETCH` repository queries. Manual runtime verification confirmed customer creation and photographer `PENDING -> ACCEPTED` transition (PASS); `ACCEPTED -> COMPLETED` verification is pending.
+- **Deposit and Payment Foundation (TASK-015)**: Introduced `Deposit` entity (`@OneToOne` mapped to `Booking`) and `DepositStatus` to secure `ACCEPTED` bookings. Added a simulated development payment flow that automatically calculates a 30% deposit requirement, protects route authorization, and idempotently updates `Deposit` status to `PAID` with a fake reference. Controlled by `photoconnect.payment.simulation-enabled` flag. **Runtime Verification**: Confirmed PASS (30% deposit calculation, dev payment simulation, DEV reference generation).
+- **UI Unification Pass (VISUAL-PASS-001)**: Replaced default Bootstrap components with the custom PhotoConnect editorial design system across all remaining pages including booking flows, deposit pages, photographer dashboards (portfolio, status, bookings), customer dashboards, and the admin panel. Consolidated shared CSS, improved responsive layout, unified `navbar.jsp` usage, removed legacy SaaS-style styling, and standardized currency to VND to enforce a premium photography-first aesthetic.
+- **Photographer Availability and Scheduling (TASK-017)**: Implemented photographer availability management. Photographers can block specific dates in their dashboard. Validation added to `BookingService` to prevent scheduling on blocked dates. Resolved runtime ClassCastException where `userRole` session String was cast to `UserRole`. Completed language consistency pass standardizing all dates, numbers, and UI to English (`en_US`, `MMM d, yyyy`). Full test suite included (192 tests); schedule page rendering and session compatibility confirmed PASS; blocked-date rejection flow remains PENDING.
+- **Real-Time Booking Chat (TASK-018)**: Implemented real-time messaging between booking participants using Spring WebSocket + STOMP (`/ws`, `/topic/booking/{id}/chat`, `/app/chat.send`) with persistent SQL Server storage (`messages` table), eager JOIN FETCH retrieval, session-derived authorization, automatic recipient resolution, unread tracking, and an automatic HTTP REST fallback (`/api/bookings/{id}/messages`). UI integrated into booking details and standalone editorial chat page (`chat.jsp`). 27 new tests added (219 total passing tests, 0 failures, 0 errors).
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
-- `users`, `photographer_profiles`, `portfolio_images`, `bookings`, and `deposits` tables mapped with foreign keys.
+- `users`, `photographer_profiles`, `portfolio_images`, `bookings`, `deposits`, `photographer_unavailable_dates`, and `messages` tables mapped with foreign keys.
 - **Verification**: Database schemas accurately reflect JPA entity models.
 
 ## Test Status
-- 175 automated unit, service, controller, and repository tests pass with 0 failures, 0 errors, and 0 skipped.
+- 219 automated unit, service, controller, and repository tests pass with 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
 - TDD approach strictly followed.
 
 ## How to Run the Project
@@ -60,8 +63,14 @@
 
 ## Known Issues
 - Real Cloudinary upload/delete browser verification is pending.
-- Real payment gateway is not integrated; simulation is used.
-- Human visual verification for deposit payment flow is pending.
+- Real payment gateway is not integrated; development simulation is used.
+- Human visual verification for photographer availability booking rejection and unblocking (TASK-017) is pending.
+- Human visual verification for multi-user real-time chat (TASK-018) is pending.
 
-## Next Task
-- TASK-016: Photographer Availability and Scheduling (not started).
+## Current Task Status
+- TASK-014: Booking Management & Status Workflow — Runtime: PENDING -> ACCEPTED (PASS); ACCEPTED -> COMPLETED (PENDING).
+- TASK-015: Deposit and Payment Foundation — Human Verification: PASS.
+- TASK-017: Photographer Availability and Scheduling — Human Verification: PENDING.
+- TASK-018: Real-Time Booking Chat — Human Verification: PENDING.
+
+

@@ -34,18 +34,24 @@ Allowed:
 - `photographer-booking-detail.jsp`
 
 ## 6. Checklist
-- [ ] Create BookingViewDto
-- [ ] Implement BookingRepository queries
-- [ ] Implement Service methods (Customer: get list, get single, cancel)
-- [ ] Implement Service methods (Photographer: get list, get single, accept, reject, complete)
-- [ ] Implement Controller for Customer (`/bookings`, `/bookings/{id}`, `/bookings/{id}/cancel`)
-- [ ] Implement Controller for Photographer (`/photographer/bookings`, etc.)
-- [ ] Create Customer JSPs (`bookings.jsp`, `booking-detail.jsp`)
-- [ ] Create Photographer JSPs (`photographer-bookings.jsp`, `photographer-booking-detail.jsp`)
-- [ ] Update Navbar with Booking links
-- [ ] Write Service and Controller Tests
-- [ ] Run `mvn test` and `mvn package`
-- [ ] Write documentation
+- [x] Create BookingViewDto
+- [x] Implement BookingRepository queries
+- [x] Implement Service methods (Customer: get list, get single, cancel)
+- [x] Implement Service methods (Photographer: get list, get single, accept, reject, complete)
+- [x] Implement Controller for Customer (`/bookings`, `/bookings/{id}`, `/bookings/{id}/cancel`)
+- [x] Implement Controller for Photographer (`/photographer/bookings`, etc.)
+- [x] Create Customer JSPs (`bookings.jsp`, `booking-detail.jsp`)
+- [x] Create Photographer JSPs (`photographer-bookings.jsp`, `photographer-booking-detail.jsp`)
+- [x] Update Navbar with Booking links
+- [x] Write Service and Controller Tests
+- [x] Run `mvn test` and `mvn package`
+- [x] Write documentation
 
 ## 7. Result & Status
-- Work in Progress
+- **Implementation**: Complete.
+- **Manual Verification Status**:
+  - `PENDING -> ACCEPTED`: PASS (Verified in browser).
+  - Customer booking creation & listing: PASS.
+  - Photographer booking request review: PASS.
+  - `ACCEPTED -> COMPLETED`: PENDING (User to verify manually).
+

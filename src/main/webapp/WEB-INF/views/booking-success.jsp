@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="en_US" />
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Booking request submitted successfully on PhotoConnect.">
     <title>Booking Submitted – PhotoConnect</title>
-    
-    <!-- Bootstrap Grid -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,98 +21,90 @@
 
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main class="py-5">
-        <div class="container">
+    <main style="padding: 6rem 0; min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+        <div class="editorial-container" style="max-width: 600px; text-align: center;">
             
-            <div class="pc-success-card">
-                
-                <div class="pc-success-icon-wrap">
+            <div style="margin-bottom: 2rem;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--border); font-size: 1.5rem; margin-bottom: 1.5rem;">
                     ✓
                 </div>
-
-                <div class="pc-hero-tag mb-3 border-0">
-                    <span class="pc-hero-tag-dot bg-success"></span>
-                    <span class="text-success">Request Submitted</span>
-                </div>
-
-                <h1 class="pc-hero-title h2 mb-3">Booking Request Sent</h1>
                 
-                <p class="text-muted mb-4" style="max-width: 520px; margin: 0 auto; line-height: 1.6;">
-                    Your shoot request has been received and routed to <strong class="text-light"><c:out value="${booking.photographerDisplayName}"/></strong>. You will be contacted once the artist reviews your booking.
+                <h1 class="editorial-title" style="margin-bottom: 1rem;">Booking Request Sent</h1>
+                
+                <p style="color: var(--text-muted); line-height: 1.6;">
+                    Your shoot request has been received and routed to <strong style="color: var(--text-color);"><c:out value="${booking.photographerDisplayName}"/></strong>. You will be contacted once the artist reviews your booking.
                 </p>
+            </div>
 
-                <!-- Booking Details Table -->
-                <div class="pc-booking-details-table text-start" style="max-width: 520px; margin: 0 auto 32px auto; background: var(--surface-soft); border-radius: var(--radius-md); padding: 24px;">
-                    
-                    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary border-opacity-25 pb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Reference ID</span>
-                        <span class="font-monospace">#BK-<c:out value="${booking.id}"/></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Photographer</span>
-                        <span><c:out value="${booking.photographerDisplayName}"/></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Shoot Date</span>
-                        <span><c:out value="${booking.bookingDate}"/></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Preferred Time</span>
-                        <span><c:out value="${booking.bookingTime}"/></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Shoot Location</span>
-                        <span class="text-end" style="max-width: 250px;"><c:out value="${booking.location}"/></span>
-                    </div>
-
-                    <c:if test="${not empty booking.notes}">
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted" style="font-size: 0.9rem;">Notes</span>
-                            <span class="text-muted fst-italic text-end" style="max-width: 250px;"><c:out value="${booking.notes}"/></span>
-                        </div>
-                    </c:if>
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Agreed Rate Snapshot</span>
-                        <span style="font-weight: 500;">
-                            <fmt:formatNumber value="${booking.agreedPrice}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
-                        </span>
-                    </div>
-
-                    <div class="d-flex justify-content-between pt-3 border-top border-secondary border-opacity-25">
-                        <span class="text-muted" style="font-size: 0.9rem;">Current Status</span>
-                        <span class="pc-badge-pending">
-                            ● <c:out value="${booking.status}"/>
-                        </span>
-                    </div>
-
+            <!-- Booking Details -->
+            <div style="text-align: left; border: 1px solid var(--border); padding: 2rem; border-radius: 0; margin-bottom: 3rem;">
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-dark);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Reference ID</span>
+                    <span style="font-family: monospace;">#BK-<c:out value="${booking.id}"/></span>
                 </div>
 
-                <!-- Next Actions -->
-                <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 pt-2">
-                    <a href="/photographers" class="pc-btn-primary" id="btn-explore-more">
-                        Explore More Artists
-                    </a>
-                    <a href="/" class="pc-btn-outline">
-                        Back to Home
-                    </a>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Photographer</span>
+                    <span><c:out value="${booking.photographerDisplayName}"/></span>
                 </div>
 
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Shoot Date</span>
+                    <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
+                    <span><fmt:formatDate value="${parsedBookingDate}" pattern="MMM d, yyyy" /></span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Preferred Time</span>
+                    <span><c:out value="${booking.bookingTime}"/></span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Shoot Location</span>
+                    <span style="text-align: right; max-width: 250px;"><c:out value="${booking.location}"/></span>
+                </div>
+
+                <c:if test="${not empty booking.notes}">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Notes</span>
+                        <span style="color: var(--text-muted); font-style: italic; text-align: right; max-width: 250px;"><c:out value="${booking.notes}"/></span>
+                    </div>
+                </c:if>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Agreed Rate Snapshot</span>
+                    <span style="font-weight: 500;">
+                        <fmt:formatNumber value="${booking.agreedPrice}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
+                    </span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 1px solid var(--border-dark);">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Current Status</span>
+                    <span>
+                        <c:out value="${booking.status}"/>
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Next Actions -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+                <a href="/photographers" class="pc-btn-primary" style="padding: 1rem 2rem;">
+                    Explore More Artists
+                </a>
+                <a href="/" class="text-link">
+                    Back to Home
+                </a>
             </div>
 
         </div>
     </main>
 
     <footer class="pc-footer">
-        <div class="container">
+        <div class="editorial-container">
             © 2026 PhotoConnect. Premium Photography Marketplace. All rights reserved.
         </div>
     </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

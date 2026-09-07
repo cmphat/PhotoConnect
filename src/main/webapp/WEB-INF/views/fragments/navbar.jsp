@@ -13,6 +13,7 @@
                     </c:when>
                     <c:when test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
                         <a class="nav-link" href="/photographer/portfolio">Portfolio</a>
+                        <a class="nav-link" href="/photographer/schedule">Schedule</a>
                         <a class="nav-link" href="/photographer/bookings">Booking Requests</a>
                         <a class="nav-link" href="/photographer/onboarding-status">Status</a>
                     </c:when>

@@ -381,3 +381,57 @@ h1, h2, h3, h4, h5, h6 {
     border-color: rgba(23,162,184,0.3);
 }
 
+/* ── Filters & Search ──────────────────────────────────────────────────── */
+.filter-panel {
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    align-items: end;
+}
+
+.filter-btn {
+    background-color: var(--text-on-dark);
+    color: var(--bg-dark);
+    border: none;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+    display: inline-flex;
+    justify-content: center;
+}
+
+.filter-btn:hover {
+    opacity: 0.8;
+}
+
+.filter-btn-outline {
+    background: transparent;
+    color: var(--text-on-dark);
+    border: 1px solid var(--border-dark);
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    transition: border-color var(--transition-fast);
+}
+
+.filter-btn-outline:hover {
+    border-color: var(--text-on-dark);
+}
+
+.results-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}

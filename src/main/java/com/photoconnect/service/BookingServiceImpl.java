@@ -8,10 +8,13 @@ import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.InvalidBookingException;
+import com.photoconnect.exception.PhotographerUnavailableException;
 import com.photoconnect.exception.SelfBookingNotAllowedException;
 import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.PhotographerProfileRepository;
 import com.photoconnect.repository.UserRepository;
+import com.photoconnect.service.BookingService;
+import com.photoconnect.service.ScheduleService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +28,16 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final PhotographerProfileRepository photographerProfileRepository;
+    private final ScheduleService scheduleService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserRepository userRepository,
-                              PhotographerProfileRepository photographerProfileRepository) {
+                              PhotographerProfileRepository photographerProfileRepository,
+                              ScheduleService scheduleService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.photographerProfileRepository = photographerProfileRepository;
+        this.scheduleService = scheduleService;
     }
 
     @Override
@@ -77,7 +83,12 @@ public class BookingServiceImpl implements BookingService {
             throw new SelfBookingNotAllowedException("You cannot book your own photographer profile.");
         }
 
-        // 4. Price Snapshot
+        // 4. Check Availability
+        if (!scheduleService.isDateAvailable(profile.getId(), request.getBookingDate())) {
+            throw new PhotographerUnavailableException("The photographer is not available on this date.");
+        }
+
+        // 5. Price Snapshot
         BigDecimal agreedPrice = profile.getPriceFrom() != null ? profile.getPriceFrom() : BigDecimal.ZERO;
 
         // 5. Persist Booking
