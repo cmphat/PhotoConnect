@@ -27,13 +27,16 @@ public class BookingController {
     private final BookingService bookingService;
     private final PublicPhotographerService publicPhotographerService;
     private final com.photoconnect.service.DepositService depositService;
+    private final com.photoconnect.service.ReviewService reviewService;
 
     public BookingController(BookingService bookingService,
                              PublicPhotographerService publicPhotographerService,
-                             com.photoconnect.service.DepositService depositService) {
+                             com.photoconnect.service.DepositService depositService,
+                             com.photoconnect.service.ReviewService reviewService) {
         this.bookingService = bookingService;
         this.publicPhotographerService = publicPhotographerService;
         this.depositService = depositService;
+        this.reviewService = reviewService;
     }
 
     /**
@@ -158,6 +161,10 @@ public class BookingController {
             // Add deposit information
             com.photoconnect.dto.DepositViewDto deposit = depositService.getCustomerDeposit(bookingId, userId);
             model.addAttribute("deposit", deposit);
+
+            // Add review information
+            com.photoconnect.dto.ReviewDto review = reviewService.getReviewByBookingId(bookingId, userId);
+            model.addAttribute("review", review);
             
             return "booking-detail";
         } catch (InvalidBookingException ex) {

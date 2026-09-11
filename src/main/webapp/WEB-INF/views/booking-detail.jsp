@@ -111,6 +111,44 @@
                     </div>
                 </c:if>
 
+                <c:if test="${booking.status == 'COMPLETED'}">
+                    <div style="margin-top: 3rem; padding: 2.5rem; border: 1px solid var(--border); background: var(--bg-dark-secondary);">
+                        <h3 class="editorial-heading" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Review & Rating</h3>
+                        <c:choose>
+                            <c:when test="${review == null}">
+                                <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+                                    Your shoot session is complete! Let others know about your experience with ${booking.photographerName}.
+                                </p>
+                                <a href="/bookings/${booking.id}/review" class="pc-btn-primary" style="display: inline-block; padding: 1rem 2rem;" id="btn-leave-review">Leave a Review</a>
+                            </c:when>
+                            <c:otherwise>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <div style="color: var(--primary); font-size: 1.25rem; letter-spacing: 0.1em;">
+                                            <c:forEach begin="1" end="${review.rating}">★</c:forEach><c:forEach begin="${review.rating + 1}" end="5">☆</c:forEach>
+                                        </div>
+                                        <span style="font-weight: 500; font-size: 1.1rem;">${review.rating} / 5 Stars</span>
+                                        <c:if test="${not empty review.createdAt}">
+                                            <fmt:parseDate value="${fn:substring(review.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedReviewAt" type="date" />
+                                            <span style="color: var(--text-muted); font-size: 0.85rem;">Reviewed on <fmt:formatDate value="${parsedReviewAt}" pattern="MMM d, yyyy" /></span>
+                                        </c:if>
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${not empty review.comment}">
+                                            <div style="color: var(--text-color); font-size: 1rem; line-height: 1.6; font-style: italic; background: var(--bg-dark); padding: 1.25rem 1.5rem; border-left: 2px solid var(--primary);">
+                                                "${review.comment}"
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">No written comment provided.</div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:if>
+
                 <c:if test="${booking.status == 'PENDING' || booking.status == 'ACCEPTED'}">
                     <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark);">
                         <form action="/bookings/${booking.id}/cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">

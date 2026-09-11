@@ -3,6 +3,7 @@ package com.photoconnect.controller;
 import com.photoconnect.dto.BookingRequest;
 import com.photoconnect.dto.PhotographerPublicDto;
 import com.photoconnect.entity.Booking;
+import com.photoconnect.entity.BookingStatus;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.User;
 import com.photoconnect.exception.InvalidBookingException;
@@ -47,6 +48,9 @@ class BookingControllerTest {
 
     @MockBean
     private com.photoconnect.service.DepositService depositService;
+
+    @MockBean
+    private com.photoconnect.service.ReviewService reviewService;
 
     private PhotographerPublicDto samplePhotographer;
     private MockHttpSession session;
@@ -222,5 +226,31 @@ class BookingControllerTest {
         mockMvc.perform(get("/bookings/101/success").session(session))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/photographers"));
+    }
+
+    @Test
+    void viewCustomerBooking_authorizedCustomer_shouldPopulateReviewAttribute() throws Exception {
+        User customer = new User();
+        customer.setId(1L);
+        customer.setFullName("Customer Jane");
+
+        PhotographerProfile profile = new PhotographerProfile();
+        profile.setId(10L);
+        profile.setDisplayName("Bob's Studio");
+        profile.setUser(customer);
+
+        Booking booking = new Booking(customer, profile, LocalDate.now().minusDays(1), LocalTime.of(14, 0), "District 1", "Notes", new BigDecimal("3000000"));
+        booking.setId(101L);
+        booking.setStatus(BookingStatus.COMPLETED);
+
+        when(bookingService.getBookingForCustomer(101L, 1L)).thenReturn(booking);
+        when(depositService.getCustomerDeposit(101L, 1L)).thenReturn(null);
+        when(reviewService.getReviewByBookingId(101L, 1L)).thenReturn(new com.photoconnect.dto.ReviewDto(1L, 101L, 10L, 5, "Loved it", "Jane", java.time.LocalDateTime.now()));
+
+        mockMvc.perform(get("/bookings/101").session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("booking"))
+                .andExpect(model().attributeExists("review"))
+                .andExpect(forwardedUrl("/WEB-INF/views/booking-detail.jsp"));
     }
 }

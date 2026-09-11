@@ -34,11 +34,14 @@ public class PhotographerController {
 
     private final PublicPhotographerService publicPhotographerService;
     private final PortfolioService portfolioService;
+    private final com.photoconnect.service.ReviewService reviewService;
 
     public PhotographerController(PublicPhotographerService publicPhotographerService,
-                                  PortfolioService portfolioService) {
+                                  PortfolioService portfolioService,
+                                  com.photoconnect.service.ReviewService reviewService) {
         this.publicPhotographerService = publicPhotographerService;
         this.portfolioService = portfolioService;
+        this.reviewService = reviewService;
     }
 
     // ── GET /photographers ────────────────────────────────────────────────
@@ -86,6 +89,11 @@ public class PhotographerController {
             List<PortfolioImagePublicDto> portfolioImages =
                     portfolioService.getPublicPortfolioForProfile(id);
             model.addAttribute("portfolioImages", portfolioImages);
+
+            // Load reviews — safe public DTOs
+            List<com.photoconnect.dto.ReviewDto> reviews =
+                    reviewService.getReviewsForPhotographer(id);
+            model.addAttribute("reviews", reviews);
 
             return "photographer-detail";
         } catch (IllegalArgumentException e) {

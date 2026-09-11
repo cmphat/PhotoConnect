@@ -33,11 +33,14 @@ public class PhotographerPublicDto {
     private final BigDecimal priceFrom;
     private final LocalDateTime createdAt;
     private final String coverImageUrl;
+    private final Double averageRating;
+    private final Integer reviewCount;
 
     private PhotographerPublicDto(Long id, String displayName, String bio,
                                    String city, Integer experienceYears,
                                    BigDecimal priceFrom, LocalDateTime createdAt,
-                                   String coverImageUrl) {
+                                   String coverImageUrl, Double averageRating,
+                                   Integer reviewCount) {
         this.id = id;
         this.displayName = displayName;
         this.bio = bio;
@@ -46,6 +49,8 @@ public class PhotographerPublicDto {
         this.priceFrom = priceFrom;
         this.createdAt = createdAt;
         this.coverImageUrl = coverImageUrl;
+        this.averageRating = averageRating;
+        this.reviewCount = reviewCount;
     }
 
     /**
@@ -68,7 +73,9 @@ public class PhotographerPublicDto {
                 profile.getExperienceYears(),
                 profile.getPriceFrom(),
                 profile.getCreatedAt(),
-                coverImageUrl
+                coverImageUrl,
+                profile.getAverageRating() != null ? profile.getAverageRating() : 0.0,
+                profile.getReviewCount() != null ? profile.getReviewCount() : 0
         );
     }
 
@@ -104,5 +111,13 @@ public class PhotographerPublicDto {
 
     public String getCoverImageUrl() {
         return coverImageUrl;
+    }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
     }
 }

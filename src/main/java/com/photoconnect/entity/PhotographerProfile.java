@@ -39,6 +39,12 @@ public class PhotographerProfile {
     @Column(name = "verification_status", nullable = false, length = 30)
     private PhotographerVerificationStatus verificationStatus = PhotographerVerificationStatus.PENDING;
 
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    @Column(name = "review_count", nullable = false)
+    private Integer reviewCount = 0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -122,6 +128,22 @@ public class PhotographerProfile {
 
     public void setVerificationStatus(PhotographerVerificationStatus verificationStatus) {
         this.verificationStatus = verificationStatus;
+    }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 
     public LocalDateTime getCreatedAt() {

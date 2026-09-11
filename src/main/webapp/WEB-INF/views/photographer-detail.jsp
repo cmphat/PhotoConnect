@@ -189,6 +189,14 @@
                     <c:if test="${not empty photographer.experienceYears}">
                         <span><c:out value="${photographer.experienceYears}"/> Yrs Exp</span>
                     </c:if>
+                    <c:choose>
+                        <c:when test="${photographer.reviewCount > 0}">
+                            <span>★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span>★ New Artist</span>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </section>
@@ -230,6 +238,49 @@
                             </div>
                         </c:otherwise>
                     </c:choose>
+
+                    <!-- Client Reviews Section -->
+                    <div style="margin-top: 5rem;">
+                        <h2 class="editorial-heading" style="font-size: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1.5rem; margin-bottom: 2.5rem;">
+                            Client Reviews
+                            <c:if test="${photographer.reviewCount > 0}">
+                                <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 400; margin-left: 1rem;">
+                                    ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)
+                                </span>
+                            </c:if>
+                        </h2>
+
+                        <c:choose>
+                            <c:when test="${empty reviews}">
+                                <p style="color: var(--text-muted); font-style: italic;">No reviews yet for this artist.</p>
+                            </c:when>
+                            <c:otherwise>
+                                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                    <c:forEach var="rev" items="${reviews}">
+                                        <div style="border: 1px solid var(--border); padding: 2rem; background: var(--bg-dark-secondary);">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <div style="font-weight: 500; font-size: 1.05rem; color: var(--text-color);"><c:out value="${rev.customerName}"/></div>
+                                                    <div style="color: var(--primary); font-size: 1rem; margin-top: 0.25rem;">
+                                                        <c:forEach begin="1" end="${rev.rating}">★</c:forEach><c:forEach begin="${rev.rating + 1}" end="5">☆</c:forEach>
+                                                    </div>
+                                                </div>
+                                                <c:if test="${not empty rev.createdAt}">
+                                                    <fmt:parseDate value="${fn:substring(rev.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedRevDate" type="date" />
+                                                    <span style="color: var(--text-muted); font-size: 0.85rem;"><fmt:formatDate value="${parsedRevDate}" pattern="MMM d, yyyy" /></span>
+                                                </c:if>
+                                            </div>
+                                            <c:if test="${not empty rev.comment}">
+                                                <div style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">
+                                                    <c:out value="${rev.comment}"/>
+                                                </div>
+                                            </c:if>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
                 </div>
 
                 <!-- Right: Booking Sidebar -->
@@ -241,6 +292,18 @@
                         <a href="/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 3rem;" id="btn-book-photographer">
                             Request Booking
                         </a>
+
+                        <div class="stat-row">
+                            <span style="color: var(--text-muted);">Rating</span>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${photographer.reviewCount > 0}">
+                                        ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount})
+                                    </c:when>
+                                    <c:otherwise>No reviews yet</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </div>
 
                         <div class="stat-row">
                             <span style="color: var(--text-muted);">Starting Rate</span>

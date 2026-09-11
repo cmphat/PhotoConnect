@@ -43,6 +43,9 @@ class PhotographerControllerTest {
     @MockBean
     private PortfolioService portfolioService;
 
+    @MockBean
+    private com.photoconnect.service.ReviewService reviewService;
+
     private PhotographerPublicDto sampleDto() {
         com.photoconnect.entity.User user = new com.photoconnect.entity.User();
         user.setId(10L);
@@ -177,7 +180,8 @@ class PhotographerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("photographer-detail"))
                 .andExpect(model().attributeExists("photographer"))
-                .andExpect(model().attributeExists("portfolioImages"));
+                .andExpect(model().attributeExists("portfolioImages"))
+                .andExpect(model().attributeExists("reviews"));
     }
 
     @Test
@@ -189,7 +193,8 @@ class PhotographerControllerTest {
         mockMvc.perform(get("/photographers/1"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("photographer", dto))
-                .andExpect(model().attributeExists("portfolioImages"));
+                .andExpect(model().attributeExists("portfolioImages"))
+                .andExpect(model().attributeExists("reviews"));
     }
 
     /**
