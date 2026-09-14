@@ -7,8 +7,8 @@
 - [ ] Spring project compile
 - [ ] SQL Server connection
 - [ ] Base entity timestamps
-- [ ] Global exception handler
-- [ ] Common API response
+- [x] Global exception handler (TASK-022)
+- [x] Common API response (TASK-022)
 - [ ] Enums
 - [ ] Git baseline
 
@@ -86,7 +86,7 @@
 ## Phase 9 — Hardening
 
 - [ ] Validation
-- [ ] Error codes
+- [x] Error codes (TASK-022)
 - [ ] Transactions
 - [ ] Authorization tests
 - [ ] Search pagination

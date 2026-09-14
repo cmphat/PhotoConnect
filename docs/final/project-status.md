@@ -49,6 +49,7 @@
 - **Booking Reviews & Photographer Ratings (TASK-019)**: Implemented customer review and rating system for completed bookings. Features `Review` entity mapped to `reviews` table with a unique constraint on `booking_id`, rating constraints (1–5), optional trimmed comments (<= 1000 chars), and server-side participant identity resolution from the `Booking` entity. Photographer profile stats (`averageRating`, `reviewCount`) are recalculated from persisted `Review` records. Integrated into booking details (`booking-detail.jsp`), dedicated submission form (`review-form.jsp`), and public photographer profile with client review lists and rating metrics (`photographer-detail.jsp`). 30 new tests added (249 total tests: 227 passing, 0 failures, 0 errors, 22 skipped).
 - **Admin Dashboard & Management (TASK-020)**: Implemented comprehensive administrative management suite. Features platform KPI dashboard (`/admin/dashboard`) with aggregate counts and explicitly disclaimed deposit metrics (TASK-015 development simulation), user search and status management (`/admin/users`) with admin self-protection guards, expanded photographer management with verification filtering and rating statistics (`/admin/photographers`), read-only booking monitoring (`/admin/bookings`), and read-only review monitoring (`/admin/reviews`). Centralized session-based role authorization enforced via `AdminSecurityUtils`. 39 new tests added (288 total tests: 266 passing, 0 failures, 0 errors, 22 skipped).
 - **Admin Review Moderation (TASK-021)**: Implemented review moderation lifecycle and dynamic rating recalculation. Features `ReviewStatus` enum (`VISIBLE`, `HIDDEN`), safe SQL Server migration `V008__add_review_status.sql`, admin moderation endpoints (`POST /admin/reviews/{id}/hide`, `POST /admin/reviews/{id}/unhide`) with feedback alerts and active filter preservation, immediate transactional photographer rating recalculation (`averageRating` and `reviewCount`) from only active `VISIBLE` reviews, public profile visibility isolation (`/photographers/{id}`), and customer booking transparency indicator (`Hidden by moderation`). 32 new tests added (320 total tests: 298 passing, 0 failures, 0 errors, 22 skipped).
+- **Global Exception Handling & Error Code Standardization (TASK-022)**: Implemented centralized `@ControllerAdvice` (`GlobalExceptionHandler`) with intelligent dual-mode content negotiation, standard `ApiResponse<T>` JSON envelope conforming to `docs/API_CONTRACT.md`, full implementation of `docs/ERROR_CODES.md` taxonomy (`ErrorCode` enum), container `/error` interception with `AppErrorController`, custom dark editorial `error.jsp`, domain exception normalization, and `ChatApiController` refactoring. 16 new tests added (336 total tests: 314 passing, 0 failures, 0 errors, 22 skipped).
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
@@ -56,7 +57,7 @@
 - **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` provided for adding `status VARCHAR(20)` with default `VISIBLE` on `reviews`.
 
 ## Test Status
-- 320 tests run with 298 passing, 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
+- 336 tests run with 314 passing, 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
 - TDD approach strictly followed.
 
 ## How to Run the Project
@@ -79,5 +80,6 @@
 - TASK-019: Booking Reviews & Photographer Ratings — Human Verification: PENDING.
 - TASK-020: Admin Dashboard & Management — Human Verification: PASS.
 - TASK-021: Admin Review Moderation — Human Verification: PASS.
+- TASK-022: Global Exception Handling & Error Code Standardization — Human Verification: PASS.
 
 

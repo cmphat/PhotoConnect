@@ -1,7 +1,8 @@
 package com.photoconnect.exception;
 
-public class PhotographerProfileAlreadyExistsException extends RuntimeException {
+public class PhotographerProfileAlreadyExistsException extends PhotoConnectException {
+
     public PhotographerProfileAlreadyExistsException(String message) {
-        super(message);
+        super(ErrorCode.PHOTOGRAPHER_003_PROFILE_EXISTS, message);
     }
 }

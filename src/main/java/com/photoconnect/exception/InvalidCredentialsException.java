@@ -1,7 +1,8 @@
 package com.photoconnect.exception;
 
-public class InvalidCredentialsException extends RuntimeException {
+public class InvalidCredentialsException extends PhotoConnectException {
+
     public InvalidCredentialsException(String message) {
-        super(message);
+        super(ErrorCode.AUTH_001_INVALID_CREDENTIALS, message);
     }
 }

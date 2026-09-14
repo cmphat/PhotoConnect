@@ -107,7 +107,7 @@ Create photographer profile entity
 
 - [ ] Validate toàn bộ form
 - [ ] Fix authorization
-- [ ] Error handling
+- [x] Error handling (TASK-022)
 - [ ] Pagination
 - [ ] Responsive
 - [ ] Seed data

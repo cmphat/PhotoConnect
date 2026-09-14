@@ -1,11 +1,8 @@
 package com.photoconnect.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+public class PhotographerUnavailableException extends PhotoConnectException {
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class PhotographerUnavailableException extends RuntimeException {
     public PhotographerUnavailableException(String message) {
-        super(message);
+        super(ErrorCode.BOOKING_002_TIME_CONFLICT, message);
     }
 }

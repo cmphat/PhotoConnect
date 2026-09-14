@@ -1,7 +1,8 @@
 package com.photoconnect.exception;
 
-public class AccountDisabledException extends RuntimeException {
+public class AccountDisabledException extends PhotoConnectException {
+
     public AccountDisabledException(String message) {
-        super(message);
+        super(ErrorCode.USER_002_ACCOUNT_LOCKED, message);
     }
 }

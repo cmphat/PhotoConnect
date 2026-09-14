@@ -1,7 +1,8 @@
 package com.photoconnect.exception;
 
-public class ReviewAccessDeniedException extends RuntimeException {
+public class ReviewAccessDeniedException extends PhotoConnectException {
+
     public ReviewAccessDeniedException(String message) {
-        super(message);
+        super(ErrorCode.REVIEW_004_NOT_OWNER, message);
     }
 }
