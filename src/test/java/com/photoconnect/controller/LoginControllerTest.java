@@ -3,18 +3,15 @@ package com.photoconnect.controller;
 import com.photoconnect.dto.LoginRequest;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
-import com.photoconnect.exception.AccountDisabledException;
 import com.photoconnect.exception.InvalidCredentialsException;
 import com.photoconnect.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

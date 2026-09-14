@@ -1,6 +1,5 @@
 package com.photoconnect.controller;
 
-import com.photoconnect.dto.BookingViewDto;
 import com.photoconnect.dto.DepositViewDto;
 import com.photoconnect.entity.Booking;
 import com.photoconnect.entity.DepositStatus;

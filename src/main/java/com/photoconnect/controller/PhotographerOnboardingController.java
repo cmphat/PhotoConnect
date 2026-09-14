@@ -1,11 +1,7 @@
 package com.photoconnect.controller;
 
 import com.photoconnect.dto.PhotographerProfileRequest;
-import com.photoconnect.entity.PhotographerProfile;
-import com.photoconnect.entity.PhotographerVerificationStatus;
-import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
-import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.PhotographerProfileAlreadyExistsException;
 import com.photoconnect.service.PhotographerProfileService;
 import jakarta.servlet.http.HttpSession;

@@ -40,4 +40,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE b.id = :id
             """)
     Optional<Booking> findByIdWithDetails(@Param("id") Long id);
+
+    long countByStatus(com.photoconnect.entity.BookingStatus status);
+
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE (:status IS NULL OR b.status = :status)
+            ORDER BY b.createdAt DESC
+            """)
+    List<Booking> findAllWithDetails(@Param("status") com.photoconnect.entity.BookingStatus status);
 }

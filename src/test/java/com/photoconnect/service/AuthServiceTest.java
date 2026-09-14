@@ -2,7 +2,6 @@ package com.photoconnect.service;
 
 import com.photoconnect.dto.LoginRequest;
 import com.photoconnect.entity.User;
-import com.photoconnect.entity.UserRole;
 import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.AccountDisabledException;
 import com.photoconnect.exception.InvalidCredentialsException;

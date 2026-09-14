@@ -7,7 +7,6 @@ import com.photoconnect.entity.Deposit;
 import com.photoconnect.entity.DepositStatus;
 import com.photoconnect.entity.User;
 import com.photoconnect.exception.InvalidBookingException;
-import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.DepositRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

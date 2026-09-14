@@ -171,4 +171,38 @@ class AdminPhotographerServiceTest {
 
         verify(photographerProfileRepository, never()).save(any());
     }
+
+    // ── All / Filtered Photographer queries ────────────────────────────
+
+    @Test
+    void listAllPhotographers_shouldReturnAllProfilesWithUser() {
+        when(photographerProfileRepository.findAllWithUser()).thenReturn(List.of(pendingProfile, approvedProfile));
+
+        List<PhotographerProfile> results = adminPhotographerService.listAllPhotographers();
+
+        assertThat(results).hasSize(2);
+        verify(photographerProfileRepository).findAllWithUser();
+    }
+
+    @Test
+    void listPhotographersByStatus_withStatus_shouldFilterByStatus() {
+        when(photographerProfileRepository.findByVerificationStatusWithUser(PhotographerVerificationStatus.APPROVED))
+                .thenReturn(List.of(approvedProfile));
+
+        List<PhotographerProfile> results = adminPhotographerService.listPhotographersByStatus(PhotographerVerificationStatus.APPROVED);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getVerificationStatus()).isEqualTo(PhotographerVerificationStatus.APPROVED);
+        verify(photographerProfileRepository).findByVerificationStatusWithUser(PhotographerVerificationStatus.APPROVED);
+    }
+
+    @Test
+    void listPhotographersByStatus_nullStatus_shouldReturnAll() {
+        when(photographerProfileRepository.findAllWithUser()).thenReturn(List.of(pendingProfile, approvedProfile));
+
+        List<PhotographerProfile> results = adminPhotographerService.listPhotographersByStatus(null);
+
+        assertThat(results).hasSize(2);
+        verify(photographerProfileRepository).findAllWithUser();
+    }
 }

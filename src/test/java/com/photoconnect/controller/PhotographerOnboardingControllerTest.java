@@ -5,7 +5,6 @@ import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
-import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.PhotographerProfileAlreadyExistsException;
 import com.photoconnect.service.PhotographerProfileService;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;

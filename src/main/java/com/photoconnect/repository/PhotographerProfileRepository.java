@@ -19,6 +19,15 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
 
     Optional<PhotographerProfile> findByUserEmail(String email);
 
+    long countByVerificationStatus(PhotographerVerificationStatus status);
+
+    @Query("""
+            SELECT p FROM PhotographerProfile p
+            JOIN FETCH p.user
+            ORDER BY p.createdAt DESC
+            """)
+    List<PhotographerProfile> findAllWithUser();
+
     // ── Admin queries: JOIN FETCH ensures the User proxy is initialized
     // within the Hibernate session so the JSP can safely access user fields
     // after the transaction closes (open-in-view=false).

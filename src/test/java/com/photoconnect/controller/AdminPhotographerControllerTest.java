@@ -113,7 +113,35 @@ class AdminPhotographerControllerTest {
 
         mockMvc.perform(get("/admin/photographers").session(adminSession()))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("applications", List.of(pending)));
+                .andExpect(model().attribute("applications", List.of(pending)))
+                .andExpect(model().attribute("currentStatus", "PENDING"));
+    }
+
+    @Test
+    void adminGet_withStatusAll_shouldCallListAllPhotographers() throws Exception {
+        PhotographerProfile profile = buildPendingProfile(1L);
+        when(adminPhotographerService.listAllPhotographers()).thenReturn(List.of(profile));
+
+        mockMvc.perform(get("/admin/photographers").param("status", "ALL").session(adminSession()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentStatus", "ALL"))
+                .andExpect(model().attribute("photographers", List.of(profile)));
+
+        verify(adminPhotographerService).listAllPhotographers();
+    }
+
+    @Test
+    void adminGet_withStatusApproved_shouldCallListPhotographersByStatus() throws Exception {
+        PhotographerProfile profile = buildPendingProfile(1L);
+        when(adminPhotographerService.listPhotographersByStatus(PhotographerVerificationStatus.APPROVED))
+                .thenReturn(List.of(profile));
+
+        mockMvc.perform(get("/admin/photographers").param("status", "APPROVED").session(adminSession()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentStatus", "APPROVED"))
+                .andExpect(model().attribute("photographers", List.of(profile)));
+
+        verify(adminPhotographerService).listPhotographersByStatus(PhotographerVerificationStatus.APPROVED);
     }
 
     // ── Detail tests ────────────────────────────────────────────────────

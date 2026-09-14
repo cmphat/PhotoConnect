@@ -32,4 +32,14 @@ public interface AdminPhotographerService {
      * NOTE: User.role remains PHOTOGRAPHER; verification status and account role are separate concepts.
      */
     PhotographerProfile reject(Long profileId);
+
+    /**
+     * Returns all photographer profiles with associated User fetched.
+     */
+    List<PhotographerProfile> listAllPhotographers();
+
+    /**
+     * Returns photographer profiles filtered by verification status with associated User fetched.
+     */
+    List<PhotographerProfile> listPhotographersByStatus(com.photoconnect.entity.PhotographerVerificationStatus status);
 }

@@ -37,4 +37,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             WHERE r.photographerProfile.id = :profileId
             """)
     List<Object[]> getRatingStatsByProfileId(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT r FROM Review r
+            JOIN FETCH r.booking b
+            JOIN FETCH r.customer
+            JOIN FETCH r.photographerProfile p
+            ORDER BY r.createdAt DESC
+            """)
+    List<Review> findAllWithDetails();
 }

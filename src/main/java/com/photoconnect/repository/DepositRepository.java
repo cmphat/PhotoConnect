@@ -22,4 +22,13 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
     Optional<Deposit> findByBookingIdWithDetails(@Param("bookingId") Long bookingId);
 
     boolean existsByBookingId(Long bookingId);
+
+    long countByStatus(com.photoconnect.entity.DepositStatus status);
+
+    @Query("""
+            SELECT COALESCE(SUM(d.amount), 0)
+            FROM Deposit d
+            WHERE d.status = :status
+            """)
+    java.math.BigDecimal sumAmountByStatus(@Param("status") com.photoconnect.entity.DepositStatus status);
 }

@@ -1,7 +1,6 @@
 package com.photoconnect.controller;
 
 import com.photoconnect.entity.PhotographerProfile;
-import com.photoconnect.entity.PhotographerUnavailableDate;
 import com.photoconnect.service.PhotographerProfileService;
 import com.photoconnect.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;

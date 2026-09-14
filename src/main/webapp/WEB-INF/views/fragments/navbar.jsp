@@ -9,7 +9,7 @@
             <c:if test="${not empty sessionScope.userId}">
                 <c:choose>
                     <c:when test="${sessionScope.userRole == 'ADMIN'}">
-                        <a class="nav-link" href="/admin/photographers">Admin</a>
+                        <a class="nav-link" href="/admin/dashboard">Admin</a>
                     </c:when>
                     <c:when test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
                         <a class="nav-link" href="/photographer/portfolio">Portfolio</a>

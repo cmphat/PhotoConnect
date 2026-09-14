@@ -2,9 +2,7 @@ package com.photoconnect.controller;
 
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
-import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
-import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.InvalidStatusTransitionException;
 import com.photoconnect.service.AdminPhotographerService;
 import jakarta.servlet.http.HttpSession;
@@ -47,12 +45,35 @@ public class AdminPhotographerController {
 
     // ── GET /admin/photographers ──────────────────────────────────────────
     @GetMapping
-    public String listPendingApplications(HttpSession session, Model model) {
+    public String listPhotographers(@org.springframework.web.bind.annotation.RequestParam(value = "status", required = false) String statusStr,
+                                    HttpSession session, Model model) {
         String redirect = requireAdmin(session);
         if (redirect != null) return redirect;
 
-        List<PhotographerProfile> pending = adminPhotographerService.listPendingApplications();
-        model.addAttribute("applications", pending);
+        List<PhotographerProfile> profiles;
+        String currentStatus;
+
+        if (statusStr == null || statusStr.isBlank() || "PENDING".equalsIgnoreCase(statusStr)) {
+            profiles = adminPhotographerService.listPendingApplications();
+            currentStatus = "PENDING";
+        } else if ("ALL".equalsIgnoreCase(statusStr)) {
+            profiles = adminPhotographerService.listAllPhotographers();
+            currentStatus = "ALL";
+        } else {
+            try {
+                PhotographerVerificationStatus verStatus = PhotographerVerificationStatus.valueOf(statusStr.trim().toUpperCase());
+                profiles = adminPhotographerService.listPhotographersByStatus(verStatus);
+                currentStatus = verStatus.name();
+            } catch (IllegalArgumentException e) {
+                profiles = adminPhotographerService.listPendingApplications();
+                currentStatus = "PENDING";
+            }
+        }
+
+        model.addAttribute("applications", profiles);
+        model.addAttribute("photographers", profiles);
+        model.addAttribute("currentStatus", currentStatus);
+        model.addAttribute("activeTab", "photographers");
         return "admin-photographers";
     }
 

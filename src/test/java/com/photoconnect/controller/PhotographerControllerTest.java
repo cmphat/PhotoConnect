@@ -2,7 +2,6 @@ package com.photoconnect.controller;
 
 import com.photoconnect.dto.PhotographerPublicDto;
 import com.photoconnect.dto.PhotographerSearchRequest;
-import com.photoconnect.dto.PortfolioImagePublicDto;
 import com.photoconnect.service.PortfolioService;
 import com.photoconnect.service.PublicPhotographerService;
 import org.junit.jupiter.api.Test;

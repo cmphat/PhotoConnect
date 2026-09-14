@@ -47,14 +47,15 @@
 - **Photographer Availability and Scheduling (TASK-017)**: Implemented photographer availability management. Photographers can block specific dates in their dashboard. Validation added to `BookingService` to prevent scheduling on blocked dates. Resolved runtime ClassCastException where `userRole` session String was cast to `UserRole`. Completed language consistency pass standardizing all dates, numbers, and UI to English (`en_US`, `MMM d, yyyy`). Full test suite included (192 tests); schedule page rendering and session compatibility confirmed PASS; blocked-date rejection flow remains PENDING.
 - **Real-Time Booking Chat (TASK-018)**: Implemented real-time messaging between booking participants using Spring WebSocket + STOMP (`/ws`, `/topic/booking/{id}/chat`, `/app/chat.send`) with persistent SQL Server storage (`messages` table), eager JOIN FETCH retrieval, session-derived authorization, automatic recipient resolution, unread tracking, and an automatic HTTP REST fallback (`/api/bookings/{id}/messages`). UI integrated into booking details and standalone editorial chat page (`chat.jsp`). 27 new tests added (219 total passing tests, 0 failures, 0 errors).
 - **Booking Reviews & Photographer Ratings (TASK-019)**: Implemented customer review and rating system for completed bookings. Features `Review` entity mapped to `reviews` table with a unique constraint on `booking_id`, rating constraints (1–5), optional trimmed comments (<= 1000 chars), and server-side participant identity resolution from the `Booking` entity. Photographer profile stats (`averageRating`, `reviewCount`) are recalculated from persisted `Review` records. Integrated into booking details (`booking-detail.jsp`), dedicated submission form (`review-form.jsp`), and public photographer profile with client review lists and rating metrics (`photographer-detail.jsp`). 30 new tests added (249 total tests: 227 passing, 0 failures, 0 errors, 22 skipped).
+- **Admin Dashboard & Management (TASK-020)**: Implemented comprehensive administrative management suite. Features platform KPI dashboard (`/admin/dashboard`) with aggregate counts and explicitly disclaimed deposit metrics (TASK-015 development simulation), user search and status management (`/admin/users`) with admin self-protection guards, expanded photographer management with verification filtering and rating statistics (`/admin/photographers`), read-only booking monitoring (`/admin/bookings`), and read-only review monitoring (`/admin/reviews`). Centralized session-based role authorization enforced via `AdminSecurityUtils`. 39 new tests added (288 total tests: 266 passing, 0 failures, 0 errors, 22 skipped).
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
 - `users`, `photographer_profiles`, `portfolio_images`, `bookings`, `deposits`, `photographer_unavailable_dates`, `messages`, and `reviews` tables mapped with foreign keys.
-- **Verification**: Database schemas accurately reflect JPA entity models.
+- **Verification**: Database schemas accurately reflect JPA entity models. Zero database migrations required for TASK-020.
 
 ## Test Status
-- 249 tests run with 227 passing, 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
+- 288 tests run with 266 passing, 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
 - TDD approach strictly followed.
 
 ## How to Run the Project
@@ -68,6 +69,7 @@
 - Human visual verification for photographer availability booking rejection and unblocking (TASK-017) is pending.
 - Human visual verification for multi-user real-time chat (TASK-018) is pending.
 - Human visual verification for customer review submission and rating updates (TASK-019) is pending.
+- Human visual verification for admin dashboard and management suite (TASK-020) is pending.
 
 ## Current Task Status
 - TASK-014: Booking Management & Status Workflow — Runtime: PENDING -> ACCEPTED (PASS); ACCEPTED -> COMPLETED (PENDING).
@@ -75,5 +77,6 @@
 - TASK-017: Photographer Availability and Scheduling — Human Verification: PENDING.
 - TASK-018: Real-Time Booking Chat — Human Verification: PENDING.
 - TASK-019: Booking Reviews & Photographer Ratings — Human Verification: PENDING.
+- TASK-020: Admin Dashboard & Management — Human Verification: PENDING.
 
 

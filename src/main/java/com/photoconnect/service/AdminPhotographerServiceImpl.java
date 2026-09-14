@@ -86,4 +86,19 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
         profile.setVerificationStatus(PhotographerVerificationStatus.REJECTED);
         return photographerProfileRepository.save(profile);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PhotographerProfile> listAllPhotographers() {
+        return photographerProfileRepository.findAllWithUser();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PhotographerProfile> listPhotographersByStatus(PhotographerVerificationStatus status) {
+        if (status == null) {
+            return photographerProfileRepository.findAllWithUser();
+        }
+        return photographerProfileRepository.findByVerificationStatusWithUser(status);
+    }
 }

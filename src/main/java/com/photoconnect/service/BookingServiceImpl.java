@@ -13,8 +13,6 @@ import com.photoconnect.exception.SelfBookingNotAllowedException;
 import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.PhotographerProfileRepository;
 import com.photoconnect.repository.UserRepository;
-import com.photoconnect.service.BookingService;
-import com.photoconnect.service.ScheduleService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
