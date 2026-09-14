@@ -1,6 +1,7 @@
 package com.photoconnect.dto;
 
 import com.photoconnect.entity.Review;
+import com.photoconnect.entity.ReviewStatus;
 
 import java.time.LocalDateTime;
 
@@ -15,15 +16,21 @@ public class ReviewDto {
     private final Integer rating;
     private final String comment;
     private final String customerName;
+    private final ReviewStatus status;
     private final LocalDateTime createdAt;
 
     public ReviewDto(Long id, Long bookingId, Long photographerProfileId, Integer rating, String comment, String customerName, LocalDateTime createdAt) {
+        this(id, bookingId, photographerProfileId, rating, comment, customerName, ReviewStatus.VISIBLE, createdAt);
+    }
+
+    public ReviewDto(Long id, Long bookingId, Long photographerProfileId, Integer rating, String comment, String customerName, ReviewStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.bookingId = bookingId;
         this.photographerProfileId = photographerProfileId;
         this.rating = rating;
         this.comment = comment;
         this.customerName = customerName;
+        this.status = status != null ? status : ReviewStatus.VISIBLE;
         this.createdAt = createdAt;
     }
 
@@ -42,6 +49,7 @@ public class ReviewDto {
                 review.getRating(),
                 review.getComment(),
                 customerName,
+                review.getStatus() != null ? review.getStatus() : ReviewStatus.VISIBLE,
                 review.getCreatedAt()
         );
     }
@@ -72,5 +80,13 @@ public class ReviewDto {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public ReviewStatus getStatus() {
+        return status;
+    }
+
+    public boolean isHidden() {
+        return ReviewStatus.HIDDEN.equals(status);
     }
 }

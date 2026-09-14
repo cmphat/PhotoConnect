@@ -146,36 +146,36 @@ AdminDashboardService     AdminUserService     AdminPhotographer  AdminBookingSe
 
 ---
 
-## 5. Human Verification Checklist (Status: PENDING)
+## 5. Human Verification Checklist (Status: PASS)
 
-- [ ] 1. Sign in as an `ADMIN` account.
-- [ ] 2. Verify navigation bar shows "Admin" pointing to `/admin/dashboard`.
-- [ ] 3. Access `/admin/dashboard` and verify KPI cards:
+- [x] 1. Sign in as an `ADMIN` account.
+- [x] 2. Verify navigation bar shows "Admin" pointing to `/admin/dashboard`.
+- [x] 3. Access `/admin/dashboard` and verify KPI cards:
   - Platform Membership (Total Users, Customers, Photographers)
   - Verification & Quality (Pending Approvals, Approved Photographers, Client Reviews)
   - Bookings & Engagement (Total Bookings, Pending Bookings, Completed Shoots)
   - Deposit Simulation Metrics (Paid Deposits Count, Simulated Deposit Volume in VND)
   - Verify presence of the Development Simulation Notice banner.
-- [ ] 4. Click "Review Pending Applications" and verify it navigates to `/admin/photographers?status=PENDING`.
-- [ ] 5. Click "Users" in the admin sub-navigation (`/admin/users`):
+- [x] 4. Click "Review Pending Applications" and verify it navigates to `/admin/photographers?status=PENDING`.
+- [x] 5. Click "Users" in the admin sub-navigation (`/admin/users`):
   - Verify list of users with Full Name, Email, Role badge, Status badge, and Registered date.
   - Search by user name or email; verify matching results.
   - Filter by role (`CUSTOMER`, `PHOTOGRAPHER`, `ADMIN`); verify filtered results.
   - Filter by status (`ACTIVE`, `INACTIVE`, `BANNED`); verify filtered results.
   - For a non-admin user, change status from `ACTIVE` to `INACTIVE`; verify flash message and updated badge.
   - Verify the logged-in admin user row displays `(You)` and `Protected (Self)` with no status modification form.
-- [ ] 6. Click "Photographers" in the admin sub-navigation (`/admin/photographers`):
+- [x] 6. Click "Photographers" in the admin sub-navigation (`/admin/photographers`):
   - Switch between Pending Queue, Approved, Rejected, and All Photographers tabs.
   - Verify Display Name, User Email, City, Experience, Starting Rate, Rating stars, Review count, and Verification status.
   - For pending applications, click "Review & Decide", inspect details, and test Approve/Reject.
-- [ ] 7. Click "Bookings" in the admin sub-navigation (`/admin/bookings`):
+- [x] 7. Click "Bookings" in the admin sub-navigation (`/admin/bookings`):
   - Verify read-only table with Shoot Date, Time, Customer, Photographer, Location, Agreed Price, Status, and Created date.
   - Click status tabs (`ALL`, `PENDING`, `ACCEPTED`, `COMPLETED`, `CANCELLED`, `REJECTED`) and verify filtering.
   - Confirm there are no edit/cancel/status buttons (strictly read-only).
-- [ ] 8. Click "Reviews" in the admin sub-navigation (`/admin/reviews`):
+- [x] 8. Click "Reviews" in the admin sub-navigation (`/admin/reviews`):
   - Verify read-only table with Review #, Booking #, Customer, Photographer, Star Rating, Comment, and Submitted date.
   - Confirm there are no edit or delete options (strictly read-only).
-- [ ] 9. Sign out, and attempt to navigate directly to `/admin/dashboard`:
+- [x] 9. Sign out, and attempt to navigate directly to `/admin/dashboard`:
   - Verify immediate redirection to `/login`.
-- [ ] 10. Sign in as a `CUSTOMER` or `PHOTOGRAPHER`, and navigate to `/admin/dashboard`:
+- [x] 10. Sign in as a `CUSTOMER` or `PHOTOGRAPHER`, and navigate to `/admin/dashboard`:
   - Verify immediate redirection to `/`.

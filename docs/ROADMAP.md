@@ -92,12 +92,12 @@ Create photographer profile entity
 
 ## Tuần 6 — Review + Admin
 
-- [ ] Review
-- [ ] Average rating
-- [ ] Admin dashboard
-- [ ] User management
-- [ ] Booking management
-- [ ] Hide review
+- [x] Review (TASK-019)
+- [x] Average rating (TASK-019)
+- [x] Admin dashboard (TASK-020)
+- [x] User management (TASK-020)
+- [x] Booking management (TASK-020)
+- [x] Hide review (TASK-021)
 
 **Kết quả demo:** hoàn chỉnh MVP feature.
 

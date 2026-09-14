@@ -2,6 +2,8 @@ package com.photoconnect.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,6 +49,10 @@ public class Review {
     @Column(name = "comment", length = 1000)
     private String comment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ReviewStatus status = ReviewStatus.VISIBLE;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -62,12 +68,25 @@ public class Review {
         this.photographerProfile = photographerProfile;
         this.rating = rating;
         this.comment = comment;
+        this.status = ReviewStatus.VISIBLE;
+    }
+
+    public Review(Booking booking, User customer, PhotographerProfile photographerProfile, Integer rating, String comment, ReviewStatus status) {
+        this.booking = booking;
+        this.customer = customer;
+        this.photographerProfile = photographerProfile;
+        this.rating = rating;
+        this.comment = comment;
+        this.status = status != null ? status : ReviewStatus.VISIBLE;
     }
 
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = ReviewStatus.VISIBLE;
         }
     }
 
@@ -138,5 +157,13 @@ public class Review {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public ReviewStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReviewStatus status) {
+        this.status = status;
     }
 }

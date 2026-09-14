@@ -77,11 +77,11 @@
 
 ## Phase 8 — Admin
 
-- [ ] Admin dashboard stats
-- [ ] User lock/unlock
-- [ ] Photographer approval
-- [ ] Booking list
-- [ ] Hide review
+- [x] Admin dashboard stats (TASK-020)
+- [x] User lock/unlock (TASK-020)
+- [x] Photographer approval (TASK-009 / TASK-020)
+- [x] Booking list (TASK-020)
+- [x] Hide review (TASK-021)
 
 ## Phase 9 — Hardening
 

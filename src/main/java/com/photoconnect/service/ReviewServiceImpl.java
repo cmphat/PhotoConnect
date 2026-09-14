@@ -85,7 +85,8 @@ public class ReviewServiceImpl implements ReviewService {
                 booking.getCustomer(),
                 booking.getPhotographerProfile(),
                 request.getRating(),
-                trimmedComment
+                trimmedComment,
+                com.photoconnect.entity.ReviewStatus.VISIBLE
         );
         review = reviewRepository.save(review);
 
@@ -141,7 +142,8 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewRepository.existsByBookingId(bookingId);
     }
 
-    private void recalculatePhotographerRating(Long profileId) {
+    @Override
+    public void recalculatePhotographerRating(Long profileId) {
         PhotographerProfile profile = photographerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Photographer profile not found: " + profileId));
 

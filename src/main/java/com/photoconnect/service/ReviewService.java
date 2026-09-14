@@ -14,4 +14,6 @@ public interface ReviewService {
     List<ReviewDto> getReviewsForPhotographer(Long photographerProfileId);
 
     boolean hasReviewForBooking(Long bookingId);
+
+    void recalculatePhotographerRating(Long profileId);
 }

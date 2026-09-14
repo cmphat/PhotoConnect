@@ -132,6 +132,9 @@
                                             <fmt:parseDate value="${fn:substring(review.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedReviewAt" type="date" />
                                             <span style="color: var(--text-muted); font-size: 0.85rem;">Reviewed on <fmt:formatDate value="${parsedReviewAt}" pattern="MMM d, yyyy" /></span>
                                         </c:if>
+                                        <c:if test="${review.status == 'HIDDEN'}">
+                                            <span style="color: #ef4444; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.15rem 0.5rem; border-radius: 2px;">Hidden by moderation</span>
+                                        </c:if>
                                     </div>
                                     <c:choose>
                                         <c:when test="${not empty review.comment}">

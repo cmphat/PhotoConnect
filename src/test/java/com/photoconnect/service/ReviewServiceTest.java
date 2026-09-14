@@ -291,5 +291,32 @@ class ReviewServiceTest {
         assertThat(results).hasSize(2);
         assertThat(results.get(0).getRating()).isEqualTo(5);
         assertThat(results.get(1).getRating()).isEqualTo(4);
+        assertThat(results.get(0).getStatus()).isEqualTo(com.photoconnect.entity.ReviewStatus.VISIBLE);
+    }
+
+    @Test
+    void recalculatePhotographerRating_whenNoReviews_shouldResetToZero() {
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(reviewRepository.getRatingStatsByProfileId(10L)).thenReturn(List.of());
+        when(reviewRepository.findByPhotographerProfileIdWithCustomer(10L)).thenReturn(List.of());
+
+        reviewService.recalculatePhotographerRating(10L);
+
+        verify(photographerProfileRepository).save(photographerProfile);
+        assertThat(photographerProfile.getAverageRating()).isEqualTo(0.0);
+        assertThat(photographerProfile.getReviewCount()).isEqualTo(0);
+    }
+
+    @Test
+    void recalculatePhotographerRating_whenReviewsExist_shouldUpdateAverageAndCount() {
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        Object[] stats = new Object[]{4.75, 4L};
+        when(reviewRepository.getRatingStatsByProfileId(10L)).thenReturn(List.<Object[]>of(stats));
+
+        reviewService.recalculatePhotographerRating(10L);
+
+        verify(photographerProfileRepository).save(photographerProfile);
+        assertThat(photographerProfile.getAverageRating()).isEqualTo(4.75);
+        assertThat(photographerProfile.getReviewCount()).isEqualTo(4);
     }
 }
