@@ -6,6 +6,8 @@ import com.photoconnect.dto.PortfolioImagePublicDto;
 import com.photoconnect.service.PortfolioService;
 import com.photoconnect.service.PublicPhotographerService;
 import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,6 +34,8 @@ import java.util.List;
 @RequestMapping("/photographers")
 public class PhotographerController {
 
+    private static final int MARKETPLACE_PAGE_SIZE = 12;
+
     private final PublicPhotographerService publicPhotographerService;
     private final PortfolioService portfolioService;
     private final com.photoconnect.service.ReviewService reviewService;
@@ -54,18 +58,36 @@ public class PhotographerController {
     @GetMapping
     public String listPhotographers(@ModelAttribute("searchRequest") PhotographerSearchRequest searchRequest,
                                     Model model) {
-        List<PhotographerPublicDto> photographers;
+        Page<PhotographerPublicDto> photographerPage;
+        PhotographerSearchRequest effectiveSearchRequest = searchRequest;
 
         if (searchRequest != null && !searchRequest.isValid()) {
             model.addAttribute("errorMessage", searchRequest.getValidationError());
-            photographers = publicPhotographerService.listApprovedPhotographers();
+            effectiveSearchRequest = new PhotographerSearchRequest();
+            photographerPage = publicPhotographerService.searchPhotographers(
+                    effectiveSearchRequest, PageRequest.of(0, MARKETPLACE_PAGE_SIZE));
         } else {
-            photographers = publicPhotographerService.searchPhotographers(searchRequest);
+            int requestedPage = searchRequest != null ? searchRequest.getPageOrDefault() : 0;
+            photographerPage = publicPhotographerService.searchPhotographers(
+                    searchRequest, PageRequest.of(requestedPage, MARKETPLACE_PAGE_SIZE));
+            if (requestedPage > 0 && photographerPage.isEmpty() && photographerPage.getTotalPages() > 0) {
+                int lastPage = photographerPage.getTotalPages() - 1;
+                effectiveSearchRequest.setPage(lastPage);
+                photographerPage = publicPhotographerService.searchPhotographers(
+                        effectiveSearchRequest, PageRequest.of(lastPage, MARKETPLACE_PAGE_SIZE));
+                model.addAttribute("errorMessage", "That results page does not exist. Showing the last available page.");
+            }
         }
 
+        List<PhotographerPublicDto> photographers = photographerPage.getContent();
+        model.addAttribute("searchRequest", effectiveSearchRequest);
         model.addAttribute("photographers", photographers);
-        model.addAttribute("resultCount", photographers.size());
-        model.addAttribute("hasFilters", searchRequest != null && searchRequest.hasFilters());
+        model.addAttribute("resultCount", photographerPage.getTotalElements());
+        model.addAttribute("currentPage", photographerPage.getNumber());
+        model.addAttribute("totalPages", photographerPage.getTotalPages());
+        model.addAttribute("hasPreviousPage", photographerPage.hasPrevious());
+        model.addAttribute("hasNextPage", photographerPage.hasNext());
+        model.addAttribute("hasFilters", effectiveSearchRequest != null && effectiveSearchRequest.hasFilters());
         return "photographers";
     }
 

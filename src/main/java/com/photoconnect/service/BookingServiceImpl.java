@@ -6,6 +6,7 @@ import com.photoconnect.entity.BookingStatus;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.User;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.PhotographerUnavailableException;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -40,6 +42,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking createBooking(Long customerUserId, Long photographerProfileId, BookingRequest request) {
+        if (customerUserId == null || photographerProfileId == null) {
+            throw new InvalidBookingException("Customer and photographer are required.");
+        }
         if (request == null) {
             throw new InvalidBookingException("Booking request cannot be null.");
         }
@@ -52,8 +57,20 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidBookingException("Booking time is required.");
         }
 
+        if (LocalDateTime.of(request.getBookingDate(), request.getBookingTime()).isBefore(LocalDateTime.now())) {
+            throw new InvalidBookingException("Booking date and time cannot be in the past.");
+        }
+
         if (request.getLocation() == null || request.getLocation().trim().isEmpty()) {
             throw new InvalidBookingException("Shoot location is required.");
+        }
+
+        if (request.getLocation().trim().length() > 255) {
+            throw new InvalidBookingException("Location cannot exceed 255 characters.");
+        }
+
+        if (request.getNotes() != null && request.getNotes().trim().length() > 1000) {
+            throw new InvalidBookingException("Notes cannot exceed 1000 characters.");
         }
 
         // 1. Validate Customer
@@ -79,6 +96,10 @@ public class BookingServiceImpl implements BookingService {
         // 3. Prevent Self-Booking
         if (customer.getId().equals(profile.getUser().getId())) {
             throw new SelfBookingNotAllowedException("You cannot book your own photographer profile.");
+        }
+
+        if (customer.getRole() != UserRole.CUSTOMER) {
+            throw new InvalidBookingException("Only customer accounts can create bookings.");
         }
 
         // 4. Check Availability

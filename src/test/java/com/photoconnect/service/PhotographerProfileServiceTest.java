@@ -119,4 +119,17 @@ class PhotographerProfileServiceTest {
 
         verify(photographerProfileRepository, never()).save(any());
     }
+
+    @Test
+    void adminUser_shouldNotBeDemotedThroughPhotographerOnboarding() {
+        activeUser.setRole(UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
+
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> photographerProfileService.createProfile(1L, validRequest));
+
+        assertThat(error.getMessage()).contains("Only customer accounts");
+        verify(photographerProfileRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
+    }
 }

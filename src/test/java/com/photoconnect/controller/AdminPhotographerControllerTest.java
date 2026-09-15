@@ -81,6 +81,18 @@ class AdminPhotographerControllerTest {
     }
 
     @Test
+    void malformedSessionUserId_shouldRedirectToLoginWithoutClassCastException() throws Exception {
+        MockHttpSession session = adminSession();
+        session.setAttribute("userId", "99");
+
+        mockMvc.perform(get("/admin/photographers").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        verifyNoInteractions(adminPhotographerService);
+    }
+
+    @Test
     void customerGet_shouldRedirectHome() throws Exception {
         mockMvc.perform(get("/admin/photographers").session(customerSession()))
                 .andExpect(status().is3xxRedirection())

@@ -37,15 +37,15 @@
             
             <!-- Search & Filter Panel -->
             <div class="filter-panel">
-                <form action="/photographers" method="get" id="search-form">
+                <form action="${pageContext.request.contextPath}/photographers" method="get" id="search-form">
                     <div class="filter-grid">
                         <div class="form-group" style="margin-bottom:0;">
                             <label for="keyword" class="form-label">Keyword</label>
-                            <input type="text" id="keyword" name="keyword" class="form-input" placeholder="Name, specialty…" value="<c:out value='${searchRequest.keyword}'/>">
+                            <input type="text" id="keyword" name="keyword" maxlength="100" class="form-input" placeholder="Name, specialty…" value="<c:out value='${searchRequest.keyword}'/>">
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
                             <label for="city" class="form-label">City</label>
-                            <input type="text" id="city" name="city" class="form-input" placeholder="e.g. Hanoi…" value="<c:out value='${searchRequest.city}'/>">
+                            <input type="text" id="city" name="city" maxlength="100" class="form-input" placeholder="e.g. Hanoi…" value="<c:out value='${searchRequest.city}'/>">
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
                             <label for="minPrice" class="form-label">Min Price (VND)</label>
@@ -58,7 +58,7 @@
                         <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
                             <button type="submit" class="filter-btn" style="flex:1;" id="btn-apply-filters">Filter</button>
                             <c:if test="${hasFilters}">
-                                <a href="/photographers" class="filter-btn-outline" id="btn-clear-filters">Clear</a>
+                                <a href="${pageContext.request.contextPath}/photographers" class="filter-btn-outline" id="btn-clear-filters">Clear</a>
                             </c:if>
                         </div>
                     </div>
@@ -100,14 +100,14 @@
                             </c:choose>
                         </p>
                         <c:if test="${hasFilters}">
-                            <a href="/photographers" class="primary-link">Reset Filters</a>
+                            <a href="${pageContext.request.contextPath}/photographers" class="primary-link">Reset Filters</a>
                         </c:if>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div class="photographer-grid">
                         <c:forEach var="p" items="${photographers}">
-                            <a href="/photographers/${p.id}" class="photographer-card" id="view-profile-${p.id}">
+                            <a href="${pageContext.request.contextPath}/photographers/${p.id}" class="photographer-card" id="view-profile-${p.id}">
                                 <div class="photo-frame">
                                     <c:choose>
                                         <c:when test="${not empty p.coverImageUrl}">
@@ -142,6 +142,34 @@
                             </a>
                         </c:forEach>
                     </div>
+
+                    <c:if test="${totalPages > 1}">
+                        <nav aria-label="Photographer results pages" style="display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:3rem;">
+                            <c:if test="${hasPreviousPage}">
+                                <c:url var="previousPageUrl" value="/photographers">
+                                    <c:param name="keyword" value="${searchRequest.keyword}" />
+                                    <c:param name="city" value="${searchRequest.city}" />
+                                    <c:param name="minPrice" value="${searchRequest.minPrice}" />
+                                    <c:param name="maxPrice" value="${searchRequest.maxPrice}" />
+                                    <c:param name="minExperience" value="${searchRequest.minExperience}" />
+                                    <c:param name="page" value="${currentPage - 1}" />
+                                </c:url>
+                                <a class="filter-btn-outline" href="${previousPageUrl}" rel="prev">Previous</a>
+                            </c:if>
+                            <span style="color:var(--text-muted);">Page <strong style="color:var(--text-on-dark);">${currentPage + 1}</strong> of ${totalPages}</span>
+                            <c:if test="${hasNextPage}">
+                                <c:url var="nextPageUrl" value="/photographers">
+                                    <c:param name="keyword" value="${searchRequest.keyword}" />
+                                    <c:param name="city" value="${searchRequest.city}" />
+                                    <c:param name="minPrice" value="${searchRequest.minPrice}" />
+                                    <c:param name="maxPrice" value="${searchRequest.maxPrice}" />
+                                    <c:param name="minExperience" value="${searchRequest.minExperience}" />
+                                    <c:param name="page" value="${currentPage + 1}" />
+                                </c:url>
+                                <a class="filter-btn-outline" href="${nextPageUrl}" rel="next">Next</a>
+                            </c:if>
+                        </nav>
+                    </c:if>
                 </c:otherwise>
             </c:choose>
 
@@ -156,4 +184,3 @@
 
 </body>
 </html>
-

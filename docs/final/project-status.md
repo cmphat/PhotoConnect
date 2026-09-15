@@ -50,14 +50,21 @@
 - **Admin Dashboard & Management (TASK-020)**: Implemented comprehensive administrative management suite. Features platform KPI dashboard (`/admin/dashboard`) with aggregate counts and explicitly disclaimed deposit metrics (TASK-015 development simulation), user search and status management (`/admin/users`) with admin self-protection guards, expanded photographer management with verification filtering and rating statistics (`/admin/photographers`), read-only booking monitoring (`/admin/bookings`), and read-only review monitoring (`/admin/reviews`). Centralized session-based role authorization enforced via `AdminSecurityUtils`. 39 new tests added (288 total tests: 266 passing, 0 failures, 0 errors, 22 skipped).
 - **Admin Review Moderation (TASK-021)**: Implemented review moderation lifecycle and dynamic rating recalculation. Features `ReviewStatus` enum (`VISIBLE`, `HIDDEN`), safe SQL Server migration `V008__add_review_status.sql`, admin moderation endpoints (`POST /admin/reviews/{id}/hide`, `POST /admin/reviews/{id}/unhide`) with feedback alerts and active filter preservation, immediate transactional photographer rating recalculation (`averageRating` and `reviewCount`) from only active `VISIBLE` reviews, public profile visibility isolation (`/photographers/{id}`), and customer booking transparency indicator (`Hidden by moderation`). 32 new tests added (320 total tests: 298 passing, 0 failures, 0 errors, 22 skipped).
 - **Global Exception Handling & Error Code Standardization (TASK-022)**: Implemented centralized `@ControllerAdvice` (`GlobalExceptionHandler`) with intelligent dual-mode content negotiation, standard `ApiResponse<T>` JSON envelope conforming to `docs/API_CONTRACT.md`, full implementation of `docs/ERROR_CODES.md` taxonomy (`ErrorCode` enum), container `/error` interception with `AppErrorController`, custom dark editorial `error.jsp`, domain exception normalization, and `ChatApiController` refactoring. 16 new tests added (336 total tests: 314 passing, 0 failures, 0 errors, 22 skipped).
+- **Server-Side Validation Hardening (TASK-023)**: Closed account, profile, marketplace search, booking, scheduling, and portfolio input-boundary gaps. Added BCrypt-length, phone-format, decimal precision/scale, text-length, identifier, same-day past-time, and null-safety checks at Bean Validation and service boundaries. Oversized portfolio captions are rejected before Cloudinary work.
+- **Role and Ownership Authorization Hardening (TASK-024)**: Centralized type-safe session role enforcement, restricted customer and photographer MVC routes before service access, added service-layer role and active-participant defenses, prevented onboarding role demotion, rotated the session ID after login, and replaced wildcard WebSocket origins with a configurable allowlist.
+- **Approved Photographer Search Pagination (TASK-025)**: Added validated zero-based pagination to `/photographers`, database-backed `Pageable` approved-only search/count queries, a 12-card MVC page size with a service cap of 24, total/page metadata, and accessible filter-preserving Previous/Next navigation.
+- **Responsive UI Stabilization (TASK-026)**: Rebalanced the photographer profile and booking panel, constrained native date/time controls, added shared overflow/grid/form safeguards, improved mobile stacking and wide-table containment, repaired malformed booking-card markup, and made JSP navigation/form routes context-path safe. Automated layout contracts pass; human visual verification remains pending.
+- **Transaction and Service Hardening Audit (TASK-027)**: Verified semantic transaction boundaries for booking, deposit, review/rating moderation, availability, and portfolio database operations. Added a reflection-based regression contract and retained explicit Cloudinary compensation for the non-transactional remote resource boundary.
+- **Development Demo Data (TASK-028)**: Added both an idempotent SQL Server seed script (`docs/development/seed/V009__demo_seed_data.sql`) and a double-opt-in `demo-seed` Spring Boot profile (`DemoDataSeeder.java`). Safely creates 1 admin, 2 customers, and 14 APPROVED photographers across 3 cities and varying prices (enabling 2-page pagination verification), 1 PENDING photographer, bookings, deposits, reviews, and chat history without destructive operations.
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
 - `users`, `photographer_profiles`, `portfolio_images`, `bookings`, `deposits`, `photographer_unavailable_dates`, `messages`, and `reviews` tables mapped with foreign keys.
-- **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` provided for adding `status VARCHAR(20)` with default `VISIBLE` on `reviews`.
+- **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` provided for adding `status VARCHAR(20)` with default `VISIBLE` on `reviews`. Seed script `docs/development/seed/V009__demo_seed_data.sql` available for development/demo data.
 
 ## Test Status
-- 336 tests run with 314 passing, 0 failures, 0 errors, and 22 skipped (integration tests requiring live DB).
+- 376 tests run with 353 passing, 0 failures, 0 errors, and 23 skipped (environment-gated integration tests requiring a live SQL Server).
+- `mvn clean package` succeeds and produces `target/photoconnect.war`.
 - TDD approach strictly followed.
 
 ## How to Run the Project
@@ -71,6 +78,10 @@
 - Human visual verification for photographer availability booking rejection and unblocking (TASK-017) is pending.
 - Human visual verification for multi-user real-time chat (TASK-018) is pending.
 - Human visual verification for customer review submission and rating updates (TASK-019) is pending.
+- Human verification for validation edge cases (TASK-023) is partial: alphabetic phone rejection was manually verified (PASS); the remaining listed edge cases are pending.
+- Human verification for cross-role, cross-owner, and WebSocket-origin authorization behavior (TASK-024) is pending.
+- Human verification for multi-page marketplace navigation (TASK-025) is partial: primary marketplace pagination flow manually verified (PASS); complex filter edge cases pending.
+- Human visual verification for the TASK-026 desktop/mobile responsive composition is pending.
 
 ## Current Task Status
 - TASK-014: Booking Management & Status Workflow — Runtime: PENDING -> ACCEPTED (PASS); ACCEPTED -> COMPLETED (PENDING).
@@ -81,5 +92,10 @@
 - TASK-020: Admin Dashboard & Management — Human Verification: PASS.
 - TASK-021: Admin Review Moderation — Human Verification: PASS.
 - TASK-022: Global Exception Handling & Error Code Standardization — Human Verification: PASS.
-
+- TASK-023: Server-Side Validation Hardening — Human Verification: PARTIAL (alphabetic phone rejection PASS).
+- TASK-024: Role and Ownership Authorization Hardening — Human Verification: PENDING.
+- TASK-025: Approved Photographer Search Pagination — Human Verification: PARTIAL (primary marketplace pagination PASS).
+- TASK-026: Responsive UI Stabilization — Automated/code completion PASS; Human Verification: PENDING.
+- TASK-027: Transaction and Service Hardening Audit — Automated/code completion PASS.
+- TASK-028: Development Demo Data — Human Verification: PASS (local SQL Server seed execution and seeded photographer visibility verified in live application).
 

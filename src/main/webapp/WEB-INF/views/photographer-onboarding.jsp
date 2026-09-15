@@ -58,7 +58,7 @@
                     </div>
                 </c:if>
 
-                <form:form action="/become-photographer" method="post" modelAttribute="profileRequest">
+                <form:form action="${pageContext.request.contextPath}/become-photographer" method="post" modelAttribute="profileRequest">
                     <div class="form-group">
                         <label for="displayName" class="form-label">Display Name *</label>
                         <form:input path="displayName" id="displayName" cssClass="form-input" placeholder="e.g. Jane Doe Photography"/>
@@ -77,7 +77,7 @@
                         <form:errors path="city" cssClass="text-danger small" cssStyle="color: #ff6b6b; font-size: 0.85rem; margin-top: 0.5rem; display: block;"/>
                     </div>
 
-                    <div style="display: flex; gap: 2rem;">
+                    <div class="pc-stack-mobile" style="display: flex; gap: 2rem;">
                         <div class="form-group" style="flex: 1;">
                             <label for="experienceYears" class="form-label">Years of Experience *</label>
                             <form:input path="experienceYears" id="experienceYears" type="number" cssClass="form-input" placeholder="e.g. 3"/>

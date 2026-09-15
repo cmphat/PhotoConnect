@@ -4,6 +4,7 @@ import com.photoconnect.dto.BookingViewDto;
 import com.photoconnect.dto.ReviewRequest;
 import com.photoconnect.entity.Booking;
 import com.photoconnect.entity.BookingStatus;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.BookingNotCompletedException;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.InvalidReviewException;
@@ -38,10 +39,9 @@ public class ReviewController {
                                  HttpSession session,
                                  Model model,
                                  RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             Booking booking = bookingService.getBookingForCustomer(bookingId, userId);
@@ -75,10 +75,9 @@ public class ReviewController {
                                HttpSession session,
                                Model model,
                                RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         if (bindingResult.hasErrors()) {
             try {

@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -75,7 +78,8 @@ class PhotographerControllerTest {
      */
     @Test
     void getPhotographers_guestNoSession_shouldReturn200() throws Exception {
-        when(publicPhotographerService.searchPhotographers(any())).thenReturn(List.of());
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/photographers"))
                 .andExpect(status().isOk())
@@ -84,7 +88,8 @@ class PhotographerControllerTest {
 
     @Test
     void getPhotographers_shouldReturn200AndCorrectView() throws Exception {
-        when(publicPhotographerService.searchPhotographers(any())).thenReturn(List.of());
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/photographers"))
                 .andExpect(status().isOk())
@@ -97,20 +102,21 @@ class PhotographerControllerTest {
     @Test
     void getPhotographers_withApprovedProfiles_shouldExposeToModel() throws Exception {
         PhotographerPublicDto dto = sampleDto();
-        when(publicPhotographerService.searchPhotographers(any())).thenReturn(List.of(dto));
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(dto)));
 
         mockMvc.perform(get("/photographers"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("photographers", List.of(dto)))
-                .andExpect(model().attribute("resultCount", 1))
+                .andExpect(model().attribute("resultCount", 1L))
                 .andExpect(model().attribute("hasFilters", false));
     }
 
     @Test
     void getPhotographers_withSearchFilters_shouldPassRequestToService() throws Exception {
         PhotographerPublicDto dto = sampleDto();
-        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class)))
-                .thenReturn(List.of(dto));
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(dto)));
 
         mockMvc.perform(get("/photographers")
                         .param("keyword", "portrait")
@@ -121,7 +127,7 @@ class PhotographerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("photographers", List.of(dto)))
                 .andExpect(model().attribute("hasFilters", true))
-                .andExpect(model().attribute("resultCount", 1));
+                .andExpect(model().attribute("resultCount", 1L));
 
         verify(publicPhotographerService).searchPhotographers(argThat(req ->
                 "portrait".equals(req.getKeyword()) &&
@@ -129,23 +135,26 @@ class PhotographerControllerTest {
                 new BigDecimal("1000000").compareTo(req.getMinPrice()) == 0 &&
                 new BigDecimal("8000000").compareTo(req.getMaxPrice()) == 0 &&
                 Integer.valueOf(3).equals(req.getMinExperience())
-        ));
+        ), argThat(pageable -> pageable.getPageNumber() == 0 && pageable.getPageSize() == 12));
     }
 
     @Test
     void getPhotographers_withInvalidPriceRange_shouldShowErrorMessage() throws Exception {
         PhotographerPublicDto dto = sampleDto();
-        when(publicPhotographerService.listApprovedPhotographers()).thenReturn(List.of(dto));
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(dto)));
 
         mockMvc.perform(get("/photographers")
                         .param("minPrice", "10000000")
                         .param("maxPrice", "5000000"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("errorMessage"))
-                .andExpect(model().attribute("photographers", List.of(dto)));
+                .andExpect(model().attribute("photographers", List.of(dto)))
+                .andExpect(model().attribute("hasFilters", false));
 
-        verify(publicPhotographerService).listApprovedPhotographers();
-        verify(publicPhotographerService, never()).searchPhotographers(argThat(r -> !r.isValid()));
+        verify(publicPhotographerService).searchPhotographers(
+                argThat(PhotographerSearchRequest::isValid),
+                argThat(pageable -> pageable.getPageNumber() == 0));
     }
 
     /**
@@ -153,7 +162,8 @@ class PhotographerControllerTest {
      */
     @Test
     void getPhotographers_loggedInUser_shouldAlsoReturn200() throws Exception {
-        when(publicPhotographerService.searchPhotographers(any())).thenReturn(List.of());
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", 1L);
@@ -162,6 +172,47 @@ class PhotographerControllerTest {
         mockMvc.perform(get("/photographers").session(session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("photographers"));
+    }
+
+    @Test
+    void getPhotographers_requestedPage_shouldExposePaginationMetadata() throws Exception {
+        PhotographerPublicDto dto = sampleDto();
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(dto), org.springframework.data.domain.PageRequest.of(1, 12), 25));
+
+        mockMvc.perform(get("/photographers").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("resultCount", 25L))
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("totalPages", 3))
+                .andExpect(model().attribute("hasPreviousPage", true))
+                .andExpect(model().attribute("hasNextPage", true));
+
+        verify(publicPhotographerService).searchPhotographers(
+                argThat(request -> Integer.valueOf(1).equals(request.getPage())),
+                argThat(pageable -> pageable.getPageNumber() == 1 && pageable.getPageSize() == 12));
+    }
+
+    @Test
+    void getPhotographers_outOfRangePage_shouldShowLastAvailablePage() throws Exception {
+        PhotographerPublicDto dto = sampleDto();
+        when(publicPhotographerService.searchPhotographers(any(PhotographerSearchRequest.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(99, 12), 13))
+                .thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(1, 12), 13));
+
+        mockMvc.perform(get("/photographers").param("page", "99"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("errorMessage"))
+                .andExpect(model().attribute("photographers", List.of(dto)))
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("totalPages", 2));
+
+        verify(publicPhotographerService).searchPhotographers(
+                any(PhotographerSearchRequest.class),
+                eq(PageRequest.of(99, 12)));
+        verify(publicPhotographerService).searchPhotographers(
+                argThat(request -> Integer.valueOf(1).equals(request.getPage())),
+                eq(PageRequest.of(1, 12)));
     }
 
     // ── GET /photographers/{id} ─────────────────────────────────────────────

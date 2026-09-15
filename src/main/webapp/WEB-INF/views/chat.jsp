@@ -78,6 +78,7 @@
         }
         .chat-input-field {
             flex: 1;
+            min-width: 0;
             padding: 0.85rem 1.15rem;
             background: #101014;
             border: 1px solid var(--border, #26262e);
@@ -87,6 +88,13 @@
             border-radius: 2px;
             outline: none;
             transition: border-color 0.2s ease;
+        }
+        @media (max-width: 640px) {
+            .chat-box { height: min(520px, 68vh); }
+            .chat-messages { padding: 1rem; }
+            .message-bubble { max-width: 90%; }
+            .chat-input-bar { padding: 0.75rem; gap: 0.75rem; }
+            .chat-input-bar button { padding-inline: 1rem !important; }
         }
         .chat-input-field:focus {
             border-color: var(--accent-gold, #c9a96e);
@@ -114,7 +122,7 @@
 
     <main style="padding: 6rem 0; min-height: 85vh;">
         <div class="editorial-container chat-container">
-            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div class="pc-stack-mobile" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                 <a href="${backUrl}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking Details</a>
                 <div id="connStatus" class="connection-indicator">
                     <span id="connDot" class="dot-indicator"></span>
@@ -123,11 +131,11 @@
             </div>
 
             <div style="margin-bottom: 2rem;">
-                <h1 class="editorial-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Conversation with ${partnerName}</h1>
+                <h1 class="editorial-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Conversation with <c:out value="${partnerName}"/></h1>
                 <p style="color: var(--text-muted); font-size: 0.95rem;">
                     Booking #${booking.id} &bull; 
                     <span style="color: var(--text-color); font-weight: 500;">${booking.status}</span> &bull; 
-                    Role: ${partnerRole}
+                    Role: <c:out value="${partnerRole}"/>
                 </p>
             </div>
 
@@ -238,7 +246,8 @@
                     throw new Error('STOMP/SockJS libraries unavailable, using REST fallback');
                 }
 
-                const socket = new SockJS('/ws');
+                const contextPath = '${pageContext.request.contextPath}';
+                const socket = new SockJS(contextPath + '/ws');
                 stompClient = Stomp.over(socket);
                 stompClient.debug = null; // Disable noisy console logging
 
@@ -273,7 +282,7 @@
         function startRestPolling() {
             if (pollingInterval) return;
             pollingInterval = setInterval(function () {
-                fetch('/api/bookings/' + bookingId + '/messages')
+                fetch(contextPath + '/api/bookings/' + bookingId + '/messages')
                     .then(res => res.json())
                     .then(res => {
                         if (res.success && Array.isArray(res.data)) {
@@ -306,7 +315,7 @@
                 messageInput.focus();
             } else {
                 // Fallback to REST API
-                fetch('/api/bookings/' + bookingId + '/messages', {
+                fetch(contextPath + '/api/bookings/' + bookingId + '/messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -34,7 +34,7 @@
                     </div>
                 </c:if>
 
-                <form:form action="/register" method="post" modelAttribute="registerRequest">
+                <form:form action="${pageContext.request.contextPath}/register" method="post" modelAttribute="registerRequest">
                     
                     <c:if test="${not empty emailError}">
                         <div style="color: #dc3545; font-size: 0.9rem; margin-bottom: 1.5rem;">${emailError}</div>
@@ -78,7 +78,7 @@
                 </form:form>
 
                 <div style="margin-top: 3rem; font-size: 0.9rem; color: var(--text-muted);">
-                    Already have an account? <a href="/login" class="text-link">Sign in</a>
+                    Already have an account? <a href="${pageContext.request.contextPath}/login" class="text-link">Sign in</a>
                 </div>
 
             </div>

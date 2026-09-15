@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -112,30 +113,30 @@ class PhotographerScheduleControllerTest {
     }
 
     @Test
-    void viewSchedule_customerRole_shouldRedirectToLogin() throws Exception {
+    void viewSchedule_customerRole_shouldRedirectHome() throws Exception {
         mockMvc.perform(get("/photographer/schedule").session(customerSession()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/"));
 
         verify(scheduleService, never()).getUnavailableDates(any());
     }
 
     @Test
-    void viewSchedule_adminRole_shouldRedirectToLogin() throws Exception {
+    void viewSchedule_adminRole_shouldRedirectHome() throws Exception {
         mockMvc.perform(get("/photographer/schedule").session(adminSession()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/"));
 
         verify(scheduleService, never()).getUnavailableDates(any());
     }
 
     @Test
-    void viewSchedule_photographerWithoutProfile_shouldRedirectToLogin() throws Exception {
+    void viewSchedule_photographerWithoutProfile_shouldRedirectToOnboardingStatus() throws Exception {
         when(photographerProfileService.findByUserId(1L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/photographer/schedule").session(photographerSession()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/photographer/onboarding-status"));
 
         verify(scheduleService, never()).getUnavailableDates(any());
     }
@@ -166,6 +167,17 @@ class PhotographerScheduleControllerTest {
                 .andExpect(redirectedUrl("/login"));
 
         verify(scheduleService, never()).addUnavailableDate(any(), any(), any());
+    }
+
+    @Test
+    void addUnavailableDate_customerRole_shouldRedirectHomeWithoutProfileLookup() throws Exception {
+        mockMvc.perform(post("/photographer/schedule/add")
+                        .session(customerSession())
+                        .param("date", LocalDate.now().plusDays(1).toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verifyNoInteractions(photographerProfileService, scheduleService);
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.photoconnect.service;
 import com.photoconnect.dto.PhotographerPublicDto;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Public read-only service for the photographer marketplace.
@@ -27,6 +29,9 @@ public interface PublicPhotographerService {
      * @throws IllegalArgumentException if validation constraints on price or experience are violated
      */
     List<PhotographerPublicDto> searchPhotographers(com.photoconnect.dto.PhotographerSearchRequest request);
+
+    Page<PhotographerPublicDto> searchPhotographers(
+            com.photoconnect.dto.PhotographerSearchRequest request, Pageable pageable);
 
     /**
      * Returns the approved photographer by id as a public DTO.

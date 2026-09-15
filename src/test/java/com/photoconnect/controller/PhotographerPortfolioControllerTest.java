@@ -60,6 +60,18 @@ class PhotographerPortfolioControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
+    @Test
+    void getPortfolio_customerRole_shouldRedirectWithoutReadingPortfolio() throws Exception {
+        MockHttpSession session = photographerSession();
+        session.setAttribute("userRole", "CUSTOMER");
+
+        mockMvc.perform(get("/photographer/portfolio").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verifyNoInteractions(portfolioService);
+    }
+
     /**
      * With a valid session, the management page should render with images in model.
      */

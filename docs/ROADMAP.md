@@ -105,14 +105,14 @@ Create photographer profile entity
 
 ## Tuần 7 — Integration + Quality
 
-- [ ] Validate toàn bộ form
-- [ ] Fix authorization
+- [x] Validate toàn bộ form (TASK-023)
+- [x] Fix authorization (TASK-024)
 - [x] Error handling (TASK-022)
-- [ ] Pagination
-- [ ] Responsive
-- [ ] Seed data
-- [ ] Test all roles
-- [ ] Update docs
+- [x] Pagination (TASK-025)
+- [x] Responsive code audit and stabilization (TASK-026; human visual verification pending)
+- [x] Seed data (TASK-028; development-only, opt-in)
+- [x] Test all roles (TASK-024)
+- [x] Update docs (TASK-023–028)
 
 Không thêm feature lớn mới nếu core còn bug.
 

@@ -3,6 +3,7 @@
 # ── Build output ──────────────────────────────────────────────────────────────
 target/
 target_old/
+target_stale_codex/
 *.class
 *.jar
 *.war

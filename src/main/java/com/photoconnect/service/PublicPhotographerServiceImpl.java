@@ -10,6 +10,8 @@ import com.photoconnect.repository.PortfolioImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -64,6 +66,28 @@ public class PublicPhotographerServiceImpl implements PublicPhotographerService 
         return approved.stream()
                 .map(this::toPublicDtoWithCover)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PhotographerPublicDto> searchPhotographers(PhotographerSearchRequest request, Pageable pageable) {
+        if (request != null && !request.isValid()) {
+            throw new IllegalArgumentException(request.getValidationError());
+        }
+        if (pageable == null || !pageable.isPaged() || pageable.getPageSize() < 1 || pageable.getPageSize() > 24) {
+            throw new IllegalArgumentException("A page size between 1 and 24 is required.");
+        }
+
+        String keyword = request != null ? request.getNormalizedKeyword() : null;
+        String city = request != null ? request.getNormalizedCity() : null;
+        BigDecimal minPrice = request != null ? request.getMinPrice() : null;
+        BigDecimal maxPrice = request != null ? request.getMaxPrice() : null;
+        Integer minExperience = request != null ? request.getMinExperience() : null;
+
+        return photographerProfileRepository.searchApprovedPhotographersPaged(
+                        PhotographerVerificationStatus.APPROVED,
+                        keyword, city, minPrice, maxPrice, minExperience, pageable)
+                .map(this::toPublicDtoWithCover);
     }
 
     /**

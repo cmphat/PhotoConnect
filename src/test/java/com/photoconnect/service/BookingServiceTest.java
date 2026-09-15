@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -181,6 +182,20 @@ class BookingServiceTest {
     }
 
     @Test
+    void createBooking_nonCustomerRole_shouldBeRejected() {
+        customer.setRole(UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+
+        assertThatThrownBy(() -> bookingService.createBooking(1L, 10L, validRequest))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("Only customer accounts");
+
+        verifyNoInteractions(scheduleService);
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
     void createBooking_photographerNotFound_shouldThrowInvalidBookingException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(photographerProfileRepository.findById(999L)).thenReturn(Optional.empty());
@@ -246,6 +261,35 @@ class BookingServiceTest {
                 .hasMessageContaining("Booking date cannot be in the past");
 
         verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void createBooking_todayWithPastTime_shouldThrowInvalidBookingException() {
+        BookingRequest pastTimeRequest = new BookingRequest(
+                10L,
+                LocalDate.now(),
+                LocalTime.now().minusMinutes(1),
+                "Location",
+                null
+        );
+
+        assertThatThrownBy(() -> bookingService.createBooking(1L, 10L, pastTimeRequest))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("date and time cannot be in the past");
+
+        verifyNoInteractions(userRepository, photographerProfileRepository, scheduleService);
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void createBooking_oversizedLocation_shouldRejectBeforeDatabaseAccess() {
+        validRequest.setLocation("x".repeat(256));
+
+        assertThatThrownBy(() -> bookingService.createBooking(1L, 10L, validRequest))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("Location cannot exceed 255 characters");
+
+        verifyNoInteractions(userRepository, photographerProfileRepository, scheduleService);
     }
 
     @Test

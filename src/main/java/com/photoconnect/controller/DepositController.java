@@ -3,6 +3,7 @@ package com.photoconnect.controller;
 import com.photoconnect.dto.BookingViewDto;
 import com.photoconnect.dto.DepositViewDto;
 import com.photoconnect.entity.Booking;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.service.BookingService;
@@ -31,10 +32,9 @@ public class DepositController {
      */
     @GetMapping("/bookings/{id}/deposit")
     public String showDepositPage(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             // Ensure booking exists and belongs to the customer
@@ -57,10 +57,9 @@ public class DepositController {
      */
     @PostMapping("/bookings/{id}/deposit/simulate-payment")
     public String simulatePayment(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             depositService.simulateSuccessfulPayment(bookingId, userId);

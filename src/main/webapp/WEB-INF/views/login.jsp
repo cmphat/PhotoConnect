@@ -34,7 +34,7 @@
                     </div>
                 </c:if>
 
-                <form:form action="/login" method="post" modelAttribute="loginRequest">
+                <form:form action="${pageContext.request.contextPath}/login" method="post" modelAttribute="loginRequest">
                     
                     <div class="form-group">
                         <label for="email" class="form-label">Email address</label>
@@ -53,7 +53,7 @@
                 </form:form>
 
                 <div style="margin-top: 3rem; font-size: 0.9rem; color: var(--text-muted);">
-                    Don't have an account? <a href="/register" class="text-link">Create one</a>
+                    Don't have an account? <a href="${pageContext.request.contextPath}/register" class="text-link">Create one</a>
                 </div>
 
             </div>

@@ -85,9 +85,9 @@
 
 ## Phase 9 — Hardening
 
-- [ ] Validation
+- [x] Validation (TASK-023)
 - [x] Error codes (TASK-022)
-- [ ] Transactions
-- [ ] Authorization tests
-- [ ] Search pagination
-- [ ] Seed/demo data
+- [x] Transactions (TASK-027)
+- [x] Authorization tests (TASK-024)
+- [x] Search pagination (TASK-025)
+- [x] Seed/demo data (TASK-028; SQL script + opt-in development profile)

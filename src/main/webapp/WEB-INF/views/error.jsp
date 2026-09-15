@@ -151,8 +151,8 @@
             </p>
 
             <div class="error-actions">
-                <a href="/" class="btn-gold">Return to Home</a>
-                <a href="/photographers" class="btn-outline">Explore Marketplace</a>
+                <a href="${pageContext.request.contextPath}/" class="btn-gold">Return to Home</a>
+                <a href="${pageContext.request.contextPath}/photographers" class="btn-outline">Explore Marketplace</a>
                 <button type="button" onclick="window.history.back()" class="btn-outline" style="cursor: pointer;">Previous Page</button>
             </div>
         </div>

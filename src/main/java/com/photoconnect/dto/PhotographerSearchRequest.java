@@ -10,11 +10,17 @@ import java.math.BigDecimal;
  */
 public class PhotographerSearchRequest {
 
+    public static final int MAX_TEXT_LENGTH = 100;
+    public static final int MAX_EXPERIENCE_YEARS = 80;
+    public static final int MAX_PRICE_INTEGER_DIGITS = 16;
+    public static final int MAX_PRICE_FRACTION_DIGITS = 2;
+
     private String keyword;
     private String city;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Integer minExperience;
+    private Integer page;
 
     public PhotographerSearchRequest() {
     }
@@ -69,6 +75,18 @@ public class PhotographerSearchRequest {
         this.minExperience = minExperience;
     }
 
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public int getPageOrDefault() {
+        return page != null ? page : 0;
+    }
+
     // ── Normalization Helpers ────────────────────────────────────────────────
 
     public String getNormalizedKeyword() {
@@ -92,19 +110,47 @@ public class PhotographerSearchRequest {
     }
 
     public String getValidationError() {
+        if (page != null && (page < 0 || page > 10_000)) {
+            return "Page must be between 0 and 10000.";
+        }
+        if (getNormalizedKeyword() != null && getNormalizedKeyword().length() > MAX_TEXT_LENGTH) {
+            return "Search keyword cannot exceed 100 characters.";
+        }
+        if (getNormalizedCity() != null && getNormalizedCity().length() > MAX_TEXT_LENGTH) {
+            return "City cannot exceed 100 characters.";
+        }
         if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
             return "Minimum price cannot be negative.";
         }
         if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
             return "Maximum price cannot be negative.";
         }
+        if (!hasValidPriceShape(minPrice)) {
+            return "Minimum price must have at most 16 integer digits and 2 decimal places.";
+        }
+        if (!hasValidPriceShape(maxPrice)) {
+            return "Maximum price must have at most 16 integer digits and 2 decimal places.";
+        }
         if (minExperience != null && minExperience < 0) {
             return "Experience cannot be negative.";
+        }
+        if (minExperience != null && minExperience > MAX_EXPERIENCE_YEARS) {
+            return "Experience cannot exceed 80 years.";
         }
         if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
             return "Minimum price cannot exceed maximum price.";
         }
         return null;
+    }
+
+    private boolean hasValidPriceShape(BigDecimal price) {
+        if (price == null) {
+            return true;
+        }
+        int fractionDigits = Math.max(price.scale(), 0);
+        int integerDigits = Math.max(price.precision() - price.scale(), 0);
+        return integerDigits <= MAX_PRICE_INTEGER_DIGITS
+                && fractionDigits <= MAX_PRICE_FRACTION_DIGITS;
     }
 
     public boolean hasFilters() {

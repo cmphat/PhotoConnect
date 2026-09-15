@@ -157,3 +157,8 @@ assets/js/
 5. Sau cùng mới animation/đẹp nâng cao.
 
 Không dành quá nhiều thời gian CSS trong 4 tuần đầu.
+
+### Implementation status
+
+- [x] Responsive code audit and stabilization for the authoritative JSP surface (TASK-026).
+- [ ] Human visual verification across representative desktop and mobile browsers.

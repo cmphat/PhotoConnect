@@ -115,6 +115,18 @@ class ChatServiceTest {
     }
 
     @Test
+    void sendMessage_inactiveParticipant_shouldBeDeniedBeforePersistence() {
+        customer.setStatus(UserStatus.BANNED);
+        when(bookingRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> chatService.sendMessage(100L, 10L, "Hello"))
+                .isInstanceOf(ChatAccessDeniedException.class)
+                .hasMessageContaining("not permitted");
+
+        verify(messageRepository, never()).save(any());
+    }
+
+    @Test
     void getMessageHistory_unauthorizedUser_shouldThrowChatAccessDeniedException() {
         when(bookingRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(booking));
 

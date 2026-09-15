@@ -1,6 +1,7 @@
 package com.photoconnect.controller;
 
 import com.photoconnect.entity.PortfolioImage;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.service.PortfolioService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -49,10 +50,9 @@ public class PhotographerPortfolioController {
      */
     @GetMapping
     public String portfolioManagementPage(HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         List<PortfolioImage> images = portfolioService.getPortfolioForUser(userId);
         model.addAttribute("images", images);
@@ -78,10 +78,9 @@ public class PhotographerPortfolioController {
                               @RequestParam(value = "caption", required = false) String caption,
                               HttpSession session,
                               RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             portfolioService.addPortfolioImage(userId, imageFile, caption);
@@ -113,10 +112,9 @@ public class PhotographerPortfolioController {
     public String deleteImage(@PathVariable Long id,
                               HttpSession session,
                               RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             portfolioService.deletePortfolioImage(userId, id);

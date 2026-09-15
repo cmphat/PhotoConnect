@@ -6,6 +6,7 @@ import com.photoconnect.exception.AccountDisabledException;
 import com.photoconnect.exception.InvalidCredentialsException;
 import com.photoconnect.service.AuthService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,6 +39,7 @@ public class LoginController {
     @PostMapping("/login")
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest loginRequest,
                                BindingResult bindingResult,
+                               HttpServletRequest httpRequest,
                                HttpSession session,
                                Model model) {
         if (bindingResult.hasErrors()) {
@@ -46,6 +48,7 @@ public class LoginController {
 
         try {
             User user = authService.authenticate(loginRequest);
+            httpRequest.changeSessionId();
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
             session.setAttribute("userFullName", user.getFullName());

@@ -83,7 +83,7 @@
             
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
                 <div>
                     <span class="section-index">Administration (Read-Only)</span>
                     <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">Booking Monitoring</h1>
@@ -95,9 +95,9 @@
 
             <!-- Status Filter Tabs -->
             <div class="status-tabs">
-                <a href="/admin/bookings?status=ALL" class="status-tab ${selectedStatus == 'ALL' ? 'active' : ''}">All Bookings</a>
+                <a href="${pageContext.request.contextPath}/admin/bookings?status=ALL" class="status-tab ${selectedStatus == 'ALL' ? 'active' : ''}">All Bookings</a>
                 <c:forEach var="st" items="${statuses}">
-                    <a href="/admin/bookings?status=${st.name()}" class="status-tab ${selectedStatus == st.name() ? 'active' : ''}">${st.name()}</a>
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=${st.name()}" class="status-tab ${selectedStatus == st.name() ? 'active' : ''}">${st.name()}</a>
                 </c:forEach>
             </div>
 

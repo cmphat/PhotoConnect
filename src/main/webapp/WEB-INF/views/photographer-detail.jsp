@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View the photographer profile of ${photographer.displayName} on PhotoConnect.">
+    <meta name="description" content="View an approved photographer profile on PhotoConnect.">
     <title><c:out value="${photographer.displayName}"/> – PhotoConnect</title>
     
     <!-- Google Fonts: Inter -->
@@ -56,14 +56,24 @@
 
         .layout-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 4rem;
-            padding: 4rem 0;
+            grid-template-columns: minmax(0, 1.8fr) minmax(320px, 390px);
+            gap: clamp(2.5rem, 5vw, 4.5rem);
+            padding: 4rem 1.5rem;
+            max-width: 1480px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .layout-grid > *,
+        .booking-sidebar-shell,
+        .booking-sidebar-column {
+            min-width: 0;
         }
         
         @media (max-width: 991px) {
             .layout-grid {
                 grid-template-columns: 1fr;
+                gap: 3rem;
             }
             .cover-text {
                 left: 1.5rem;
@@ -104,12 +114,21 @@
             transform: scale(1.03);
         }
 
+        .booking-sidebar-column {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
         .booking-sidebar {
             position: sticky;
             top: 100px;
             background: var(--bg-dark-secondary);
-            padding: 3rem;
+            padding: clamp(2rem, 3.5vw, 3rem);
             border: 1px solid var(--border-dark);
+            width: 100%;
+            max-width: 390px;
+            margin: 0;
         }
 
         .stat-row {
@@ -117,6 +136,37 @@
             justify-content: space-between;
             padding: 1rem 0;
             border-bottom: 1px solid var(--border-dark);
+            gap: 1rem;
+        }
+
+        .stat-row > :last-child {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            text-align: right;
+        }
+
+        @media (max-width: 991px) {
+            .booking-sidebar {
+                position: static;
+                max-width: none;
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .layout-grid {
+                padding: 2.5rem 0;
+            }
+            .booking-sidebar {
+                padding: 1.5rem;
+            }
+            .profile-meta {
+                flex-wrap: wrap;
+                gap: 0.75rem 1.25rem;
+            }
+            .cover-text {
+                right: 1rem;
+            }
         }
 
         .stat-row:last-child {
@@ -206,7 +256,7 @@
             <div class="layout-grid">
                 
                 <!-- Left: Bio & Portfolio -->
-                <div>
+                <div class="booking-sidebar-shell">
                     <div class="bio-section">
                         <c:choose>
                             <c:when test="${not empty photographer.bio}">
@@ -284,12 +334,12 @@
                 </div>
 
                 <!-- Right: Booking Sidebar -->
-                <div>
+                <div class="booking-sidebar-column">
                     <div class="booking-sidebar">
                         <h3 style="font-size: 1.5rem; font-weight: 400; margin-bottom: 1rem;">Book a Session</h3>
                         <p style="color: var(--text-muted); margin-bottom: 2rem;">Reserve a photoshoot directly with this verified artist.</p>
                         
-                        <a href="/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 3rem;" id="btn-book-photographer">
+                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 3rem;" id="btn-book-photographer">
                             Request Booking
                         </a>
 

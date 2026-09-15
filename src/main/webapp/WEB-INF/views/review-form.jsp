@@ -19,21 +19,21 @@
     <main style="padding: 6rem 0; min-height: 80vh;">
         <div class="editorial-container" style="max-width: 700px;">
             <div style="margin-bottom: 2rem;">
-                <a href="/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
+                <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
             </div>
 
             <h1 class="editorial-title" style="margin-bottom: 0.75rem;">Leave a Review</h1>
             <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.05rem;">
-                Share your experience for your completed session with <strong style="color: var(--text-color);">${booking.photographerName}</strong>.
+                Share your experience for your completed session with <strong style="color: var(--text-color);"><c:out value="${booking.photographerName}"/></strong>.
             </p>
 
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem 1.25rem; border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
-            <form action="/bookings/${booking.id}/review" method="post" style="border: 1px solid var(--border); padding: 3rem; background: var(--bg-dark-secondary);">
+            <form action="${pageContext.request.contextPath}/bookings/${booking.id}/review" method="post" style="border: 1px solid var(--border); padding: clamp(1.5rem, 5vw, 3rem); background: var(--bg-dark-secondary);">
                 
                 <!-- Rating selection (Accessible 1 to 5) -->
                 <div style="margin-bottom: 2.5rem;">
@@ -74,11 +74,11 @@
                 </div>
 
                 <!-- Actions -->
-                <div style="display: flex; gap: 1.5rem; align-items: center;">
+                <div class="pc-stack-mobile" style="display: flex; gap: 1.5rem; align-items: center;">
                     <button type="submit" class="pc-btn-primary" style="padding: 1rem 2.5rem; font-size: 0.95rem;">
                         Submit Review
                     </button>
-                    <a href="/bookings/${booking.id}" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem;">Cancel</a>
+                    <a href="${pageContext.request.contextPath}/bookings/${booking.id}" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem;">Cancel</a>
                 </div>
             </form>
         </div>

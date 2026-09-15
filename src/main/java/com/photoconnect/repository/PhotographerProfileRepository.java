@@ -3,6 +3,8 @@ package com.photoconnect.repository;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,7 +26,7 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
     @Query("""
             SELECT p FROM PhotographerProfile p
             JOIN FETCH p.user
-            ORDER BY p.createdAt DESC
+            ORDER BY p.createdAt DESC, p.id DESC
             """)
     List<PhotographerProfile> findAllWithUser();
 
@@ -76,7 +78,7 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
             AND (:minPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom >= :minPrice))
             AND (:maxPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom <= :maxPrice))
             AND (:minExperience IS NULL OR (p.experienceYears IS NOT NULL AND p.experienceYears >= :minExperience))
-            ORDER BY p.createdAt DESC
+            ORDER BY p.createdAt DESC, p.id DESC
             """)
     List<PhotographerProfile> searchApprovedPhotographers(
             @Param("status") PhotographerVerificationStatus status,
@@ -85,4 +87,41 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
             @Param("minPrice") java.math.BigDecimal minPrice,
             @Param("maxPrice") java.math.BigDecimal maxPrice,
             @Param("minExperience") Integer minExperience);
+
+    @Query(value = """
+            SELECT p FROM PhotographerProfile p
+            JOIN FETCH p.user
+            WHERE p.verificationStatus = :status
+            AND (:keyword IS NULL OR :keyword = ''
+                 OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR (p.bio IS NOT NULL AND LOWER(p.bio) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                 OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            AND (:city IS NULL OR :city = ''
+                 OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))))
+            AND (:minPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom >= :minPrice))
+            AND (:maxPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom <= :maxPrice))
+            AND (:minExperience IS NULL OR (p.experienceYears IS NOT NULL AND p.experienceYears >= :minExperience))
+            ORDER BY p.createdAt DESC, p.id DESC
+            """,
+            countQuery = """
+            SELECT COUNT(p) FROM PhotographerProfile p
+            WHERE p.verificationStatus = :status
+            AND (:keyword IS NULL OR :keyword = ''
+                 OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR (p.bio IS NOT NULL AND LOWER(p.bio) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                 OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            AND (:city IS NULL OR :city = ''
+                 OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))))
+            AND (:minPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom >= :minPrice))
+            AND (:maxPrice IS NULL OR (p.priceFrom IS NOT NULL AND p.priceFrom <= :maxPrice))
+            AND (:minExperience IS NULL OR (p.experienceYears IS NOT NULL AND p.experienceYears >= :minExperience))
+            """)
+    Page<PhotographerProfile> searchApprovedPhotographersPaged(
+            @Param("status") PhotographerVerificationStatus status,
+            @Param("keyword") String keyword,
+            @Param("city") String city,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minExperience") Integer minExperience,
+            Pageable pageable);
 }

@@ -2,24 +2,24 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <header class="nav-container">
     <div class="nav-left">
-        <a class="nav-brand" href="/">PhotoConnect</a>
+        <a class="nav-brand" href="${pageContext.request.contextPath}/">PhotoConnect</a>
         <nav class="nav-links">
-            <a class="nav-link" href="/">Home</a>
-            <a class="nav-link" href="/photographers">Explore</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/">Home</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
             <c:if test="${not empty sessionScope.userId}">
                 <c:choose>
                     <c:when test="${sessionScope.userRole == 'ADMIN'}">
-                        <a class="nav-link" href="/admin/dashboard">Admin</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard">Admin</a>
                     </c:when>
                     <c:when test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
-                        <a class="nav-link" href="/photographer/portfolio">Portfolio</a>
-                        <a class="nav-link" href="/photographer/schedule">Schedule</a>
-                        <a class="nav-link" href="/photographer/bookings">Booking Requests</a>
-                        <a class="nav-link" href="/photographer/onboarding-status">Status</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/portfolio">Portfolio</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/schedule">Schedule</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/bookings">Booking Requests</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/onboarding-status">Status</a>
                     </c:when>
                     <c:otherwise>
-                        <a class="nav-link" href="/become-photographer">Join Roster</a>
-                        <a class="nav-link" href="/bookings">My Bookings</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/become-photographer">Join Roster</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/bookings">My Bookings</a>
                     </c:otherwise>
                 </c:choose>
             </c:if>
@@ -29,13 +29,13 @@
         <c:choose>
             <c:when test="${not empty sessionScope.userId}">
                 <span class="nav-user" style="margin-right: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">Account</span>
-                <form action="/logout" method="post" style="display:inline; margin:0; padding:0;">
+                <form action="${pageContext.request.contextPath}/logout" method="post" style="display:inline; margin:0; padding:0;">
                     <button type="submit" class="nav-link" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-primary);">Sign Out</button>
                 </form>
             </c:when>
             <c:otherwise>
-                <a class="nav-link" href="/login">Sign In</a>
-                <a class="primary-link" href="/register">Join PhotoConnect</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/login">Sign In</a>
+                <a class="primary-link" href="${pageContext.request.contextPath}/register">Join PhotoConnect</a>
             </c:otherwise>
         </c:choose>
     </div>

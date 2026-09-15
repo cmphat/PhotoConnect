@@ -86,20 +86,20 @@
 
             <c:if test="${not empty successMessage}">
                 <div style="color: #34d399; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(52, 211, 153, 0.2);">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <!-- Upload Section -->
             <div style="border: 1px solid var(--border); padding: 3rem; margin-bottom: 4rem; border-radius: 0;">
                 <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Upload New Image</h2>
-                <form action="/photographer/portfolio/upload" method="post" enctype="multipart/form-data" id="upload-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 2rem; align-items: end;">
+                <form action="${pageContext.request.contextPath}/photographer/portfolio/upload" method="post" enctype="multipart/form-data" id="upload-form">
+                    <div class="pc-upload-grid">
                         <div>
                             <label for="imageFile" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Image File *</label>
                             <input type="file" id="imageFile" name="imageFile" accept="image/jpeg,image/png,image/webp" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-dark); background: transparent; color: var(--text-color);">
@@ -138,7 +138,7 @@
                                      class="portfolio-img"
                                      loading="lazy">
                                 <div class="portfolio-overlay">
-                                    <form action="/photographer/portfolio/${img.id}/delete" method="post" onsubmit="return confirm('Delete this image? This cannot be undone.');" style="margin: 0;">
+                                    <form action="${pageContext.request.contextPath}/photographer/portfolio/${img.id}/delete" method="post" onsubmit="return confirm('Delete this image? This cannot be undone.');" style="margin: 0;">
                                         <button type="submit" class="btn-delete-img" id="btn-delete-${img.id}">Delete</button>
                                     </form>
                                     

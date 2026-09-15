@@ -39,6 +39,10 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
             throw new AccountDisabledException("Your account must be active to apply as a photographer.");
         }
 
+        if (user.getRole() != UserRole.CUSTOMER) {
+            throw new IllegalStateException("Only customer accounts can apply to become photographers.");
+        }
+
         // 3. Prevent duplicate profiles (service-level check before DB constraint)
         if (photographerProfileRepository.existsByUserId(userId)) {
             throw new PhotographerProfileAlreadyExistsException("A photographer profile already exists for this account.");

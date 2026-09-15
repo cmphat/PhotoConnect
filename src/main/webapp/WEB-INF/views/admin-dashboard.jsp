@@ -101,7 +101,7 @@
             
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
                 <div>
                     <span class="section-index">Administration Panel</span>
                     <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">System Overview & Analytics</h1>
@@ -113,12 +113,12 @@
 
             <c:if test="${not empty successMessage}">
                 <div style="color: #34d399; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(52, 211, 153, 0.3); background-color: rgba(52, 211, 153, 0.05);">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
@@ -251,11 +251,11 @@
                 <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Administrative Shortcuts</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Jump directly into specific operational sections:</p>
                 <div class="quick-actions">
-                    <a href="/admin/photographers?status=PENDING" class="quick-action-btn">Review Pending Applications (${stats.pendingPhotographerApprovals})</a>
-                    <a href="/admin/users" class="quick-action-btn">Manage Users & Statuses</a>
-                    <a href="/admin/photographers" class="quick-action-btn">All Photographers</a>
-                    <a href="/admin/bookings" class="quick-action-btn">Monitor Bookings</a>
-                    <a href="/admin/reviews" class="quick-action-btn">Inspect Client Reviews</a>
+                    <a href="${pageContext.request.contextPath}/admin/photographers?status=PENDING" class="quick-action-btn">Review Pending Applications (${stats.pendingPhotographerApprovals})</a>
+                    <a href="${pageContext.request.contextPath}/admin/users" class="quick-action-btn">Manage Users & Statuses</a>
+                    <a href="${pageContext.request.contextPath}/admin/photographers" class="quick-action-btn">All Photographers</a>
+                    <a href="${pageContext.request.contextPath}/admin/bookings" class="quick-action-btn">Monitor Bookings</a>
+                    <a href="${pageContext.request.contextPath}/admin/reviews" class="quick-action-btn">Inspect Client Reviews</a>
                 </div>
             </div>
 

@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,6 +41,18 @@ class ChatApiControllerTest {
         mockMvc.perform(get("/api/bookings/100/messages"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void getMessages_malformedSessionUserId_shouldReturn401WithoutServiceCall() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", "10");
+
+        mockMvc.perform(get("/api/bookings/100/messages").session(session))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+
+        verifyNoInteractions(chatService);
     }
 
     @Test

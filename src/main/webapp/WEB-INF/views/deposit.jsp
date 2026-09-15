@@ -19,20 +19,20 @@
     <main style="padding: 6rem 0; min-height: 80vh;">
         <div class="editorial-container" style="max-width: 600px;">
             <div style="margin-bottom: 2rem;">
-                <a href="/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
+                <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
             </div>
             
             <h1 class="editorial-title" style="margin-bottom: 1rem;">Pay Deposit</h1>
 
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <div style="border: 1px solid var(--border); padding: 3rem; border-radius: 0;">
                 <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-dark);">
-                    <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Session with ${booking.photographerName}</h2>
+                    <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Session with <c:out value="${booking.photographerName}"/></h2>
                     <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
                     <p style="color: var(--text-muted);"><fmt:formatDate value="${parsedBookingDate}" pattern="MMM d, yyyy" /> at ${booking.bookingTime}</p>
                 </div>
@@ -61,7 +61,7 @@
                             </p>
                         </div>
 
-                        <form action="/bookings/${booking.id}/deposit/simulate-payment" method="post">
+                        <form action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/simulate-payment" method="post">
                             <button type="submit" class="submit-btn">Simulate Payment</button>
                         </form>
                     </c:when>
@@ -70,7 +70,7 @@
                             <div style="font-size: 2rem; margin-bottom: 1.5rem;">✓</div>
                             <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Deposit Paid</h3>
                             <p style="color: var(--text-muted); margin-bottom: 2rem;">Payment Reference: ${deposit.paymentReference}</p>
-                            <a href="/bookings/${booking.id}" class="pc-btn-outline" style="border: none; border-bottom: 1px solid currentColor; border-radius: 0; padding: 0.5rem 0;">Return to Booking</a>
+                            <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="pc-btn-outline" style="border: none; border-bottom: 1px solid currentColor; border-radius: 0; padding: 0.5rem 0;">Return to Booking</a>
                         </div>
                     </c:when>
                 </c:choose>

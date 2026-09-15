@@ -12,6 +12,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -208,5 +209,26 @@ public class PhotographerProfileRepositoryIntegrationTests {
                 PhotographerVerificationStatus.APPROVED, "Secret", null, null, null, null);
         assertThat(results).isEmpty();
     }
-}
 
+    @Test
+    void searchApprovedPhotographersPaged_shouldReturnBoundedApprovedPage() {
+        PhotographerProfile profile = new PhotographerProfile();
+        profile.setUser(testUser);
+        profile.setDisplayName("Paged Public Studio");
+        profile.setCity("Da Nang");
+        profile.setExperienceYears(4);
+        profile.setPriceFrom(new BigDecimal("3000000.00"));
+        profile.setVerificationStatus(PhotographerVerificationStatus.APPROVED);
+        profileRepository.save(profile);
+
+        var page = profileRepository.searchApprovedPhotographersPaged(
+                PhotographerVerificationStatus.APPROVED,
+                "Paged", null, null, null, null,
+                PageRequest.of(0, 1));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getVerificationStatus())
+                .isEqualTo(PhotographerVerificationStatus.APPROVED);
+    }
+}

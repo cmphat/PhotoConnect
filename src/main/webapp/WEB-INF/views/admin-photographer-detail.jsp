@@ -79,17 +79,17 @@
     <main style="padding: 6rem 0; min-height: 80vh;">
         <div class="editorial-container" style="max-width: 800px;">
             <div style="margin-bottom: 2rem;">
-                <a href="/admin/photographers" class="text-link" style="color: var(--text-muted); font-size: 0.9rem;">← Back to Applications</a>
+                <a href="${pageContext.request.contextPath}/admin/photographers" class="text-link" style="color: var(--text-muted); font-size: 0.9rem;">← Back to Applications</a>
             </div>
 
             <c:if test="${not empty successMessage}">
                 <div style="color: #34d399; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(52, 211, 153, 0.2);">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
@@ -142,17 +142,17 @@
 
                         <h2 class="editorial-heading" style="font-size: 1.25rem; margin-top: 3rem; margin-bottom: 1.5rem;">Bio</h2>
                         <div style="color: var(--text-muted); line-height: 1.7; margin-bottom: 4rem;">
-                            <c:out value="${profile.bio}" escapeXml="false"/>
+                            <c:out value="${profile.bio}"/>
                         </div>
 
                         <c:if test="${profile.verificationStatus == 'PENDING'}">
                             <div style="display: flex; gap: 1rem; border-top: 1px solid var(--border-dark); padding-top: 3rem;">
-                                <form action="/admin/photographers/${profile.id}/approve" method="post" style="margin: 0;">
+                                <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/approve" method="post" style="margin: 0;">
                                     <button type="submit" class="btn-approve" onclick="return confirm('Approve this application?')">
                                         Approve Application
                                     </button>
                                 </form>
-                                <form action="/admin/photographers/${profile.id}/reject" method="post" style="margin: 0;">
+                                <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/reject" method="post" style="margin: 0;">
                                     <button type="submit" class="btn-reject" onclick="return confirm('Reject this application?')">
                                         Reject
                                     </button>

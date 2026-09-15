@@ -81,7 +81,7 @@
             
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
                 <div>
                     <span class="section-index">Administration</span>
                     <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">Photographer Management</h1>
@@ -93,21 +93,21 @@
 
             <c:if test="${not empty successMessage}">
                 <div style="color: #34d399; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(52, 211, 153, 0.3); background-color: rgba(52, 211, 153, 0.05);">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <!-- Status Filter Tabs -->
             <div class="status-tabs">
-                <a href="/admin/photographers?status=PENDING" class="status-tab ${currentStatus == 'PENDING' || empty currentStatus ? 'active' : ''}">Pending Queue</a>
-                <a href="/admin/photographers?status=APPROVED" class="status-tab ${currentStatus == 'APPROVED' ? 'active' : ''}">Approved</a>
-                <a href="/admin/photographers?status=REJECTED" class="status-tab ${currentStatus == 'REJECTED' ? 'active' : ''}">Rejected</a>
-                <a href="/admin/photographers?status=ALL" class="status-tab ${currentStatus == 'ALL' ? 'active' : ''}">All Photographers</a>
+                <a href="${pageContext.request.contextPath}/admin/photographers?status=PENDING" class="status-tab ${currentStatus == 'PENDING' || empty currentStatus ? 'active' : ''}">Pending Queue</a>
+                <a href="${pageContext.request.contextPath}/admin/photographers?status=APPROVED" class="status-tab ${currentStatus == 'APPROVED' ? 'active' : ''}">Approved</a>
+                <a href="${pageContext.request.contextPath}/admin/photographers?status=REJECTED" class="status-tab ${currentStatus == 'REJECTED' ? 'active' : ''}">Rejected</a>
+                <a href="${pageContext.request.contextPath}/admin/photographers?status=ALL" class="status-tab ${currentStatus == 'ALL' ? 'active' : ''}">All Photographers</a>
             </div>
 
             <c:choose>
@@ -175,12 +175,12 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${app.verificationStatus == 'PENDING'}">
-                                                    <a href="/admin/photographers/${app.id}" class="text-link" style="font-size: 0.85rem; font-weight: 500; color: #f59e0b;">Review & Decide</a>
+                                                    <a href="${pageContext.request.contextPath}/admin/photographers/${app.id}" class="text-link" style="font-size: 0.85rem; font-weight: 500; color: #f59e0b;">Review & Decide</a>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a href="/admin/photographers/${app.id}" class="text-link" style="font-size: 0.85rem; margin-right: 0.75rem;">Application</a>
+                                                    <a href="${pageContext.request.contextPath}/admin/photographers/${app.id}" class="text-link" style="font-size: 0.85rem; margin-right: 0.75rem;">Application</a>
                                                     <c:if test="${app.verificationStatus == 'APPROVED'}">
-                                                        <a href="/photographers/${app.id}" target="_blank" class="text-link" style="font-size: 0.85rem; color: var(--text-muted);">Marketplace ↗</a>
+                                                        <a href="${pageContext.request.contextPath}/photographers/${app.id}" target="_blank" class="text-link" style="font-size: 0.85rem; color: var(--text-muted);">Marketplace ↗</a>
                                                     </c:if>
                                                 </c:otherwise>
                                             </c:choose>

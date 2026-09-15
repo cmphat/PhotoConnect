@@ -90,6 +90,8 @@ Query:
 - `maxPrice`
 - `page`
 
+`page` is zero-based, defaults to `0`, and is validated in the range `0..10000`. The MVC marketplace returns at most 12 approved photographers per page and preserves active filters in pagination links.
+
 ### GET `/photographers/{id}`
 Chi tiết profile + portfolio + packages + review.
 

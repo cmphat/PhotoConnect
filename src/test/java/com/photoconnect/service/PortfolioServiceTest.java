@@ -178,6 +178,18 @@ class PortfolioServiceTest {
         verify(cloudinaryStorageService).uploadImage(any(), any());
     }
 
+    @Test
+    void addPortfolioImage_oversizedCaption_shouldRejectBeforeCloudUpload() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> portfolioService.addPortfolioImage(1L, validJpegFile(), "x".repeat(501)));
+
+        assertThat(error.getMessage()).contains("Caption cannot exceed 500 characters");
+        verifyNoInteractions(cloudinaryStorageService, portfolioImageRepository);
+    }
+
     // ── Upload: PENDING photographer rejected ─────────────────────────────────
 
     /**

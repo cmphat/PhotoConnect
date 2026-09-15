@@ -43,6 +43,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     private static final String CLOUDINARY_FOLDER = "photoconnect/portfolio";
     private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024; // 10 MB
+    private static final int MAX_CAPTION_LENGTH = 500;
 
     /**
      * Allowed MIME types. We check content-type (not just file extension)
@@ -71,6 +72,9 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     @Transactional
     public PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption) {
+        if (userId == null) {
+            throw new IllegalArgumentException("Authenticated photographer is required.");
+        }
         // 1. Load photographer profile for authenticated user
         PhotographerProfile profile = photographerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException(
@@ -86,6 +90,14 @@ public class PortfolioServiceImpl implements PortfolioService {
         // 3. Validate the uploaded file
         validateFile(file);
 
+        String normalizedCaption = caption != null ? caption.trim() : null;
+        if (normalizedCaption != null && normalizedCaption.length() > MAX_CAPTION_LENGTH) {
+            throw new IllegalArgumentException("Caption cannot exceed 500 characters.");
+        }
+        if (normalizedCaption != null && normalizedCaption.isEmpty()) {
+            normalizedCaption = null;
+        }
+
         // 4. Upload to Cloudinary — binary storage
         CloudinaryStorageService.CloudinaryUploadResult uploadResult =
                 cloudinaryStorageService.uploadImage(file, CLOUDINARY_FOLDER);
@@ -96,7 +108,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         image.setPhotographerProfile(profile);
         image.setImageUrl(uploadResult.secureUrl());
         image.setPublicId(uploadResult.publicId());
-        image.setCaption(caption != null ? caption.trim() : null);
+        image.setCaption(normalizedCaption);
         image.setDisplayOrder(0);
 
         try {

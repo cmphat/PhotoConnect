@@ -88,13 +88,13 @@
                     <div style="text-align: center; padding: 4rem 2rem; border: 1px solid var(--border); margin-bottom: 2rem;">
                         <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 1rem;">No Application Found</h2>
                         <p style="color: var(--text-muted); margin-bottom: 2rem;">You have not yet submitted a photographer application.</p>
-                        <a href="/become-photographer" class="pc-btn-primary" style="padding: 1rem 2rem;">Apply Now</a>
+                        <a href="${pageContext.request.contextPath}/become-photographer" class="pc-btn-primary" style="padding: 1rem 2rem;">Apply Now</a>
                     </div>
                 </c:otherwise>
             </c:choose>
 
             <div style="text-align: center;">
-                <a href="/" class="text-link">Back to Home</a>
+                <a href="${pageContext.request.contextPath}/" class="text-link">Back to Home</a>
             </div>
 
         </div>

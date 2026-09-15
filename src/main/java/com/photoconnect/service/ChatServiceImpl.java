@@ -4,6 +4,8 @@ import com.photoconnect.dto.ChatMessageDto;
 import com.photoconnect.entity.Booking;
 import com.photoconnect.entity.Message;
 import com.photoconnect.entity.User;
+import com.photoconnect.entity.UserRole;
+import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.ChatAccessDeniedException;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.repository.BookingRepository;
@@ -58,8 +60,7 @@ public class ChatServiceImpl implements ChatService {
             throw new IllegalArgumentException("Message cannot exceed " + MAX_CONTENT_LENGTH + " characters.");
         }
 
-        Booking booking = bookingRepository.findByIdWithDetails(bookingId)
-                .orElseThrow(() -> new InvalidBookingException("Booking not found."));
+        Booking booking = getBookingForParticipant(bookingId, senderUserId);
 
         User customer = booking.getCustomer();
         User photographerUser = booking.getPhotographerProfile() != null
@@ -115,6 +116,13 @@ public class ChatServiceImpl implements ChatService {
 
         if (!userId.equals(customerUserId) && !userId.equals(photographerUserId)) {
             throw new ChatAccessDeniedException("You are not authorized to access chat for this booking.");
+        }
+
+        User participant = userId.equals(customerUserId) ? booking.getCustomer()
+                : booking.getPhotographerProfile().getUser();
+        UserRole expectedRole = userId.equals(customerUserId) ? UserRole.CUSTOMER : UserRole.PHOTOGRAPHER;
+        if (participant.getStatus() != UserStatus.ACTIVE || participant.getRole() != expectedRole) {
+            throw new ChatAccessDeniedException("Your account is not permitted to access this booking chat.");
         }
 
         return booking;

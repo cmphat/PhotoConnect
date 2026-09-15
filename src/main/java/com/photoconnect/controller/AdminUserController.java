@@ -84,7 +84,7 @@ public class AdminUserController {
             adminUserService.updateUserStatus(id, newStatus, currentAdminId);
             redirectAttributes.addFlashAttribute("successMessage", "User status updated to " + newStatus.name() + ".");
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Invalid status value: " + statusStr);
+            redirectAttributes.addFlashAttribute("errorMessage", "The requested user or status value is invalid.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }

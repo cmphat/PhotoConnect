@@ -2,9 +2,9 @@ package com.photoconnect.controller;
 
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
-import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidStatusTransitionException;
 import com.photoconnect.service.AdminPhotographerService;
+import com.photoconnect.util.AdminSecurityUtils;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,28 +26,11 @@ public class AdminPhotographerController {
         this.adminPhotographerService = adminPhotographerService;
     }
 
-    // ── Authorization helper ──────────────────────────────────────────────
-    private boolean isAdmin(HttpSession session) {
-        Object role = session.getAttribute("userRole");
-        return role != null && UserRole.ADMIN.name().equals(role.toString());
-    }
-
-    private String requireAdmin(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
-        if (!isAdmin(session)) {
-            return "redirect:/";  // logged in but not admin
-        }
-        return null;
-    }
-
     // ── GET /admin/photographers ──────────────────────────────────────────
     @GetMapping
     public String listPhotographers(@org.springframework.web.bind.annotation.RequestParam(value = "status", required = false) String statusStr,
                                     HttpSession session, Model model) {
-        String redirect = requireAdmin(session);
+        String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
         List<PhotographerProfile> profiles;
@@ -80,7 +63,7 @@ public class AdminPhotographerController {
     // ── GET /admin/photographers/{id} ─────────────────────────────────────
     @GetMapping("/{id}")
     public String viewApplicationDetail(@PathVariable Long id, HttpSession session, Model model) {
-        String redirect = requireAdmin(session);
+        String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
         try {
@@ -97,7 +80,7 @@ public class AdminPhotographerController {
     public String approveApplication(@PathVariable Long id,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
-        String redirect = requireAdmin(session);
+        String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
         try {
@@ -116,7 +99,7 @@ public class AdminPhotographerController {
     public String rejectApplication(@PathVariable Long id,
                                     HttpSession session,
                                     RedirectAttributes redirectAttributes) {
-        String redirect = requireAdmin(session);
+        String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
         try {

@@ -5,6 +5,7 @@ import com.photoconnect.entity.Booking;
 import com.photoconnect.exception.ChatAccessDeniedException;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.service.ChatService;
+import com.photoconnect.util.SessionSecurityUtils;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,12 +29,10 @@ public class ChatController {
                            HttpSession session,
                            Model model,
                            RedirectAttributes redirectAttributes) {
-        Object userIdObj = session.getAttribute("userId");
-        if (userIdObj == null) {
+        Long currentUserId = SessionSecurityUtils.userId(session);
+        if (currentUserId == null) {
             return "redirect:/login";
         }
-
-        Long currentUserId = (Long) userIdObj;
 
         try {
             Booking booking = chatService.getBookingForParticipant(bookingId, currentUserId);

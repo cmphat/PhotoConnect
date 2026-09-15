@@ -4,6 +4,7 @@ import com.photoconnect.dto.BookingRequest;
 import com.photoconnect.dto.BookingResponseDto;
 import com.photoconnect.dto.PhotographerPublicDto;
 import com.photoconnect.entity.Booking;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.SelfBookingNotAllowedException;
 import com.photoconnect.service.BookingService;
@@ -29,6 +30,10 @@ public class BookingController {
     private final com.photoconnect.service.DepositService depositService;
     private final com.photoconnect.service.ReviewService reviewService;
 
+    private String requireCustomer(HttpSession session) {
+        return com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
+    }
+
     public BookingController(BookingService bookingService,
                              PublicPhotographerService publicPhotographerService,
                              com.photoconnect.service.DepositService depositService,
@@ -46,10 +51,9 @@ public class BookingController {
     public String showBookingForm(@PathVariable("id") Long photographerId,
                                   HttpSession session,
                                   Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             PhotographerPublicDto photographer = publicPhotographerService.getApprovedPhotographerById(photographerId);
@@ -78,10 +82,9 @@ public class BookingController {
                                 HttpSession session,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         PhotographerPublicDto photographer;
         try {
@@ -115,10 +118,9 @@ public class BookingController {
     public String showBookingSuccess(@PathVariable("id") Long bookingId,
                                      HttpSession session,
                                      Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             Booking booking = bookingService.getBookingForCustomer(bookingId, userId);
@@ -134,10 +136,9 @@ public class BookingController {
      */
     @GetMapping("/bookings")
     public String listCustomerBookings(HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         java.util.List<Booking> bookings = bookingService.getCustomerBookings(userId);
         model.addAttribute("bookings", bookings.stream().map(com.photoconnect.dto.BookingViewDto::from).toList());
@@ -149,10 +150,9 @@ public class BookingController {
      */
     @GetMapping("/bookings/{id}")
     public String viewCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             Booking booking = bookingService.getBookingForCustomer(bookingId, userId);
@@ -177,10 +177,9 @@ public class BookingController {
      */
     @PostMapping("/bookings/{id}/cancel")
     public String cancelCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             bookingService.cancelBooking(bookingId, userId);

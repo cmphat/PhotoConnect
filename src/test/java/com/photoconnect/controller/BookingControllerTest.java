@@ -83,6 +83,17 @@ class BookingControllerTest {
     }
 
     @Test
+    void getBookingForm_photographerRole_shouldRedirectWithoutCallingService() throws Exception {
+        session.setAttribute("userRole", "PHOTOGRAPHER");
+
+        mockMvc.perform(get("/photographers/10/book").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verify(publicPhotographerService, never()).getApprovedPhotographerById(any());
+    }
+
+    @Test
     void getBookingForm_authenticated_photographerFound_shouldRenderForm() throws Exception {
         when(publicPhotographerService.getApprovedPhotographerById(10L))
                 .thenReturn(samplePhotographer);

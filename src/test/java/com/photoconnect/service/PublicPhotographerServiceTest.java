@@ -16,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -281,6 +284,35 @@ class PublicPhotographerServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getCoverImageUrl()).isNull();
+    }
+
+    @Test
+    void searchPhotographers_paged_shouldPreserveTotalsAndApprovedFilter() {
+        PageRequest pageable = PageRequest.of(1, 12);
+        when(photographerProfileRepository.searchApprovedPhotographersPaged(
+                eq(PhotographerVerificationStatus.APPROVED), eq("portrait"), isNull(),
+                isNull(), isNull(), isNull(), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(approvedProfile), pageable, 25));
+
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setKeyword(" portrait ");
+        request.setPage(1);
+
+        Page<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(request, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getTotalElements()).isEqualTo(25);
+        assertThat(result.getNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void searchPhotographers_paged_shouldRejectUnboundedPageSize() {
+        assertThrows(IllegalArgumentException.class,
+                () -> publicPhotographerService.searchPhotographers(
+                        new PhotographerSearchRequest(), PageRequest.of(0, 25)));
+
+        verify(photographerProfileRepository, never()).searchApprovedPhotographersPaged(
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     // ── getApprovedPhotographerById() ───────────────────────────────────────

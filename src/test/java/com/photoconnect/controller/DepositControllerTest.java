@@ -71,7 +71,7 @@ public class DepositControllerTest {
         when(bookingService.getBookingForCustomer(anyLong(), anyLong())).thenReturn(booking);
         when(depositService.getOrCreateDepositForBooking(anyLong(), anyLong())).thenReturn(deposit);
 
-        mockMvc.perform(get("/bookings/100/deposit").sessionAttr("userId", 10L))
+        mockMvc.perform(get("/bookings/100/deposit").sessionAttr("userId", 10L).sessionAttr("userRole", "CUSTOMER"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("deposit"))
                 .andExpect(model().attributeExists("booking", "deposit"));
@@ -81,7 +81,7 @@ public class DepositControllerTest {
     void showDepositPage_invalidBooking_redirectsToBookings() throws Exception {
         when(bookingService.getBookingForCustomer(anyLong(), anyLong())).thenThrow(new InvalidBookingException("Invalid"));
 
-        mockMvc.perform(get("/bookings/100/deposit").sessionAttr("userId", 10L))
+        mockMvc.perform(get("/bookings/100/deposit").sessionAttr("userId", 10L).sessionAttr("userRole", "CUSTOMER"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/bookings/100"));
     }
@@ -90,7 +90,7 @@ public class DepositControllerTest {
     void simulatePayment_customer_simulatesAndRedirects() throws Exception {
         when(depositService.simulateSuccessfulPayment(anyLong(), anyLong())).thenReturn(deposit);
 
-        mockMvc.perform(post("/bookings/100/deposit/simulate-payment").sessionAttr("userId", 10L))
+        mockMvc.perform(post("/bookings/100/deposit/simulate-payment").sessionAttr("userId", 10L).sessionAttr("userRole", "CUSTOMER"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/bookings/100"))
                 .andExpect(flash().attributeExists("successMessage"));

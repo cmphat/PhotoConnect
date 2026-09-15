@@ -26,6 +26,23 @@
     --transition-slow: 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    max-width: 100%;
+}
+
+img,
+svg,
+video {
+    max-width: 100%;
+}
+
 body {
     background-color: var(--bg-dark);
     color: var(--text-on-dark);
@@ -107,6 +124,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     align-items: center;
     gap: 2.5rem;
+    min-width: 0;
 }
 
 .nav-links {
@@ -164,6 +182,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     cursor: pointer;
     transition: opacity var(--transition-fast);
+    max-width: 100%;
 }
 
 .submit-btn:hover {
@@ -172,6 +191,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── Layout & Containers ───────────────────────────────────────────────── */
 .editorial-container {
+    width: 100%;
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 3rem;
@@ -235,6 +255,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-input {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border-dark);
@@ -243,6 +265,70 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.5rem 0;
     font-family: var(--font-primary);
     transition: border-color var(--transition-fast);
+}
+
+textarea.form-input {
+    resize: vertical;
+}
+
+input[type="date"].form-input,
+input[type="time"].form-input {
+    min-inline-size: 0;
+    color-scheme: dark;
+    width: 100%;
+    max-width: 100%;
+}
+
+.pc-booking-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+    max-width: 1120px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.pc-booking-datetime-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.pc-booking-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid var(--border-dark);
+    padding-top: 2rem;
+}
+
+.pc-scroll-region {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pc-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem;
+}
+
+.pc-detail-grid > [style*="grid-column: span 2"] {
+    grid-column: 1 / -1 !important;
+}
+
+.pc-upload-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 2rem;
+    align-items: end;
+}
+
+.pc-stack-mobile {
+    min-width: 0;
 }
 
 .form-input:focus {
@@ -335,12 +421,82 @@ h1, h2, h3, h4, h5, h6 {
     }
     .nav-container {
         padding: 1.25rem 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .nav-left, .nav-right, .nav-links {
+        gap: 1.25rem;
+    }
+    .nav-links {
+        margin-left: 0;
+        flex-wrap: wrap;
     }
     .editorial-container {
         padding: 0 1.5rem;
     }
     .photographer-grid {
         grid-template-columns: 1fr;
+    }
+    .pc-booking-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .editorial-container {
+        padding-inline: 1rem;
+    }
+    .auth-form-container {
+        padding: 2.5rem 1.25rem;
+    }
+    .hero-display {
+        font-size: clamp(3rem, 18vw, 5rem);
+        overflow-wrap: anywhere;
+    }
+    .nav-container,
+    .nav-left,
+    .nav-right {
+        align-items: flex-start;
+    }
+    .nav-container {
+        padding-inline: 1rem;
+    }
+    .nav-right {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    .filter-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+    .results-meta,
+    .pc-stack-mobile,
+    .pc-booking-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .pc-stack-mobile > div:last-child {
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+    .pc-booking-datetime-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+    .pc-detail-grid,
+    .pc-upload-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.5rem;
+    }
+    .pc-booking-actions .submit-btn,
+    .pc-booking-actions a {
+        width: 100% !important;
+        text-align: center;
+        padding-inline: 1rem !important;
+    }
+    .photographer-grid,
+    .masonry-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 }
 

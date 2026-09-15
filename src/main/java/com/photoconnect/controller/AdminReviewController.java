@@ -2,6 +2,7 @@ package com.photoconnect.controller;
 
 import com.photoconnect.entity.Review;
 import com.photoconnect.entity.ReviewStatus;
+import com.photoconnect.exception.ReviewNotFoundException;
 import com.photoconnect.service.AdminReviewService;
 import com.photoconnect.util.AdminSecurityUtils;
 import jakarta.servlet.http.HttpSession;
@@ -71,12 +72,14 @@ public class AdminReviewController {
         try {
             adminReviewService.hideReview(id);
             redirectAttributes.addFlashAttribute("successMessage", "Review #" + id + " has been hidden from public display.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to hide review: " + e.getMessage());
+        } catch (ReviewNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to hide review. Please try again.");
         }
 
-        if (currentStatus != null && !currentStatus.isBlank() && !"ALL".equalsIgnoreCase(currentStatus)) {
-            return "redirect:/admin/reviews?status=" + currentStatus;
+        if (isSupportedStatusFilter(currentStatus)) {
+            return "redirect:/admin/reviews?status=" + currentStatus.toUpperCase();
         }
         return "redirect:/admin/reviews";
     }
@@ -94,13 +97,19 @@ public class AdminReviewController {
         try {
             adminReviewService.unhideReview(id);
             redirectAttributes.addFlashAttribute("successMessage", "Review #" + id + " has been restored to public display.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to restore review: " + e.getMessage());
+        } catch (ReviewNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to restore review. Please try again.");
         }
 
-        if (currentStatus != null && !currentStatus.isBlank() && !"ALL".equalsIgnoreCase(currentStatus)) {
-            return "redirect:/admin/reviews?status=" + currentStatus;
+        if (isSupportedStatusFilter(currentStatus)) {
+            return "redirect:/admin/reviews?status=" + currentStatus.toUpperCase();
         }
         return "redirect:/admin/reviews";
+    }
+
+    private boolean isSupportedStatusFilter(String value) {
+        return "VISIBLE".equalsIgnoreCase(value) || "HIDDEN".equalsIgnoreCase(value);
     }
 }

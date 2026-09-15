@@ -25,6 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -75,6 +76,18 @@ class ChatControllerTest {
         mockMvc.perform(get("/bookings/100/chat"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void viewChat_malformedSessionUserId_shouldRedirectToLoginWithoutServiceCall() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", Integer.valueOf(10));
+
+        mockMvc.perform(get("/bookings/100/chat").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        verifyNoInteractions(chatService);
     }
 
     @Test

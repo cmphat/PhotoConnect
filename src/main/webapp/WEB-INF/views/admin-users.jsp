@@ -112,7 +112,7 @@
             
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
                 <div>
                     <span class="section-index">Administration</span>
                     <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">User Management</h1>
@@ -124,17 +124,17 @@
 
             <c:if test="${not empty successMessage}">
                 <div style="color: #34d399; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(52, 211, 153, 0.3); background-color: rgba(52, 211, 153, 0.05);">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
                 <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05);">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <!-- Search & Filter Controls -->
-            <form action="/admin/users" method="get" class="filter-panel">
+            <form action="${pageContext.request.contextPath}/admin/users" method="get" class="filter-panel">
                 <div class="form-group" style="flex: 1; min-width: 220px;">
                     <label class="form-label" for="search">Search Name or Email</label>
                     <input type="text" id="search" name="search" class="form-input" placeholder="e.g. John Doe, user@example.com" value="${search}" />
@@ -162,7 +162,7 @@
 
                 <button type="submit" class="action-btn" style="padding: 0.6rem 1.25rem;">Apply Filters</button>
                 <c:if test="${not empty search || selectedRole != 'ALL' || selectedStatus != 'ALL'}">
-                    <a href="/admin/users" class="action-btn" style="text-align: center; line-height: 1.8; text-decoration: none;">Reset</a>
+                    <a href="${pageContext.request.contextPath}/admin/users" class="action-btn" style="text-align: center; line-height: 1.8; text-decoration: none;">Reset</a>
                 </c:if>
             </form>
 
@@ -172,7 +172,7 @@
                     <div style="text-align: center; padding: 6rem 2rem; border: 1px solid var(--border-dark); background-color: var(--bg-dark-secondary);">
                         <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No users found</h3>
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem;">No accounts match the specified search and filter criteria.</p>
-                        <a href="/admin/users" class="action-btn" style="text-decoration: none;">Clear Filters</a>
+                        <a href="${pageContext.request.contextPath}/admin/users" class="action-btn" style="text-decoration: none;">Clear Filters</a>
                     </div>
                 </c:when>
                 <c:otherwise>
@@ -231,7 +231,7 @@
                                                     <span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">Protected (Self)</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <form action="/admin/users/${u.id}/status" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+                                                    <form action="${pageContext.request.contextPath}/admin/users/${u.id}/status" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
                                                         <select name="status" class="action-select">
                                                             <option value="ACTIVE" ${u.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
                                                             <option value="INACTIVE" ${u.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>

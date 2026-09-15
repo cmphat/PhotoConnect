@@ -78,6 +78,24 @@ public class ScheduleServiceTest {
     }
 
     @Test
+    void addUnavailableDate_NullDate_ThrowsValidationException() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> scheduleService.addUnavailableDate(1L, null, "Vacation"));
+
+        assertEquals("Photographer profile and date are required", ex.getMessage());
+        verifyNoInteractions(scheduleRepository, profileRepository);
+    }
+
+    @Test
+    void addUnavailableDate_OversizedReason_ThrowsValidationException() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> scheduleService.addUnavailableDate(1L, LocalDate.now().plusDays(1), "x".repeat(256)));
+
+        assertEquals("Reason cannot exceed 255 characters", ex.getMessage());
+        verifyNoInteractions(scheduleRepository, profileRepository);
+    }
+
+    @Test
     void isDateAvailable_Available_ReturnsTrue() {
         LocalDate date = LocalDate.now().plusDays(1);
         when(scheduleRepository.existsByPhotographerProfileIdAndDate(1L, date)).thenReturn(false);
@@ -95,5 +113,11 @@ public class ScheduleServiceTest {
         boolean available = scheduleService.isDateAvailable(1L, date);
 
         assertFalse(available);
+    }
+
+    @Test
+    void isDateAvailable_NullInput_ReturnsFalseWithoutQuery() {
+        assertFalse(scheduleService.isDateAvailable(1L, null));
+        verifyNoInteractions(scheduleRepository);
     }
 }

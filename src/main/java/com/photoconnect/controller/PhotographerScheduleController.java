@@ -5,6 +5,7 @@ import com.photoconnect.entity.PhotographerUnavailableDate;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.service.PhotographerProfileService;
 import com.photoconnect.service.ScheduleService;
+import com.photoconnect.util.SessionSecurityUtils;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,25 +37,24 @@ public class PhotographerScheduleController {
             return null;
         }
 
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
+        if (!SessionSecurityUtils.hasRole(session, UserRole.PHOTOGRAPHER)) {
             return null;
         }
 
-        Object role = session.getAttribute("userRole");
-        if (role == null || !UserRole.PHOTOGRAPHER.name().equals(role.toString())) {
-            return null;
-        }
-
+        Long userId = SessionSecurityUtils.userId(session);
         Optional<PhotographerProfile> profileOpt = photographerProfileService.findByUserId(userId);
         return profileOpt.map(PhotographerProfile::getId).orElse(null);
     }
 
     @GetMapping
     public String viewSchedule(HttpSession session, Model model) {
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) {
+            return redirect;
+        }
         Long profileId = getPhotographerProfileId(session);
         if (profileId == null) {
-            return "redirect:/login";
+            return "redirect:/photographer/onboarding-status";
         }
 
         List<PhotographerUnavailableDate> unavailableDates = scheduleService.getUnavailableDates(profileId);
@@ -69,9 +69,13 @@ public class PhotographerScheduleController {
                                      @RequestParam(value = "reason", required = false) String reason,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) {
+            return redirect;
+        }
         Long profileId = getPhotographerProfileId(session);
         if (profileId == null) {
-            return "redirect:/login";
+            return "redirect:/photographer/onboarding-status";
         }
 
         try {
@@ -88,9 +92,13 @@ public class PhotographerScheduleController {
     public String removeUnavailableDate(@PathVariable("id") Long dateId,
                                         HttpSession session,
                                         RedirectAttributes redirectAttributes) {
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) {
+            return redirect;
+        }
         Long profileId = getPhotographerProfileId(session);
         if (profileId == null) {
-            return "redirect:/login";
+            return "redirect:/photographer/onboarding-status";
         }
 
         scheduleService.removeUnavailableDate(profileId, dateId);

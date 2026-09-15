@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Request a photography booking with ${photographer.displayName} on PhotoConnect.">
+    <meta name="description" content="Request a photography booking on PhotoConnect.">
     <title>Book <c:out value="${photographer.displayName}"/> – PhotoConnect</title>
     
     <!-- Google Fonts -->
@@ -27,10 +27,10 @@
             
             <!-- Breadcrumb Navigation -->
             <div style="margin-bottom: 2rem;">
-                <a href="/photographers/${photographer.id}" class="text-link" style="font-size:0.88rem;">← Back to Profile</a>
+                <a href="${pageContext.request.contextPath}/photographers/${photographer.id}" class="text-link" style="font-size:0.88rem;">← Back to Profile</a>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 4rem;">
+            <div class="pc-booking-layout">
                 
                 <!-- Left: Photographer Summary -->
                 <div>
@@ -97,10 +97,10 @@
                         </div>
                     </c:if>
 
-                    <form action="/photographers/${photographer.id}/book" method="post" id="booking-form">
+                    <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/book" method="post" id="booking-form">
                         
                         <!-- Date & Time Row -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div class="pc-booking-datetime-grid">
                             <div class="form-group">
                                 <label for="bookingDate" class="form-label">Shoot Date *</label>
                                 <input type="date" 
@@ -172,8 +172,8 @@
                         </div>
 
                         <!-- Actions -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 2rem;">
-                            <a href="/photographers/${photographer.id}" class="pc-btn-outline" style="border: none; padding-left: 0;">
+                        <div class="pc-booking-actions">
+                            <a href="${pageContext.request.contextPath}/photographers/${photographer.id}" class="pc-btn-outline" style="border: none; padding-left: 0;">
                                 Cancel
                             </a>
                             <button type="submit" class="submit-btn" id="btn-submit-booking" style="width: auto; padding: 1rem 3rem;">

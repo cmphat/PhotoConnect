@@ -26,12 +26,12 @@
 
         <c:if test="${not empty successMessage}">
             <div class="pc-alert pc-alert-success" style="margin-bottom: 2rem;">
-                ${successMessage}
+                <c:out value="${successMessage}"/>
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="pc-alert pc-alert-danger" style="margin-bottom: 2rem;">
-                ${errorMessage}
+                <c:out value="${errorMessage}"/>
             </div>
         </c:if>
 
@@ -67,7 +67,8 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <table class="pc-table" style="width: 100%;">
+                        <div class="pc-scroll-region">
+                        <table class="pc-table" style="width: 100%; min-width: 560px;">
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -98,6 +99,7 @@
                                 </c:forEach>
                             </tbody>
                         </table>
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>

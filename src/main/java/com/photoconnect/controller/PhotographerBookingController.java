@@ -2,6 +2,7 @@ package com.photoconnect.controller;
 
 import com.photoconnect.dto.BookingViewDto;
 import com.photoconnect.entity.Booking;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.service.BookingService;
 import jakarta.servlet.http.HttpSession;
@@ -27,10 +28,9 @@ public class PhotographerBookingController {
 
     @GetMapping
     public String listPhotographerBookings(HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null || !"PHOTOGRAPHER".equals(session.getAttribute("userRole"))) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         List<Booking> bookings = bookingService.getPhotographerBookings(userId);
         model.addAttribute("bookings", bookings.stream().map(BookingViewDto::from).toList());
@@ -39,10 +39,9 @@ public class PhotographerBookingController {
 
     @GetMapping("/{id}")
     public String viewPhotographerBooking(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null || !"PHOTOGRAPHER".equals(session.getAttribute("userRole"))) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             Booking booking = bookingService.getBookingForPhotographer(bookingId, userId);
@@ -55,10 +54,9 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/accept")
     public String acceptBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null || !"PHOTOGRAPHER".equals(session.getAttribute("userRole"))) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             bookingService.acceptBooking(bookingId, userId);
@@ -72,10 +70,9 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/reject")
     public String rejectBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null || !"PHOTOGRAPHER".equals(session.getAttribute("userRole"))) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             bookingService.rejectBooking(bookingId, userId);
@@ -89,10 +86,9 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/complete")
     public String completeBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null || !"PHOTOGRAPHER".equals(session.getAttribute("userRole"))) {
-            return "redirect:/login";
-        }
+        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             bookingService.completeBooking(bookingId, userId);

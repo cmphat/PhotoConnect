@@ -85,7 +85,7 @@
                 <p class="hero-subtitle">
                     Find photographers for moments worth remembering.
                 </p>
-                <a href="/photographers" class="primary-link" style="font-size: 1.1rem; border-bottom-width: 2px;">Explore photographers →</a>
+                <a href="${pageContext.request.contextPath}/photographers" class="primary-link" style="font-size: 1.1rem; border-bottom-width: 2px;">Explore photographers →</a>
             </div>
         </section>
 
@@ -97,7 +97,7 @@
                     Curated visual artists for editorial, commercial, and portrait storytelling.
                 </h2>
                 <div style="margin-top: 4rem;">
-                    <a href="/photographers" class="text-link" style="font-size: 1.25rem;">View all artists</a>
+                    <a href="${pageContext.request.contextPath}/photographers" class="text-link" style="font-size: 1.25rem;">View all artists</a>
                 </div>
             </div>
         </section>
@@ -116,7 +116,7 @@
                     <c:otherwise>
                         <div class="photographer-grid" style="margin-top: 4rem;">
                             <c:forEach var="p" items="${featuredPhotographers}">
-                                <a href="/photographers/${p.id}" class="photographer-card">
+                                <a href="${pageContext.request.contextPath}/photographers/${p.id}" class="photographer-card">
                                     <div class="photo-frame">
                                         <c:choose>
                                             <c:when test="${not empty p.coverImageUrl}">
@@ -157,7 +157,7 @@
                 <h2 class="editorial-heading" style="margin: 0 auto 3rem auto; max-width: 700px;">
                     Are you a professional visual artist?
                 </h2>
-                <a href="/become-photographer" class="primary-link" style="font-size: 1.25rem; border-bottom-width: 2px;">Apply to join PhotoConnect</a>
+                <a href="${pageContext.request.contextPath}/become-photographer" class="primary-link" style="font-size: 1.25rem; border-bottom-width: 2px;">Apply to join PhotoConnect</a>
             </div>
         </section>
     </main>

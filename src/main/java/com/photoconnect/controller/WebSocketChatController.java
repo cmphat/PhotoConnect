@@ -32,12 +32,10 @@ public class WebSocketChatController {
         }
 
         Object userIdObj = sessionAttributes.get("userId");
-        if (userIdObj == null) {
+        if (!(userIdObj instanceof Long senderUserId)) {
             log.warn("STOMP message received with no userId in session attributes");
             return;
         }
-
-        Long senderUserId = (Long) userIdObj;
         if (request == null || request.getBookingId() == null || request.getContent() == null) {
             log.warn("STOMP message payload is invalid");
             return;

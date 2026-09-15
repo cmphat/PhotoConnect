@@ -90,10 +90,10 @@
 
             <!-- Next Actions -->
             <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
-                <a href="/photographers" class="pc-btn-primary" style="padding: 1rem 2rem;">
+                <a href="${pageContext.request.contextPath}/photographers" class="pc-btn-primary" style="padding: 1rem 2rem;">
                     Explore More Artists
                 </a>
-                <a href="/" class="text-link">
+                <a href="${pageContext.request.contextPath}/" class="text-link">
                     Back to Home
                 </a>
             </div>

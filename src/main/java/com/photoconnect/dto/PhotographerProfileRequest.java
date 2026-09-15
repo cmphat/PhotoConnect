@@ -24,6 +24,7 @@ public class PhotographerProfileRequest {
 
     @NotNull(message = "Starting price is required.")
     @DecimalMin(value = "0.0", inclusive = true, message = "Starting price must be zero or positive.")
+    @Digits(integer = 16, fraction = 2, message = "Starting price must have at most 16 integer digits and 2 decimal places.")
     private BigDecimal priceFrom;
 
     public PhotographerProfileRequest() {
