@@ -42,6 +42,9 @@ public class PhotographerScheduleController {
         }
 
         Long userId = SessionSecurityUtils.userId(session);
+        if (userId == null) {
+            return null;
+        }
         Optional<PhotographerProfile> profileOpt = photographerProfileService.findByUserId(userId);
         return profileOpt.map(PhotographerProfile::getId).orElse(null);
     }

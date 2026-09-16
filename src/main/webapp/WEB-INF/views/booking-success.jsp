@@ -90,7 +90,10 @@
 
             <!-- Next Actions -->
             <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
-                <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary">
+                <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="btn btn-primary">
+                    View Booking Details
+                </a>
+                <a href="${pageContext.request.contextPath}/photographers" class="btn btn-secondary">
                     Explore More Artists
                 </a>
                 <a href="${pageContext.request.contextPath}/" class="btn btn-ghost">

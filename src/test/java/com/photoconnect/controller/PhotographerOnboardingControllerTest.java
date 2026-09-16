@@ -173,4 +173,42 @@ class PhotographerOnboardingControllerTest {
                 .andExpect(model().attributeExists("profile"))
                 .andExpect(model().attribute("verificationStatus", "PENDING"));
     }
+
+    @Test
+    void adminGet_shouldRedirectToAdminDashboard() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 99L);
+        session.setAttribute("userRole", "ADMIN");
+
+        mockMvc.perform(get("/become-photographer").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard"));
+    }
+
+    @Test
+    void adminPost_shouldRedirectToAdminDashboard() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 99L);
+        session.setAttribute("userRole", "ADMIN");
+
+        mockMvc.perform(post("/become-photographer").session(session)
+                        .param("displayName", "Admin Studio")
+                        .param("bio", "Admin trying to onboard as photographer")
+                        .param("city", "Hanoi")
+                        .param("experienceYears", "5")
+                        .param("priceFrom", "1500000"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard"));
+    }
+
+    @Test
+    void adminStatusGet_shouldRedirectToAdminDashboard() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 99L);
+        session.setAttribute("userRole", "ADMIN");
+
+        mockMvc.perform(get("/photographer/onboarding-status").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard"));
+    }
 }

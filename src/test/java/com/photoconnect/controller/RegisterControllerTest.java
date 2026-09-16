@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -88,5 +89,31 @@ public class RegisterControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeExists("emailError"));
+    }
+
+    @Test
+    public void testShowRegisterForm_WhenAlreadyAuthenticated_RedirectsHome() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 42L);
+
+        mockMvc.perform(get("/register").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
+    public void testProcessRegistration_WhenAlreadyAuthenticated_RedirectsHome() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 42L);
+
+        mockMvc.perform(post("/register").session(session)
+                        .param("fullName", "John Doe")
+                        .param("email", "john@example.com")
+                        .param("password", "password123")
+                        .param("confirmPassword", "password123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        Mockito.verify(userService, Mockito.never()).registerUser(any());
     }
 }

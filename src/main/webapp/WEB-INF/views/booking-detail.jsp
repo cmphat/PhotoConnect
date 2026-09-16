@@ -102,8 +102,15 @@
                                     </div>
                                     <div style="grid-column: span 2;">
                                         <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Paid At</div>
-                                        <fmt:parseDate value="${fn:substring(deposit.paidAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedPaidAt" type="date" />
-                                        <div style="font-size: 1.1rem;"><fmt:formatDate value="${parsedPaidAt}" pattern="MMM d, yyyy" /></div>
+                                        <c:choose>
+                                            <c:when test="${not empty deposit.paidAt}">
+                                                <fmt:parseDate value="${fn:substring(deposit.paidAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedPaidAt" type="date" />
+                                                <div style="font-size: 1.1rem;"><fmt:formatDate value="${parsedPaidAt}" pattern="MMM d, yyyy" /></div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div style="font-size: 1.1rem;">Recorded</div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                                 <a href="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/receipt" class="text-link" style="display: inline-block; margin-top: 1.5rem;">View Payment Receipt</a>

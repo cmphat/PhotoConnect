@@ -4,6 +4,7 @@ import com.photoconnect.dto.RegisterRequest;
 import com.photoconnect.exception.EmailAlreadyExistsException;
 import com.photoconnect.exception.PasswordMismatchException;
 import com.photoconnect.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +25,10 @@ public class RegisterController {
     }
 
     @GetMapping
-    public String showRegisterForm(Model model) {
+    public String showRegisterForm(Model model, HttpSession session) {
+        if (session.getAttribute("userId") != null) {
+            return "redirect:/";
+        }
         model.addAttribute("registerRequest", new RegisterRequest());
         return "register";
     }
@@ -32,7 +36,11 @@ public class RegisterController {
     @PostMapping
     public String processRegistration(@Valid @ModelAttribute("registerRequest") RegisterRequest registerRequest,
                                       BindingResult bindingResult,
+                                      HttpSession session,
                                       Model model) {
+        if (session.getAttribute("userId") != null) {
+            return "redirect:/";
+        }
         if (bindingResult.hasErrors()) {
             return "register";
         }

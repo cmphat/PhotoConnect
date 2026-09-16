@@ -57,6 +57,7 @@
 - **Transaction and Service Hardening Audit (TASK-027)**: Verified semantic transaction boundaries for booking, deposit, review/rating moderation, availability, and portfolio database operations. Added a reflection-based regression contract and retained explicit Cloudinary compensation for the non-transactional remote resource boundary.
 - **Development Demo Data (TASK-028)**: Added both an idempotent SQL Server seed script (`docs/development/seed/V009__demo_seed_data.sql`) and a double-opt-in `demo-seed` Spring Boot profile (`DemoDataSeeder.java`). Safely creates 1 admin, 2 customers, and 14 APPROVED photographers across 3 cities and varying prices (enabling 2-page pagination verification), 1 PENDING photographer, bookings, deposits, reviews, and chat history without destructive operations.
 - **Professional Demo Payment & Receipt Experience (TASK-029)**: Replaced the TASK-015 developer-facing action with an explicitly disclosed, local-only PhotoConnect demo checkout. Added Demo QR and deterministic demo-card methods, `PENDING -> PROCESSING -> PAID/FAILED` plus cancellation, server-generated `PC-yyyyMMdd-XXXXXXXX` references, pessimistic-lock/idempotency protection, owner-only results and printable receipts, responsive editorial payment UI, and nullable method/failure metadata via V010. No gateway, banking API, merchant account, card persistence, or real transfer exists. **Human Verification: PARTIAL (Core Flow PASS; Edge Cases Automated/Pending)**.
+- **Final End-to-End QA & Bug Fixing (TASK-030)**: Conducted full-system stabilization audit across all personas (GUEST, CUSTOMER, PHOTOGRAPHER, ADMIN). Fixed REST fallback JavaScript scoping and send button class in `chat.jsp`, guarded legacy null `paidAt` in `booking-detail.jsp`, added direct booking detail navigation to `booking-success.jsp`, guarded `/become-photographer` against ADMIN users, and redirected authenticated users from `/register`. Added 8 regression/contract tests. **Automated Verification: PASS (404 tests, 0 failures, 0 errors, 23 skipped); Human Verification: PENDING (Untested Browser Scenarios Tracked)**.
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
@@ -64,7 +65,7 @@
 - **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` adds review status; seed script `docs/development/seed/V009__demo_seed_data.sql` provides opt-in demo data; forward-only migration `docs/development/migrations/V010__professional_demo_payment.sql` adds nullable `payment_method` and `failure_reason` deposit metadata without changing historical rows.
 
 ## Test Status
-- 396 tests run with 373 passing, 0 failures, 0 errors, and 23 skipped (environment-gated integration tests requiring a live SQL Server).
+- 404 tests run with 381 passing, 0 failures, 0 errors, and 23 skipped (environment-gated integration tests requiring a live SQL Server).
 - `mvn clean package` succeeds and produces `target/photoconnect.war`.
 - TDD approach strictly followed.
 

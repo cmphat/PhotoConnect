@@ -53,7 +53,6 @@ public class BookingController {
                                   Model model) {
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
             PhotographerPublicDto photographer = publicPhotographerService.getApprovedPhotographerById(photographerId);

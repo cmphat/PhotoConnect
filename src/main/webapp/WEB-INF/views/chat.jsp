@@ -47,6 +47,9 @@
             border: 1px solid rgba(201, 169, 110, 0.35);
             color: #f3f4f6;
         }
+        .message-mine .message-sender {
+            color: var(--accent-gold, #c9a96e);
+        }
         .message-partner {
             align-self: flex-start;
             background: #14141a;
@@ -140,7 +143,11 @@
             </div>
 
             <div class="chat-box">
-                <div id="messagesContainer" class="chat-messages">
+                <div id="messagesContainer"
+                     class="chat-messages"
+                     data-booking-id="${booking.id}"
+                     data-current-user-id="${currentUserId}"
+                     data-context-path="${pageContext.request.contextPath}">
                     <c:choose>
                         <c:when test="${empty messages}">
                             <div id="emptyNotice" style="text-align: center; color: var(--text-muted); margin: auto; padding: 2rem;">
@@ -151,10 +158,10 @@
                             <c:forEach var="msg" items="${messages}">
                                 <div class="message-bubble ${msg.senderId == currentUserId ? 'message-mine' : 'message-partner'}">
                                     <div class="message-meta">
-                                        <span class="message-sender" style="${msg.senderId == currentUserId ? 'color: var(--accent-gold, #c9a96e);' : ''}">
-                                            ${msg.senderId == currentUserId ? 'You' : msg.senderName}
+                                        <span class="message-sender">
+                                            <c:out value="${msg.senderId == currentUserId ? 'You' : msg.senderName}" />
                                         </span>
-                                        <span class="message-time">${msg.formattedSentAt}</span>
+                                        <span class="message-time"><c:out value="${msg.formattedSentAt}" /></span>
                                     </div>
                                     <div><c:out value="${msg.content}" /></div>
                                 </div>
@@ -171,7 +178,7 @@
                            autocomplete="off"
                            maxlength="2000"
                            required />
-                    <button type="submit" id="sendBtn" class="pc-btn-primary" style="padding: 0.85rem 1.75rem; white-space: nowrap;">
+                    <button type="submit" id="sendBtn" class="btn btn-primary" style="padding: 0.85rem 1.75rem; white-space: nowrap;">
                         Send
                     </button>
                 </form>
@@ -184,165 +191,168 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
     <script>
-        const bookingId = ${booking.id};
-        const currentUserId = ${currentUserId};
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const chatForm = document.getElementById('chatForm');
-        const connDot = document.getElementById('connDot');
-        const connText = document.getElementById('connText');
+        (function () {
+            'use strict';
 
-        let stompClient = null;
-        let isStompConnected = false;
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (!messagesContainer) return;
 
-        function scrollToBottom() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        scrollToBottom();
+            const bookingId = parseInt(messagesContainer.dataset.bookingId, 10);
+            const currentUserId = parseInt(messagesContainer.dataset.currentUserId, 10);
+            const contextPath = messagesContainer.dataset.contextPath || '';
+            const messageInput = document.getElementById('messageInput');
+            const chatForm = document.getElementById('chatForm');
+            const connDot = document.getElementById('connDot');
+            const connText = document.getElementById('connText');
 
-        function appendMessage(msg) {
-            const emptyNotice = document.getElementById('emptyNotice');
-            if (emptyNotice) {
-                emptyNotice.remove();
+            let stompClient = null;
+            let isStompConnected = false;
+
+            function scrollToBottom() {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
-
-            const isMine = (msg.senderId === currentUserId);
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble ' + (isMine ? 'message-mine' : 'message-partner');
-
-            const meta = document.createElement('div');
-            meta.className = 'message-meta';
-
-            const senderSpan = document.createElement('span');
-            senderSpan.className = 'message-sender';
-            if (isMine) {
-                senderSpan.style.color = 'var(--accent-gold, #c9a96e)';
-                senderSpan.textContent = 'You';
-            } else {
-                senderSpan.textContent = msg.senderName || 'User';
-            }
-
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'message-time';
-            timeSpan.textContent = msg.formattedSentAt || 'Just now';
-
-            meta.appendChild(senderSpan);
-            meta.appendChild(timeSpan);
-
-            const contentDiv = document.createElement('div');
-            contentDiv.textContent = msg.content;
-
-            bubble.appendChild(meta);
-            bubble.appendChild(contentDiv);
-            messagesContainer.appendChild(bubble);
-
             scrollToBottom();
-        }
 
-        // Initialize WebSocket connection
-        function connectWebSocket() {
-            try {
-                if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
-                    throw new Error('STOMP/SockJS libraries unavailable, using REST fallback');
+            function appendMessage(msg) {
+                const emptyNotice = document.getElementById('emptyNotice');
+                if (emptyNotice) {
+                    emptyNotice.remove();
                 }
 
-                const contextPath = '${pageContext.request.contextPath}';
-                const socket = new SockJS(contextPath + '/ws');
-                stompClient = Stomp.over(socket);
-                stompClient.debug = null; // Disable noisy console logging
+                const isMine = (msg.senderId === currentUserId);
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble ' + (isMine ? 'message-mine' : 'message-partner');
 
-                stompClient.connect({}, function (frame) {
-                    isStompConnected = true;
-                    connDot.classList.add('dot-connected');
-                    connText.textContent = 'Live (WebSocket)';
+                const meta = document.createElement('div');
+                meta.className = 'message-meta';
 
-                    stompClient.subscribe('/topic/booking/' + bookingId + '/chat', function (response) {
-                        try {
-                            const message = JSON.parse(response.body);
-                            appendMessage(message);
-                        } catch (e) {
-                            console.error('Failed to parse chat message payload', e);
-                        }
-                    });
-                }, function (error) {
-                    isStompConnected = false;
-                    connDot.classList.remove('dot-connected');
-                    connText.textContent = 'Connected (REST Fallback)';
-                    startRestPolling();
-                });
-            } catch (err) {
-                isStompConnected = false;
-                connDot.classList.remove('dot-connected');
-                connText.textContent = 'Connected (REST Mode)';
-                startRestPolling();
+                const senderSpan = document.createElement('span');
+                senderSpan.className = 'message-sender';
+                senderSpan.textContent = isMine ? 'You' : (msg.senderName || 'User');
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = msg.formattedSentAt || 'Just now';
+
+                meta.appendChild(senderSpan);
+                meta.appendChild(timeSpan);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.textContent = msg.content;
+
+                bubble.appendChild(meta);
+                bubble.appendChild(contentDiv);
+                messagesContainer.appendChild(bubble);
+
+                scrollToBottom();
             }
-        }
 
-        let pollingInterval = null;
-        function startRestPolling() {
-            if (pollingInterval) return;
-            pollingInterval = setInterval(function () {
-                fetch(contextPath + '/api/bookings/' + bookingId + '/messages')
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.success && Array.isArray(res.data)) {
-                            // Update messages container if new messages received
-                            const currentCount = messagesContainer.querySelectorAll('.message-bubble').length;
-                            if (res.data.length > currentCount) {
-                                messagesContainer.innerHTML = '';
-                                res.data.forEach(appendMessage);
-                            }
-                        }
-                    })
-                    .catch(err => console.debug('Polling error', err));
-            }, 3000);
-        }
-
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const content = messageInput.value.trim();
-            if (!content) return;
-
-            messageInput.disabled = true;
-
-            if (isStompConnected && stompClient) {
-                stompClient.send('/app/chat.send', {}, JSON.stringify({
-                    bookingId: bookingId,
-                    content: content
-                }));
-                messageInput.value = '';
-                messageInput.disabled = false;
-                messageInput.focus();
-            } else {
-                // Fallback to REST API
-                fetch(contextPath + '/api/bookings/' + bookingId + '/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        bookingId: bookingId,
-                        content: content
-                    })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success && res.data) {
-                        appendMessage(res.data);
+            // Initialize WebSocket connection
+            function connectWebSocket() {
+                try {
+                    if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
+                        throw new Error('STOMP/SockJS libraries unavailable, using REST fallback');
                     }
-                    messageInput.value = '';
-                })
-                .catch(err => {
-                    alert('Failed to send message: ' + err.message);
-                })
-                .finally(() => {
-                    messageInput.disabled = false;
-                    messageInput.focus();
+
+                    const socket = new SockJS(contextPath + '/ws');
+                    stompClient = Stomp.over(socket);
+                    stompClient.debug = null; // Disable noisy console logging
+
+                    stompClient.connect({}, function (frame) {
+                        isStompConnected = true;
+                        if (connDot) connDot.classList.add('dot-connected');
+                        if (connText) connText.textContent = 'Live (WebSocket)';
+
+                        stompClient.subscribe('/topic/booking/' + bookingId + '/chat', function (response) {
+                            try {
+                                const message = JSON.parse(response.body);
+                                appendMessage(message);
+                            } catch (e) {
+                                console.error('Failed to parse chat message payload', e);
+                            }
+                        });
+                    }, function (error) {
+                        isStompConnected = false;
+                        if (connDot) connDot.classList.remove('dot-connected');
+                        if (connText) connText.textContent = 'Connected (REST Fallback)';
+                        startRestPolling();
+                    });
+                } catch (err) {
+                    isStompConnected = false;
+                    if (connDot) connDot.classList.remove('dot-connected');
+                    if (connText) connText.textContent = 'Connected (REST Mode)';
+                    startRestPolling();
+                }
+            }
+
+            let pollingInterval = null;
+            function startRestPolling() {
+                if (pollingInterval) return;
+                pollingInterval = setInterval(function () {
+                    fetch(contextPath + '/api/bookings/' + bookingId + '/messages')
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success && Array.isArray(res.data)) {
+                                // Update messages container if new messages received
+                                const currentCount = messagesContainer.querySelectorAll('.message-bubble').length;
+                                if (res.data.length > currentCount) {
+                                    messagesContainer.innerHTML = '';
+                                    res.data.forEach(appendMessage);
+                                }
+                            }
+                        })
+                        .catch(err => console.debug('Polling error', err));
+                }, 3000);
+            }
+
+            if (chatForm && messageInput) {
+                chatForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const content = messageInput.value.trim();
+                    if (!content) return;
+
+                    messageInput.disabled = true;
+
+                    if (isStompConnected && stompClient) {
+                        stompClient.send('/app/chat.send', {}, JSON.stringify({
+                            bookingId: bookingId,
+                            content: content
+                        }));
+                        messageInput.value = '';
+                        messageInput.disabled = false;
+                        messageInput.focus();
+                    } else {
+                        // Fallback to REST API
+                        fetch(contextPath + '/api/bookings/' + bookingId + '/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                bookingId: bookingId,
+                                content: content
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success && res.data) {
+                                appendMessage(res.data);
+                            }
+                            messageInput.value = '';
+                        })
+                        .catch(err => {
+                            alert('Failed to send message: ' + err.message);
+                        })
+                        .finally(() => {
+                            messageInput.disabled = false;
+                            messageInput.focus();
+                        });
+                    }
                 });
             }
-        });
 
-        connectWebSocket();
+            connectWebSocket();
+        })();
     </script>
 </body>
 </html>

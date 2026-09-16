@@ -29,6 +29,11 @@ public class PhotographerOnboardingController {
             return "redirect:/login";
         }
 
+        String userRole = (String) session.getAttribute("userRole");
+        if (UserRole.ADMIN.name().equals(userRole)) {
+            return "redirect:/admin/dashboard";
+        }
+
         if (photographerProfileService.findByUserId(userId).isPresent()) {
             return "redirect:/photographer/onboarding-status";
         }
@@ -45,6 +50,11 @@ public class PhotographerOnboardingController {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             return "redirect:/login";
+        }
+
+        String userRole = (String) session.getAttribute("userRole");
+        if (UserRole.ADMIN.name().equals(userRole)) {
+            return "redirect:/admin/dashboard";
         }
 
         if (bindingResult.hasErrors()) {
@@ -69,6 +79,11 @@ public class PhotographerOnboardingController {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             return "redirect:/login";
+        }
+
+        String userRole = (String) session.getAttribute("userRole");
+        if (UserRole.ADMIN.name().equals(userRole)) {
+            return "redirect:/admin/dashboard";
         }
 
         photographerProfileService.findByUserId(userId).ifPresent(profile -> {
