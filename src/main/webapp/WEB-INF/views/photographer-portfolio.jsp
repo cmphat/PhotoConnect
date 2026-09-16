@@ -110,7 +110,7 @@
                             <input type="text" id="caption" name="caption" maxlength="500" placeholder="Describe this photo…" class="pc-input" style="border: 1px solid var(--border-dark);">
                         </div>
                         <div>
-                            <button type="submit" class="submit-btn" id="btn-upload-submit" style="padding: 0.8rem 2rem;">Upload</button>
+                            <button type="submit" class="btn btn-primary" id="btn-upload-submit">Upload</button>
                         </div>
                     </div>
                 </form>

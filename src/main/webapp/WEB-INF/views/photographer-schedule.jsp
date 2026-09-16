@@ -51,7 +51,7 @@
                         <input type="text" id="reason" name="reason" class="pc-input" placeholder="e.g. Vacation, Fully Booked" maxlength="255" style="width: 100%;">
                     </div>
                     
-                    <button type="submit" class="pc-btn pc-btn-primary" style="width: 100%;">Block Date</button>
+                    <button type="submit" class="btn btn-primary btn-block">Block Date</button>
                 </form>
             </div>
 
@@ -90,7 +90,7 @@
                                         </td>
                                         <td style="text-align: right;">
                                             <form action="<c:url value='/photographer/schedule/remove/${dateObj.id}'/>" method="post" style="display: inline;">
-                                                <button type="submit" class="pc-btn pc-btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="return confirm('Are you sure you want to unblock this date?');">
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to unblock this date?');">
                                                     Remove
                                                 </button>
                                             </form>

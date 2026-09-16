@@ -120,6 +120,7 @@ Không thêm feature lớn mới nếu core còn bug.
 
 ## Tuần 8 — Freeze + Demo
 
+- [x] Professional demo deposit checkout + receipt (TASK-029; core flow manually verified, edge cases automated)
 - [ ] Feature freeze
 - [ ] Fix bug
 - [ ] Demo data

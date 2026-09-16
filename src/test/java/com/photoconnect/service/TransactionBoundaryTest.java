@@ -16,6 +16,9 @@ class TransactionBoundaryTest {
                 com.photoconnect.dto.BookingRequest.class);
         assertTransactional(DepositServiceImpl.class, "getOrCreateDepositForBooking", Long.class, Long.class);
         assertTransactional(DepositServiceImpl.class, "simulateSuccessfulPayment", Long.class, Long.class);
+        assertTransactional(DepositServiceImpl.class, "processDemoPayment", Long.class, Long.class,
+                com.photoconnect.dto.DemoPaymentRequest.class);
+        assertTransactional(DepositServiceImpl.class, "cancelDemoPayment", Long.class, Long.class);
         assertTransactional(ReviewServiceImpl.class, "createReview", Long.class, Long.class,
                 com.photoconnect.dto.ReviewRequest.class);
         assertTransactional(AdminReviewServiceImpl.class, "hideReview", Long.class);

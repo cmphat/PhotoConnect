@@ -75,10 +75,10 @@
 
                 <!-- Actions -->
                 <div class="pc-stack-mobile" style="display: flex; gap: 1.5rem; align-items: center;">
-                    <button type="submit" class="pc-btn-primary" style="padding: 1rem 2.5rem; font-size: 0.95rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2.5rem;">
                         Submit Review
                     </button>
-                    <a href="${pageContext.request.contextPath}/bookings/${booking.id}" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem;">Cancel</a>
+                    <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="btn btn-ghost">Cancel</a>
                 </div>
             </form>
         </div>

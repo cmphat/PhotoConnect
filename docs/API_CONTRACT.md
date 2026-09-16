@@ -171,7 +171,41 @@ Role: photographer owner.
 
 ---
 
-# 5. Review
+# 5. Demo Deposit Checkout
+
+All routes are local simulation routes. They require the authenticated booking-owning `CUSTOMER`; no amount, customer ID, status, or transaction reference is accepted as authoritative browser input.
+
+### GET `/bookings/{id}/deposit`
+
+Compatibility redirect to the canonical checkout route.
+
+### GET `/bookings/{id}/deposit/checkout`
+
+Creates or resumes the single booking deposit, calculated server-side as `agreedPrice × 30%`, and renders Demo QR / Demo Card choices. An already-paid deposit redirects to its receipt.
+
+### POST `/bookings/{id}/deposit/process`
+
+Form input:
+- `paymentMethod`: `DEMO_QR` or `DEMO_CARD`
+- Demo-card fields only when `DEMO_CARD` is selected; these are ephemeral and never persisted or sent externally.
+
+The server moves the deposit through `PROCESSING` to `PAID` or `FAILED`, generates the transaction reference, and redirects to the result route.
+
+### POST `/bookings/{id}/deposit/cancel`
+
+Changes an unpaid `PENDING` attempt to `CANCELLED`. A paid deposit remains immutable.
+
+### GET `/bookings/{id}/deposit/result`
+
+Shows the authoritative `PAID`, `FAILED`, `CANCELLED`, or current status and retry/receipt actions.
+
+### GET `/bookings/{id}/deposit/receipt`
+
+Owner-only printable receipt. Available only for `PAID` deposits.
+
+---
+
+# 6. Review
 
 ### POST `/api/reviews`
 Role: `CUSTOMER`
@@ -191,7 +225,7 @@ Public.
 
 ---
 
-# 6. Chat
+# 7. Chat
 
 ### GET `/api/bookings/{bookingId}/messages`
 Role:
@@ -207,7 +241,7 @@ Realtime gửi qua WebSocket, xem `REALTIME_EVENTS.md`.
 
 ---
 
-# 7. Admin
+# 8. Admin
 
 ## MVC
 
@@ -237,7 +271,7 @@ Danh sách booking.
 
 ---
 
-# 8. HTTP status
+# 9. HTTP status
 
 | Case | Status |
 |---|---|
@@ -252,7 +286,7 @@ Danh sách booking.
 
 ---
 
-# 9. Nguyên tắc
+# 10. Nguyên tắc
 
 - Không tin ID gửi từ client nếu có thể lấy user từ JWT.
 - Authorization luôn kiểm tra server-side.

@@ -30,7 +30,7 @@
                 <div style="text-align: center; padding: 6rem 2rem; border: 1px solid var(--border);">
                     <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 1rem;">No bookings yet</h3>
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">You haven't requested any photography sessions.</p>
-                    <a href="${pageContext.request.contextPath}/photographers" class="pc-btn-primary" style="padding: 1rem 2rem;">Explore Photographers</a>
+                    <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary">Explore Photographers</a>
                 </div>
             </c:if>
 

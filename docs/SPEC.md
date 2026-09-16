@@ -100,6 +100,12 @@ Hệ thống:
 - Ẩn review không phù hợp.
 - Dashboard cơ bản: user count, photographer count, booking count, completed booking count.
 
+### 3.8 Demo deposit checkout
+- Booking `ACCEPTED` requires a server-calculated 30% deposit.
+- Demo QR and demo card methods are local simulations only; no real payment gateway or money transfer.
+- Only the authenticated `CUSTOMER` who owns the booking may initiate or complete checkout.
+- Successful demo payment records `PAID`; failed and cancelled attempts never do.
+
 ---
 
 ## 4. Ngoài phạm vi bắt buộc
@@ -206,6 +212,14 @@ Lưu SQL Server
 ### `reviews.status`
 - `VISIBLE`
 - `HIDDEN`
+
+### `deposits.status`
+- `PENDING`
+- `PROCESSING`
+- `PAID`
+- `FAILED`
+- `CANCELLED`
+- Historical states retained: `REFUNDED`, `FORFEITED`
 
 ---
 

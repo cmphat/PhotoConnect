@@ -49,7 +49,7 @@
                         <span style="font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted);">
                             Status: <strong style="color: var(--text-color);">${booking.status}</strong>
                         </span>
-                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="pc-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem;">
                             💬 Open Chat
                         </a>
                     </div>
@@ -78,19 +78,19 @@
                 </div>
 
                 <c:if test="${booking.status == 'PENDING'}">
-                    <div class="pc-stack-mobile" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark); display: flex; gap: 2rem; align-items: center;">
+                    <div class="pc-stack-mobile" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark); display: flex; gap: 1rem; align-items: center;">
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/accept" method="post" style="margin: 0;">
-                            <button type="submit" class="pc-btn-primary" style="padding: 1rem 2rem;">Accept Booking</button>
+                            <button type="submit" class="btn btn-primary">Accept Booking</button>
                         </form>
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reject" method="post" onsubmit="return confirm('Are you sure you want to reject this request?');" style="margin: 0;">
-                            <button type="submit" class="pc-btn-outline" style="border: none; padding-left: 0; padding-right: 0; color: var(--text-muted);">Reject Request</button>
+                            <button type="submit" class="btn btn-danger">Reject Request</button>
                         </form>
                     </div>
                 </c:if>
                 <c:if test="${booking.status == 'ACCEPTED'}">
                     <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark);">
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/complete" method="post" onsubmit="return confirm('Mark this shoot as completed?');" style="margin: 0;">
-                            <button type="submit" class="pc-btn-primary" style="padding: 1rem 2rem;">Mark as Completed</button>
+                            <button type="submit" class="btn btn-primary">Mark as Completed</button>
                         </form>
                     </div>
                 </c:if>

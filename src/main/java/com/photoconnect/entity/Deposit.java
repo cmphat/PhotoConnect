@@ -39,6 +39,13 @@ public class Deposit {
     @Column(name = "payment_reference")
     private String paymentReference;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 30)
+    private DemoPaymentMethod paymentMethod;
+
+    @Column(name = "failure_reason", length = 255)
+    private String failureReason;
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
@@ -111,6 +118,22 @@ public class Deposit {
 
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;
+    }
+
+    public DemoPaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(DemoPaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 
     public LocalDateTime getPaidAt() {

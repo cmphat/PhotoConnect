@@ -173,10 +173,10 @@
 
                         <!-- Actions -->
                         <div class="pc-booking-actions">
-                            <a href="${pageContext.request.contextPath}/photographers/${photographer.id}" class="pc-btn-outline" style="border: none; padding-left: 0;">
+                            <a href="${pageContext.request.contextPath}/photographers/${photographer.id}" class="btn btn-ghost">
                                 Cancel
                             </a>
-                            <button type="submit" class="submit-btn" id="btn-submit-booking" style="width: auto; padding: 1rem 3rem;">
+                            <button type="submit" class="btn btn-primary" id="btn-submit-booking" style="width: auto; padding: 1rem 3rem;">
                                 Request Booking
                             </button>
                         </div>

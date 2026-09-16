@@ -49,7 +49,7 @@
                         <span style="font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted);">
                             Status: <strong style="color: var(--text-color);">${booking.status}</strong>
                         </span>
-                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="pc-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem;">
                             💬 Open Chat
                         </a>
                     </div>
@@ -77,18 +77,18 @@
                     </c:if>
                 </div>
 
-                <c:if test="${booking.status == 'ACCEPTED'}">
+                <c:if test="${booking.status == 'ACCEPTED' || (deposit != null && deposit.status == 'PAID')}">
                     <div style="margin-top: 3rem; padding: 2.5rem; border: 1px solid var(--border); background: var(--bg-dark-secondary);">
                         <h3 class="editorial-heading" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Deposit Information</h3>
                         <c:choose>
-                            <c:when test="${deposit == null || deposit.status == 'PENDING'}">
+                            <c:when test="${booking.status == 'ACCEPTED' && (deposit == null || deposit.status != 'PAID')}">
                                 <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
                                     A 30% deposit is required to secure this booking.
                                     <c:if test="${deposit != null}">
                                         <br><span style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Deposit Amount: <fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</span>
                                     </c:if>
                                 </p>
-                                <a href="${pageContext.request.contextPath}/bookings/${booking.id}/deposit" class="pc-btn-primary" style="display: inline-block; padding: 1rem 2rem;">Pay Deposit</a>
+                                <a href="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/checkout" class="btn btn-primary">Pay Deposit</a>
                             </c:when>
                             <c:when test="${deposit.status == 'PAID'}">
                                 <div class="pc-detail-grid" style="gap: 2rem;">
@@ -98,7 +98,7 @@
                                     </div>
                                     <div>
                                         <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Reference</div>
-                                        <div style="font-size: 1.1rem;">${deposit.paymentReference}</div>
+                                        <div style="font-size: 1.1rem;"><c:out value="${deposit.paymentReference}" /></div>
                                     </div>
                                     <div style="grid-column: span 2;">
                                         <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Paid At</div>
@@ -106,6 +106,7 @@
                                         <div style="font-size: 1.1rem;"><fmt:formatDate value="${parsedPaidAt}" pattern="MMM d, yyyy" /></div>
                                     </div>
                                 </div>
+                                <a href="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/receipt" class="text-link" style="display: inline-block; margin-top: 1.5rem;">View Payment Receipt</a>
                             </c:when>
                         </c:choose>
                     </div>
@@ -119,7 +120,7 @@
                                 <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
                                     Your shoot session is complete! Let others know about your experience with <c:out value="${booking.photographerName}"/>.
                                 </p>
-                                <a href="${pageContext.request.contextPath}/bookings/${booking.id}/review" class="pc-btn-primary" style="display: inline-block; padding: 1rem 2rem;" id="btn-leave-review">Leave a Review</a>
+                                <a href="${pageContext.request.contextPath}/bookings/${booking.id}/review" class="btn btn-primary" id="btn-leave-review">Leave a Review</a>
                             </c:when>
                             <c:otherwise>
                                 <div>
@@ -155,7 +156,7 @@
                 <c:if test="${booking.status == 'PENDING' || booking.status == 'ACCEPTED'}">
                     <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-dark);">
                         <form action="${pageContext.request.contextPath}/bookings/${booking.id}/cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
-                            <button type="submit" class="pc-btn-outline" style="border: none; padding-left: 0; padding-right: 0; color: var(--text-muted);">Cancel Booking</button>
+                            <button type="submit" class="btn btn-danger">Cancel Booking</button>
                         </form>
                     </div>
                 </c:if>

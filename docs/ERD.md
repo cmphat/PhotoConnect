@@ -222,17 +222,37 @@ Constraint logic:
 
 ---
 
-## 13. Bonus tables
+## 13. `deposits`
+
+Implemented as one row per booking (`booking_id` unique).
+
+| Column | Type | Note |
+|---|---|---|
+| id | BIGINT IDENTITY PK | |
+| booking_id | BIGINT FK bookings(id), UNIQUE | authoritative booking/owner source |
+| amount | DECIMAL(18,2) | server-calculated 30% snapshot |
+| status | VARCHAR(30) | PENDING / PROCESSING / PAID / FAILED / CANCELLED; historical REFUNDED / FORFEITED retained |
+| payment_reference | VARCHAR(255) NULL | server-generated demo transaction reference |
+| payment_method | VARCHAR(30) NULL | DEMO_QR / DEMO_CARD |
+| failure_reason | NVARCHAR(255) NULL | safe generic demo failure description |
+| paid_at | DATETIME2 NULL | successful demo confirmation time |
+| created_at | DATETIME2 | |
+| updated_at | DATETIME2 | |
+
+Card number, CVV, expiry, and cardholder input are never columns and are never persisted.
+
+---
+
+## 14. Bonus tables
 
 Chỉ tạo khi core đã xong:
 
 ### vouchers
 ### voucher_usages
-### deposits
 
 ---
 
-## 14. Thứ tự tạo entity
+## 15. Thứ tự tạo entity
 
 ```text
 1. User
@@ -246,4 +266,5 @@ Chỉ tạo khi core đã xong:
 9. Message
 10. Review
 11. Notification
+12. Deposit
 ```

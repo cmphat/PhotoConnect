@@ -1,5 +1,6 @@
 package com.photoconnect.service;
 
+import com.photoconnect.dto.DemoPaymentRequest;
 import com.photoconnect.dto.DepositViewDto;
 
 public interface DepositService {
@@ -23,6 +24,12 @@ public interface DepositService {
      */
     DepositViewDto getCustomerDeposit(Long bookingId, Long customerUserId);
 
+    /** Processes one deterministic, local-only demo checkout attempt. */
+    DepositViewDto processDemoPayment(Long bookingId, Long customerUserId, DemoPaymentRequest request);
+
+    /** Cancels an unpaid demo attempt without changing the associated booking. */
+    DepositViewDto cancelDemoPayment(Long bookingId, Long customerUserId);
+
     /**
      * Simulates a successful payment for a PENDING deposit in development environment.
      * 
@@ -30,5 +37,6 @@ public interface DepositService {
      * @param customerUserId the ID of the authenticated customer
      * @return DepositViewDto representing the PAID deposit
      */
+    @Deprecated(forRemoval = false)
     DepositViewDto simulateSuccessfulPayment(Long bookingId, Long customerUserId);
 }

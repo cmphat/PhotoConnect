@@ -161,4 +161,5 @@ Không dành quá nhiều thời gian CSS trong 4 tuần đầu.
 ### Implementation status
 
 - [x] Responsive code audit and stabilization for the authoritative JSP surface (TASK-026).
+- [x] Professional responsive demo deposit checkout, result states, and print-friendly receipt (TASK-029; core flow manually verified, edge cases automated).
 - [ ] Human visual verification across representative desktop and mobile browsers.

@@ -3,6 +3,7 @@ package com.photoconnect.repository;
 import com.photoconnect.entity.Booking;
 import com.photoconnect.entity.Deposit;
 import com.photoconnect.entity.DepositStatus;
+import com.photoconnect.entity.DemoPaymentMethod;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.User;
@@ -85,6 +86,8 @@ public class DepositRepositoryIntegrationTests {
     void shouldSaveAndRetrieveDeposit() {
         Deposit deposit = new Deposit(booking, new BigDecimal("300.00"));
         deposit.setStatus(DepositStatus.PENDING);
+        deposit.setPaymentMethod(DemoPaymentMethod.DEMO_QR);
+        deposit.setPaymentReference("PC-20260915-INTEG001");
         
         Deposit saved = depositRepository.save(deposit);
         
@@ -94,6 +97,8 @@ public class DepositRepositoryIntegrationTests {
         Optional<Deposit> retrievedOpt = depositRepository.findByBookingIdWithDetails(booking.getId());
         assertThat(retrievedOpt).isPresent();
         assertThat(retrievedOpt.get().getAmount()).isEqualByComparingTo("300.00");
+        assertThat(retrievedOpt.get().getPaymentMethod()).isEqualTo(DemoPaymentMethod.DEMO_QR);
+        assertThat(retrievedOpt.get().getPaymentReference()).isEqualTo("PC-20260915-INTEG001");
         assertThat(retrievedOpt.get().getBooking().getCustomer().getId()).isEqualTo(customerUser.getId());
     }
 

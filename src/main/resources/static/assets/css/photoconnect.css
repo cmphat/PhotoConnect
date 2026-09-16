@@ -173,21 +173,191 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background-color: var(--text-on-dark);
     color: var(--bg-dark);
-    border: none;
-    padding: 1.25rem 2rem;
-    font-size: 1rem;
+    border: 1px solid var(--text-on-dark);
+    border-radius: 0;
+    padding: 1rem 2rem;
+    min-height: 48px;
+    font-family: inherit;
+    font-size: 0.95rem;
     font-weight: 500;
+    letter-spacing: 0.02em;
     width: 100%;
     cursor: pointer;
-    transition: opacity var(--transition-fast);
+    text-decoration: none;
+    text-align: center;
+    transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
     max-width: 100%;
+    box-sizing: border-box;
 }
 
 .submit-btn:hover {
-    opacity: 0.8;
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
+    color: var(--bg-dark);
+    opacity: 0.92;
 }
+
+.submit-btn:focus-visible {
+    outline: 2px solid var(--accent-gold, #c9a96e);
+    outline-offset: 2px;
+}
+
+/* ── Unified Action Button System ─────────────────────────────────────────── */
+.btn,
+.pc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    padding: 0.75rem 1.6rem;
+    min-height: 44px;
+    border-radius: 0;
+    border: 1px solid transparent;
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-on-dark);
+    box-sizing: border-box;
+    vertical-align: middle;
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast),
+                opacity var(--transition-fast);
+}
+
+.btn:focus-visible,
+.pc-btn:focus-visible {
+    outline: 2px solid var(--accent-gold, #c9a96e);
+    outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn.disabled,
+.pc-btn:disabled,
+.pc-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Primary: solid high-contrast editorial button */
+.btn-primary,
+.pc-btn-primary {
+    background-color: var(--text-on-dark);
+    color: var(--bg-dark);
+    border-color: var(--text-on-dark);
+}
+
+.btn-primary:hover,
+.pc-btn-primary:hover {
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
+    color: var(--bg-dark);
+    opacity: 0.92;
+}
+
+.btn-primary:active,
+.pc-btn-primary:active {
+    background-color: #cccccc;
+    border-color: #cccccc;
+}
+
+/* Secondary / Outline: subtle border on dark, editorial transparency */
+.btn-secondary,
+.pc-btn-secondary,
+.btn-outline,
+.pc-btn-outline {
+    background-color: transparent;
+    color: var(--text-on-dark);
+    border-color: var(--border-dark);
+}
+
+.btn-secondary:hover,
+.pc-btn-secondary:hover,
+.btn-outline:hover,
+.pc-btn-outline:hover {
+    border-color: var(--text-on-dark);
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-on-dark);
+}
+
+.btn-secondary:active,
+.pc-btn-secondary:active,
+.btn-outline:active,
+.pc-btn-outline:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Danger: restrained editorial dark crimson */
+.btn-danger,
+.pc-btn-danger {
+    background-color: rgba(220, 53, 69, 0.08);
+    color: #f87171;
+    border-color: rgba(220, 53, 69, 0.35);
+}
+
+.btn-danger:hover,
+.pc-btn-danger:hover {
+    background-color: rgba(220, 53, 69, 0.18);
+    border-color: rgba(220, 53, 69, 0.6);
+    color: #fca5a5;
+}
+
+.btn-danger:active,
+.pc-btn-danger:active {
+    background-color: rgba(220, 53, 69, 0.28);
+}
+
+/* Ghost / Link: quiet secondary non-destructive actions */
+.btn-ghost,
+.pc-btn-ghost,
+.btn-link {
+    background-color: transparent;
+    color: var(--text-muted);
+    border-color: transparent;
+}
+
+.btn-ghost:hover,
+.pc-btn-ghost:hover,
+.btn-link:hover {
+    color: var(--text-on-dark);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: transparent;
+}
+
+/* Size modifiers */
+.btn-sm,
+.pc-btn-sm {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.82rem;
+    min-height: 36px;
+}
+
+.btn-lg,
+.pc-btn-lg {
+    padding: 1rem 2.25rem;
+    font-size: 1rem;
+    min-height: 50px;
+}
+
+.btn-block,
+.pc-btn-block {
+    width: 100%;
+    display: flex;
+}
+
 
 /* ── Layout & Containers ───────────────────────────────────────────────── */
 .editorial-container {

@@ -7,73 +7,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pay Deposit - PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
+    <title>Demo Checkout - PhotoConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/payment.css">
+    <script src="${pageContext.request.contextPath}/assets/js/demo-checkout.js" defer></script>
 </head>
-<body>
+<body class="payment-page">
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 6rem 0; min-height: 80vh;">
-        <div class="editorial-container" style="max-width: 600px;">
-            <div style="margin-bottom: 2rem;">
-                <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
+    <main class="payment-main">
+        <div class="payment-shell">
+            <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="payment-back">&larr; Back to booking</a>
+
+            <header class="checkout-header">
+                <div>
+                    <span class="payment-eyebrow">Secure demo checkout</span>
+                    <h1>Complete your deposit</h1>
+                    <p>Reserve your photography session with the required 30% deposit.</p>
+                </div>
+                <div class="demo-notice" role="note">
+                    <strong>Demo Payment Environment</strong>
+                    <span>No real money will be transferred.</span>
+                </div>
+            </header>
+
+            <div class="checkout-grid">
+                <section class="checkout-panel" aria-labelledby="payment-method-heading">
+                    <div class="panel-heading">
+                        <span>01</span>
+                        <div>
+                            <h2 id="payment-method-heading">Payment method</h2>
+                            <p>Choose a local simulation option for this demonstration.</p>
+                        </div>
+                    </div>
+
+                    <form id="demo-payment-form" action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/process" method="post" novalidate>
+                        <div class="method-selector" role="radiogroup" aria-label="Demo payment method">
+                            <label class="method-option">
+                                <input type="radio" name="paymentMethod" value="DEMO_QR" checked>
+                                <span class="method-marker" aria-hidden="true"></span>
+                                <span>
+                                    <strong>Demo QR / Bank Transfer</strong>
+                                    <small>Scan a harmless PhotoConnect demo payload.</small>
+                                </span>
+                            </label>
+                            <label class="method-option">
+                                <input type="radio" name="paymentMethod" value="DEMO_CARD">
+                                <span class="method-marker" aria-hidden="true"></span>
+                                <span>
+                                    <strong>Demo Card</strong>
+                                    <small>Use a documented fictional test scenario.</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="payment-method-panel" data-payment-panel="DEMO_QR">
+                            <div class="qr-layout">
+                                <div class="qr-frame">
+                                    <img src="${demoQrDataUri}" alt="PhotoConnect demo QR for booking ${booking.id}" width="240" height="240">
+                                    <span>DEMO</span>
+                                </div>
+                                <div class="qr-details">
+                                    <span class="payment-eyebrow">Demo QR — no real transfer</span>
+                                    <dl>
+                                        <div><dt>Amount</dt><dd><fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</dd></div>
+                                        <div><dt>Booking</dt><dd>#<c:out value="${booking.id}" /></dd></div>
+                                        <div><dt>Reference</dt><dd><c:out value="${deposit.paymentReference}" /></dd></div>
+                                    </dl>
+                                    <details>
+                                        <summary>View encoded demo payload</summary>
+                                        <code><c:out value="${demoQrPayload}" /></code>
+                                    </details>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-method-panel" data-payment-panel="DEMO_CARD" hidden>
+                            <div class="card-demo-note">
+                                <strong>Fictional test values only.</strong>
+                                Card details are evaluated in memory and are never stored, logged, or transmitted.
+                            </div>
+                            <div class="card-form-grid">
+                                <label class="payment-field payment-field-wide">
+                                    <span>Cardholder name</span>
+                                    <input type="text" name="cardholderName" maxlength="120" autocomplete="off" placeholder="Demo Customer" data-card-field>
+                                </label>
+                                <label class="payment-field payment-field-wide">
+                                    <span>Card number</span>
+                                    <input type="text" name="cardNumber" maxlength="19" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242" data-card-number data-card-field>
+                                </label>
+                                <label class="payment-field">
+                                    <span>Expiry</span>
+                                    <input type="text" name="expiry" maxlength="5" inputmode="numeric" autocomplete="off" placeholder="12/30" data-card-field>
+                                </label>
+                                <label class="payment-field">
+                                    <span>CVV</span>
+                                    <input type="password" name="cvv" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="123" data-card-field>
+                                </label>
+                            </div>
+                            <div class="test-scenarios">
+                                <span><strong>Success:</strong> 4242 4242 4242 4242</span>
+                                <span><strong>Declined:</strong> 4000 0000 0000 0002</span>
+                            </div>
+                        </div>
+
+                        <div class="checkout-actions">
+                            <button type="submit" class="payment-primary" data-submit-payment>
+                                <span data-submit-label>Confirm Demo Payment</span>
+                            </button>
+                            <p>By continuing, you confirm this is a demonstration transaction only.</p>
+                        </div>
+                    </form>
+
+                    <form action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/cancel" method="post" class="cancel-payment-form">
+                        <button type="submit" class="payment-cancel-btn btn btn-secondary">Cancel payment and return</button>
+                    </form>
+                </section>
+
+                <aside class="order-summary" aria-labelledby="order-summary-heading">
+                    <div class="panel-heading compact">
+                        <span>02</span>
+                        <div><h2 id="order-summary-heading">Order summary</h2></div>
+                    </div>
+                    <div class="booking-summary">
+                        <span class="payment-eyebrow">Booking #<c:out value="${booking.id}" /></span>
+                        <h3><c:out value="${booking.sessionTitle}" /></h3>
+                        <p>with <c:out value="${booking.photographerName}" /></p>
+                        <dl>
+                            <div><dt>Date</dt><dd><c:out value="${booking.bookingDate}" /></dd></div>
+                            <div><dt>Time</dt><dd><c:out value="${booking.bookingTime}" /></dd></div>
+                            <div><dt>Location</dt><dd><c:out value="${booking.location}" /></dd></div>
+                            <div><dt>Status</dt><dd><c:out value="${booking.status}" /></dd></div>
+                        </dl>
+                    </div>
+                    <div class="price-summary">
+                        <div><span>Agreed booking price</span><strong><fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND</strong></div>
+                        <div><span>Deposit percentage</span><strong>30%</strong></div>
+                        <div class="price-due"><span>Deposit due now</span><strong><fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</strong></div>
+                        <div><span>Remaining balance</span><strong><fmt:formatNumber value="${remainingBalance}" pattern="#,##0" /> VND</strong></div>
+                    </div>
+                    <div class="summary-assurance">
+                        Amount and booking ownership are verified by PhotoConnect on the server.
+                    </div>
+                </aside>
             </div>
-            
-            <h1 class="editorial-title" style="margin-bottom: 1rem;">Pay Deposit</h1>
+        </div>
 
-            <c:if test="${not empty errorMessage}">
-                <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
-                    <c:out value="${errorMessage}"/>
-                </div>
-            </c:if>
-
-            <div style="border: 1px solid var(--border); padding: 3rem; border-radius: 0;">
-                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-dark);">
-                    <h2 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Session with <c:out value="${booking.photographerName}"/></h2>
-                    <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
-                    <p style="color: var(--text-muted);"><fmt:formatDate value="${parsedBookingDate}" pattern="MMM d, yyyy" /> at ${booking.bookingTime}</p>
-                </div>
-
-                <div style="margin-bottom: 3rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <span style="color: var(--text-muted);">Total Agreed Price</span>
-                        <span><fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                        <span style="color: var(--text-muted);">Deposit Rate</span>
-                        <span>30%</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 400; padding-top: 1.5rem; border-top: 1px solid var(--border-dark);">
-                        <span>Deposit Amount Due</span>
-                        <span><fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</span>
-                    </div>
-                </div>
-
-                <c:choose>
-                    <c:when test="${deposit.status == 'PENDING'}">
-                        <div style="border-left: 2px solid var(--border); padding: 1.5rem; margin-bottom: 2rem; background: var(--bg-dark-secondary);">
-                            <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 500;">Development payment simulation</h4>
-                            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
-                                This is a simulated development payment flow. No real money is transferred. Clicking the button below will immediately mark this deposit as PAID.
-                            </p>
-                        </div>
-
-                        <form action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/simulate-payment" method="post">
-                            <button type="submit" class="submit-btn">Simulate Payment</button>
-                        </form>
-                    </c:when>
-                    <c:when test="${deposit.status == 'PAID'}">
-                        <div style="text-align: center; padding: 3rem 2rem; border: 1px solid var(--border); border-radius: 0;">
-                            <div style="font-size: 2rem; margin-bottom: 1.5rem;">✓</div>
-                            <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Deposit Paid</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 2rem;">Payment Reference: ${deposit.paymentReference}</p>
-                            <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="pc-btn-outline" style="border: none; border-bottom: 1px solid currentColor; border-radius: 0; padding: 0.5rem 0;">Return to Booking</a>
-                        </div>
-                    </c:when>
-                </c:choose>
+        <div class="processing-overlay" data-processing-overlay hidden role="status" aria-live="polite">
+            <div class="processing-dialog">
+                <span class="processing-spinner" aria-hidden="true"></span>
+                <h2>Processing your demo payment...</h2>
+                <p>Please keep this window open. No real payment is taking place.</p>
             </div>
         </div>
     </main>

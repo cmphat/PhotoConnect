@@ -89,11 +89,11 @@
             </div>
 
             <!-- Next Actions -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
-                <a href="${pageContext.request.contextPath}/photographers" class="pc-btn-primary" style="padding: 1rem 2rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary">
                     Explore More Artists
                 </a>
-                <a href="${pageContext.request.contextPath}/" class="text-link">
+                <a href="${pageContext.request.contextPath}/" class="btn btn-ghost">
                     Back to Home
                 </a>
             </div>

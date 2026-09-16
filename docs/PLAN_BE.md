@@ -91,3 +91,4 @@
 - [x] Authorization tests (TASK-024)
 - [x] Search pagination (TASK-025)
 - [x] Seed/demo data (TASK-028; SQL script + opt-in development profile)
+- [x] Professional local-only demo deposit state flow, ownership locking, and receipt metadata (TASK-029)

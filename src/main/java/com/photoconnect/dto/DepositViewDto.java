@@ -1,6 +1,7 @@
 package com.photoconnect.dto;
 
 import com.photoconnect.entity.DepositStatus;
+import com.photoconnect.entity.DemoPaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +12,8 @@ public class DepositViewDto {
     private BigDecimal amount;
     private DepositStatus status;
     private String paymentReference;
+    private DemoPaymentMethod paymentMethod;
+    private String failureReason;
     private LocalDateTime paidAt;
 
     public Long getId() {
@@ -51,6 +54,22 @@ public class DepositViewDto {
 
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;
+    }
+
+    public DemoPaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(DemoPaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 
     public LocalDateTime getPaidAt() {

@@ -17,6 +17,7 @@ public class BookingViewDto {
     private Long id;
     private String customerName;
     private String photographerName;
+    private String sessionTitle;
     private Long photographerProfileId;
     private LocalDate bookingDate;
     private LocalTime bookingTime;
@@ -33,7 +34,11 @@ public class BookingViewDto {
         BookingViewDto dto = new BookingViewDto();
         dto.setId(booking.getId());
         dto.setCustomerName(booking.getCustomer().getFullName());
-        dto.setPhotographerName(booking.getPhotographerProfile().getUser().getFullName());
+        String displayName = booking.getPhotographerProfile().getDisplayName();
+        dto.setPhotographerName(displayName == null || displayName.isBlank()
+                ? booking.getPhotographerProfile().getUser().getFullName()
+                : displayName);
+        dto.setSessionTitle("Photography Session");
         dto.setPhotographerProfileId(booking.getPhotographerProfile().getId());
         dto.setBookingDate(booking.getBookingDate());
         dto.setBookingTime(booking.getBookingTime());
@@ -67,6 +72,14 @@ public class BookingViewDto {
 
     public void setPhotographerName(String photographerName) {
         this.photographerName = photographerName;
+    }
+
+    public String getSessionTitle() {
+        return sessionTitle;
+    }
+
+    public void setSessionTitle(String sessionTitle) {
+        this.sessionTitle = sessionTitle;
     }
 
     public Long getPhotographerProfileId() {

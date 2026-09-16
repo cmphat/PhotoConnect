@@ -56,14 +56,15 @@
 - **Responsive UI Stabilization (TASK-026)**: Rebalanced the photographer profile and booking panel, constrained native date/time controls, added shared overflow/grid/form safeguards, improved mobile stacking and wide-table containment, repaired malformed booking-card markup, and made JSP navigation/form routes context-path safe. Automated layout contracts pass; human visual verification remains pending.
 - **Transaction and Service Hardening Audit (TASK-027)**: Verified semantic transaction boundaries for booking, deposit, review/rating moderation, availability, and portfolio database operations. Added a reflection-based regression contract and retained explicit Cloudinary compensation for the non-transactional remote resource boundary.
 - **Development Demo Data (TASK-028)**: Added both an idempotent SQL Server seed script (`docs/development/seed/V009__demo_seed_data.sql`) and a double-opt-in `demo-seed` Spring Boot profile (`DemoDataSeeder.java`). Safely creates 1 admin, 2 customers, and 14 APPROVED photographers across 3 cities and varying prices (enabling 2-page pagination verification), 1 PENDING photographer, bookings, deposits, reviews, and chat history without destructive operations.
+- **Professional Demo Payment & Receipt Experience (TASK-029)**: Replaced the TASK-015 developer-facing action with an explicitly disclosed, local-only PhotoConnect demo checkout. Added Demo QR and deterministic demo-card methods, `PENDING -> PROCESSING -> PAID/FAILED` plus cancellation, server-generated `PC-yyyyMMdd-XXXXXXXX` references, pessimistic-lock/idempotency protection, owner-only results and printable receipts, responsive editorial payment UI, and nullable method/failure metadata via V010. No gateway, banking API, merchant account, card persistence, or real transfer exists. **Human Verification: PARTIAL (Core Flow PASS; Edge Cases Automated/Pending)**.
 
 ## Database Status
 - SQL Server database `PhotoConnect` connectivity established.
 - `users`, `photographer_profiles`, `portfolio_images`, `bookings`, `deposits`, `photographer_unavailable_dates`, `messages`, and `reviews` tables mapped with foreign keys.
-- **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` provided for adding `status VARCHAR(20)` with default `VISIBLE` on `reviews`. Seed script `docs/development/seed/V009__demo_seed_data.sql` available for development/demo data.
+- **Verification**: Database schemas accurately reflect JPA entity models. Migration `docs/development/migrations/V008__add_review_status.sql` adds review status; seed script `docs/development/seed/V009__demo_seed_data.sql` provides opt-in demo data; forward-only migration `docs/development/migrations/V010__professional_demo_payment.sql` adds nullable `payment_method` and `failure_reason` deposit metadata without changing historical rows.
 
 ## Test Status
-- 376 tests run with 353 passing, 0 failures, 0 errors, and 23 skipped (environment-gated integration tests requiring a live SQL Server).
+- 396 tests run with 373 passing, 0 failures, 0 errors, and 23 skipped (environment-gated integration tests requiring a live SQL Server).
 - `mvn clean package` succeeds and produces `target/photoconnect.war`.
 - TDD approach strictly followed.
 
@@ -74,7 +75,8 @@
 
 ## Known Issues
 - Real Cloudinary upload/delete browser verification is pending.
-- Real payment gateway is not integrated; development simulation is used.
+- Real payment gateway is intentionally not integrated; TASK-029 is an explicitly disclosed local demo payment environment.
+- Human verification for TASK-029 core flow (photographer acceptance, ACCEPTED 30% deposit requirement, checkout render, demo QR payment option, calculation breakdown, PC-* reference, demo disclosures, legacy deposit compatibility & receipt, UI button consistency) is PASS. Edge cases (failed card, cancelled payment, duplicate POST, cross-customer IDOR, photographer/admin denial, DevTools amount tampering, full mobile responsive matrix) remain verified via automated tests.
 - Human visual verification for photographer availability booking rejection and unblocking (TASK-017) is pending.
 - Human visual verification for multi-user real-time chat (TASK-018) is pending.
 - Human visual verification for customer review submission and rating updates (TASK-019) is pending.
@@ -98,4 +100,4 @@
 - TASK-026: Responsive UI Stabilization — Automated/code completion PASS; Human Verification: PENDING.
 - TASK-027: Transaction and Service Hardening Audit — Automated/code completion PASS.
 - TASK-028: Development Demo Data — Human Verification: PASS (local SQL Server seed execution and seeded photographer visibility verified in live application).
-
+- TASK-029: Professional Demo Payment & Receipt Experience — Human Verification: PARTIAL (Core Flow PASS; Edge Cases Automated/Pending). UI action/button consistency pass completed.
