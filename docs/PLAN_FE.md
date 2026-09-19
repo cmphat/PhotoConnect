@@ -1,165 +1,58 @@
-# PLAN_FE.md — Kế Hoạch Frontend JSP/JSTL
+# PhotoConnect Frontend Plan — Final JSP/JSTL State
 
-## 1. Layout chung
+The frontend is complete for the frozen feature scope and uses JSP/JSTL, HTML, CSS, and plain JavaScript only.
 
-Sitemesh / fragments:
+## Shared product shell
 
-```text
-Header
-Navbar
-Main content
-Footer
-Toast/alert
-```
+- [x] Editorial photography-first navigation and page containers
+- [x] Shared typography, spacing, surfaces, forms, alerts, status text, buttons, tables, and empty states
+- [x] Context-path-safe links, forms, static assets, and JavaScript endpoints
+- [x] Visible keyboard focus and responsive wrapping/overflow controls
 
-Bootstrap responsive.
+## Public and auth
 
----
+- [x] Homepage and featured-photographer presentation
+- [x] Marketplace keyword/city/price/experience filters and pagination
+- [x] Photographer detail, portfolio, ratings, reviews, and booking panel
+- [x] Login and registration forms with server validation and mobile stacking
 
-## 2. Public pages
+## Customer
 
-### Home
-- Hero
-- Photographer nổi bật
-- Category
-- CTA
+- [x] Booking create, confirmation, list, detail, cancellation, and state/actions
+- [x] Booking chat and persisted history
+- [x] Completed-booking review form
+- [x] Demo deposit checkout, result, receipt, disclosures, and print styling
 
-### Photographer list
-- Search
-- Location filter
-- Category filter
-- Price filter
-- Pagination
+## Photographer
 
-### Photographer detail
-- Avatar
-- Bio
-- Rating
-- Category
-- Portfolio gallery
-- Service packages
-- Booking CTA
-- Review list
+- [x] Onboarding and verification status
+- [x] Portfolio upload/delete management
+- [x] Availability management
+- [x] Incoming booking list/detail and accept/reject/complete actions
+- [x] Booking chat entry points
 
----
+## Admin
 
-## 3. Auth
+- [x] Dashboard metrics
+- [x] User search/filter/status management
+- [x] Photographer filtering/detail/approval actions
+- [x] Booking monitoring table
+- [x] Review filtering and hide/unhide moderation
 
-### Login
-- Email
-- Password
-- Error display
+## JavaScript boundaries
 
-### Register
-- Full name
-- Email
-- Password
-- Role CUSTOMER / PHOTOGRAPHER
+- [x] Demo checkout method/panel behavior in plain JavaScript
+- [x] Portfolio/lightbox interaction in plain JavaScript
+- [x] STOMP/SockJS chat with REST fallback in plain JavaScript
+- [x] No Node frontend build, SPA, React, Vue, Angular, Python, or Tailwind build system
 
----
+## Final status
 
-## 4. Customer area
+- [x] TASK-026 responsive stabilization
+- [x] TASK-029 professional demo payment UI
+- [x] TASK-030 chat/JSP integration fixes
+- [x] TASK-031 all-page design-system and responsive polish
+- [x] TASK-032 final frontend documentation
+- [ ] Human visual verification at 1440, 1024, 768, and 390 px
 
-### Dashboard
-- Upcoming bookings
-- Recent bookings
-
-### Booking create
-- Package
-- Date/time
-- Location
-- Note
-- Confirmation
-
-### Booking detail
-- Status timeline
-- Photographer info
-- Chat
-- Cancel button theo rule
-- Review form khi completed
-
----
-
-## 5. Photographer area
-
-### Profile management
-- Bio
-- Location
-- Experience
-- Price from
-- Category
-
-### Portfolio management
-- Upload
-- Preview
-- Delete
-
-### Package management
-- CRUD package
-
-### Booking management
-- Pending list
-- Accept/Reject
-- Accepted
-- In progress
-- Completed
-
-### Chat
-- Booking conversation
-
----
-
-## 6. Admin
-
-### Dashboard
-Cards:
-- Users
-- Photographers
-- Pending approvals
-- Bookings
-- Completed bookings
-
-### Photographer approval
-- Profile detail
-- Approve
-- Reject
-
-### User management
-- Search
-- Lock/unlock
-
-### Booking management
-- Filter status
-
----
-
-## 7. JS modules
-
-```text
-assets/js/
-├── auth.js
-├── photographer-list.js
-├── photographer-profile.js
-├── portfolio.js
-├── booking.js
-├── chat.js
-└── admin.js
-```
-
----
-
-## 8. UI priority
-
-1. Luồng chạy đúng.
-2. Form rõ ràng.
-3. Responsive.
-4. Error/loading states.
-5. Sau cùng mới animation/đẹp nâng cao.
-
-Không dành quá nhiều thời gian CSS trong 4 tuần đầu.
-
-### Implementation status
-
-- [x] Responsive code audit and stabilization for the authoritative JSP surface (TASK-026).
-- [x] Professional responsive demo deposit checkout, result states, and print-friendly receipt (TASK-029; core flow manually verified, edge cases automated).
-- [ ] Human visual verification across representative desktop and mobile browsers.
+The unchecked item is a human release gate, not remaining implementation or a new feature task.

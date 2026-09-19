@@ -1,9 +1,9 @@
 -- ==============================================================================
 -- PhotoConnect – Development & Demo Seed Data
 -- File: docs/development/seed/V009__demo_seed_data.sql
--- Task: TASK-026 Development and Demo Seed Data
+-- Task: TASK-028 Development and Demo Seed Data
 -- Dialect: Microsoft SQL Server 2019+
--- 
+--
 -- SAFETY RULES:
 -- 1. STRICTLY NON-DESTRUCTIVE: Never drops tables or truncates existing data.
 -- 2. FULLY IDEMPOTENT: Uses IF NOT EXISTS guards for all records. Safe to rerun.
@@ -205,7 +205,7 @@ BEGIN
     BEGIN
         INSERT INTO dbo.bookings (customer_id, photographer_profile_id, booking_date, booking_time, location, notes, agreed_price, status, created_at, updated_at)
         VALUES (@Cust1Id, @P1ProfileId, @CompletedBookingDate, '14:00:00', N'Studio LightSpace, Hoan Kiem, Hanoi', N'Lookbook photoshoot for indie apparel brand', 2500000.00, 'COMPLETED', DATEADD(DAY, -10, @Now), @Now);
-        
+
         DECLARE @B1Id BIGINT = SCOPE_IDENTITY();
         PRINT 'Created COMPLETED booking: ' + CAST(@B1Id AS VARCHAR(20));
 
@@ -216,7 +216,7 @@ BEGIN
         -- Add Review
         INSERT INTO dbo.reviews (booking_id, customer_id, photographer_profile_id, rating, comment, status, created_at, updated_at)
         VALUES (@B1Id, @Cust1Id, @P1ProfileId, 5, N'Exceptional visual direction and lighting! The photos were delivered ahead of schedule and perfectly captured the aesthetic we envisioned.', 'VISIBLE', DATEADD(DAY, -4, @Now), DATEADD(DAY, -4, @Now));
-        
+
         -- Update Photographer 1 Rating Stats
         UPDATE dbo.photographer_profiles
         SET average_rating = 5.0, review_count = 1
@@ -239,7 +239,7 @@ BEGIN
     BEGIN
         INSERT INTO dbo.bookings (customer_id, photographer_profile_id, booking_date, booking_time, location, notes, agreed_price, status, created_at, updated_at)
         VALUES (@Cust2Id, @P2ProfileId, @AcceptedBookingDate, '09:00:00', N'Hanoi Botanical Garden', N'Fine art portrait session in morning light', 1800000.00, 'ACCEPTED', DATEADD(DAY, -1, @Now), @Now);
-        
+
         DECLARE @B2Id BIGINT = SCOPE_IDENTITY();
         PRINT 'Created ACCEPTED booking: ' + CAST(@B2Id AS VARCHAR(20));
 

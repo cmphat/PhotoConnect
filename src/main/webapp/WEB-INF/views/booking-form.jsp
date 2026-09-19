@@ -11,10 +11,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Request a photography booking on PhotoConnect.">
     <title>Book <c:out value="${photographer.displayName}"/> – PhotoConnect</title>
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- PhotoConnect Custom Design System -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
@@ -22,29 +22,30 @@
 
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 4rem 0;">
+    <main class="pc-page pc-page-compact">
         <div class="editorial-container">
-            
+
             <!-- Breadcrumb Navigation -->
             <div style="margin-bottom: 2rem;">
                 <a href="${pageContext.request.contextPath}/photographers/${photographer.id}" class="text-link" style="font-size:0.88rem;">← Back to Profile</a>
             </div>
 
             <div class="pc-booking-layout">
-                
+
                 <!-- Left: Photographer Summary -->
                 <div>
                     <div style="position: sticky; top: 120px;">
                         <div class="photo-frame" style="aspect-ratio: 4/5; margin-bottom: 2rem;">
                             <c:choose>
                                 <c:when test="${not empty photographer.coverImageUrl}">
-                                    <img src="<c:out value='${photographer.coverImageUrl}'/>" 
-                                         alt="<c:out value='${photographer.displayName}'/> cover" 
+                                    <img src="<c:out value='${photographer.coverImageUrl}'/>"
+                                         alt="<c:out value='${photographer.displayName}'/> cover"
                                          loading="lazy">
                                 </c:when>
                                 <c:otherwise>
-                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--bg-dark); color: var(--border-dark); font-size: 3rem; font-weight: 300;">
-                                        <c:out value="${fn:toUpperCase(fn:substring(photographer.displayName, 0, 1))}"/>
+                                    <div class="pc-card-placeholder">
+                                        <div class="placeholder-initial"><c:out value="${fn:toUpperCase(fn:substring(photographer.displayName, 0, 1))}"/></div>
+                                        <div class="placeholder-badge">Editorial Artist</div>
                                     </div>
                                 </c:otherwise>
                             </c:choose>
@@ -56,7 +57,7 @@
 
                         <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
                             <c:if test="${not empty photographer.city}">
-                                <span>📍 <c:out value="${photographer.city}"/></span>
+                                <span><c:out value="${photographer.city}"/></span>
                             </c:if>
                             <c:if test="${not empty photographer.experienceYears}">
                                 <span style="margin-left: 0.5rem;">· <c:out value="${photographer.experienceYears}"/> yrs exp</span>
@@ -92,42 +93,42 @@
 
                     <!-- Error alert -->
                     <c:if test="${not empty errorMessage}">
-                        <div style="color: #ef4444; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
+                        <div class="pc-alert pc-alert-danger" role="alert">
                             <c:out value="${errorMessage}"/>
                         </div>
                     </c:if>
 
                     <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/book" method="post" id="booking-form">
-                        
+
                         <!-- Date & Time Row -->
                         <div class="pc-booking-datetime-grid">
                             <div class="form-group">
                                 <label for="bookingDate" class="form-label">Shoot Date *</label>
-                                <input type="date" 
-                                       id="bookingDate" 
-                                       name="bookingDate" 
+                                <input type="date"
+                                       id="bookingDate"
+                                       name="bookingDate"
                                        min="<c:out value='${minBookingDate}'/>"
-                                       class="form-input" 
-                                       value="<c:out value='${bookingRequest.bookingDate}'/>" 
+                                       class="form-input"
+                                       value="<c:out value='${bookingRequest.bookingDate}'/>"
                                        required>
                                 <spring:bind path="bookingRequest.bookingDate">
                                     <c:if test="${status.error}">
-                                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;"><c:out value="${status.errorMessage}"/></div>
+                                        <div class="field-error"><c:out value="${status.errorMessage}"/></div>
                                     </c:if>
                                 </spring:bind>
                             </div>
 
                             <div class="form-group">
                                 <label for="bookingTime" class="form-label">Preferred Time *</label>
-                                <input type="time" 
-                                       id="bookingTime" 
-                                       name="bookingTime" 
-                                       class="form-input" 
-                                       value="<c:out value='${bookingRequest.bookingTime}'/>" 
+                                <input type="time"
+                                       id="bookingTime"
+                                       name="bookingTime"
+                                       class="form-input"
+                                       value="<c:out value='${bookingRequest.bookingTime}'/>"
                                        required>
                                 <spring:bind path="bookingRequest.bookingTime">
                                     <c:if test="${status.error}">
-                                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;"><c:out value="${status.errorMessage}"/></div>
+                                        <div class="field-error"><c:out value="${status.errorMessage}"/></div>
                                     </c:if>
                                 </spring:bind>
                             </div>
@@ -136,17 +137,17 @@
                         <!-- Location -->
                         <div class="form-group" style="margin-bottom: 2rem;">
                             <label for="location" class="form-label">Shoot Location / Address *</label>
-                            <input type="text" 
-                                   id="location" 
-                                   name="location" 
-                                   maxlength="255" 
-                                   placeholder="e.g. Studio LightSpace, District 1..." 
-                                   class="form-input" 
-                                   value="<c:out value='${bookingRequest.location}'/>" 
+                            <input type="text"
+                                   id="location"
+                                   name="location"
+                                   maxlength="255"
+                                   placeholder="e.g. Studio LightSpace, District 1..."
+                                   class="form-input"
+                                   value="<c:out value='${bookingRequest.location}'/>"
                                    required>
                             <spring:bind path="bookingRequest.location">
                                 <c:if test="${status.error}">
-                                    <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;"><c:out value="${status.errorMessage}"/></div>
+                                    <div class="field-error"><c:out value="${status.errorMessage}"/></div>
                                 </c:if>
                             </spring:bind>
                         </div>
@@ -154,15 +155,15 @@
                         <!-- Notes / Requirements -->
                         <div class="form-group" style="margin-bottom: 2rem;">
                             <label for="notes" class="form-label">Notes & Requirements (Optional)</label>
-                            <textarea id="notes" 
-                                      name="notes" 
-                                      rows="4" 
-                                      maxlength="1000" 
-                                      placeholder="Share shoot concept, number of outfits, etc..." 
+                            <textarea id="notes"
+                                      name="notes"
+                                      rows="4"
+                                      maxlength="1000"
+                                      placeholder="Share shoot concept, number of outfits, etc..."
                                       class="form-input"><c:out value='${bookingRequest.notes}'/></textarea>
                             <spring:bind path="bookingRequest.notes">
                                 <c:if test="${status.error}">
-                                    <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.5rem;"><c:out value="${status.errorMessage}"/></div>
+                                    <div class="field-error"><c:out value="${status.errorMessage}"/></div>
                                 </c:if>
                             </spring:bind>
                         </div>

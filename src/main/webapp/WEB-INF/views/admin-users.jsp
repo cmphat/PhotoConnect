@@ -13,131 +13,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-    <style>
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
-        .admin-table th {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 2px solid var(--border-dark);
-            color: var(--text-muted);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.8rem;
-        }
-        .admin-table td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid var(--border-dark);
-            vertical-align: middle;
-        }
-        .admin-table tbody tr:hover {
-            background-color: var(--bg-dark-secondary);
-        }
-        .filter-panel {
-            background-color: var(--bg-dark-secondary);
-            border: 1px solid var(--border-dark);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: flex-end;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-        .form-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-        }
-        .form-input, .form-select {
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-dark);
-            color: var(--text-on-dark);
-            padding: 0.6rem 0.8rem;
-            font-size: 0.9rem;
-            font-family: inherit;
-        }
-        .badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.2rem 0.5rem;
-            border-radius: 2px;
-        }
-        .badge-active { background-color: rgba(52, 211, 153, 0.15); color: #34d399; }
-        .badge-inactive { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .badge-banned { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; }
-        .badge-role { background-color: rgba(255, 255, 255, 0.1); color: var(--text-on-dark); }
-        .action-select {
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-dark);
-            color: var(--text-on-dark);
-            padding: 0.35rem 0.5rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .action-btn {
-            background-color: transparent;
-            border: 1px solid var(--border-dark);
-            color: var(--text-on-dark);
-            padding: 0.35rem 0.75rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all var(--transition-fast);
-        }
-        .action-btn:hover {
-            background-color: var(--text-on-dark);
-            color: var(--bg-dark);
-        }
-    </style>
 </head>
 <body>
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 4rem 0 6rem; min-height: 80vh;">
-        <div class="editorial-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
-            
+    <main class="pc-page pc-page-compact">
+        <div class="editorial-container pc-container-admin">
+
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-page-header pc-stack-mobile">
                 <div>
                     <span class="section-index">Administration</span>
-                    <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">User Management</h1>
+                    <h1 class="editorial-title">User Management</h1>
                 </div>
-                <div style="color: var(--text-muted); font-size: 0.85rem;">
+                <div class="pc-page-meta">
                     Total Results: ${fn:length(users)}
                 </div>
             </div>
 
             <c:if test="${not empty successMessage}">
-                <div style="color: #34d399; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(52, 211, 153, 0.3); background-color: rgba(52, 211, 153, 0.05);">
+                <div class="pc-alert pc-alert-success" role="status">
                     <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
-                <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05);">
+                <div class="pc-alert pc-alert-danger" role="alert">
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <!-- Search & Filter Controls -->
-            <form action="${pageContext.request.contextPath}/admin/users" method="get" class="filter-panel">
+            <form action="${pageContext.request.contextPath}/admin/users" method="get" class="admin-filter-panel">
                 <div class="form-group" style="flex: 1; min-width: 220px;">
                     <label class="form-label" for="search">Search Name or Email</label>
-                    <input type="text" id="search" name="search" class="form-input" placeholder="e.g. John Doe, user@example.com" value="${search}" />
+                    <input type="text" id="search" name="search" class="form-input" placeholder="e.g. John Doe, user@example.com" value="<c:out value='${search}'/>" />
                 </div>
 
                 <div class="form-group" style="min-width: 150px;">
@@ -160,23 +70,23 @@
                     </select>
                 </div>
 
-                <button type="submit" class="action-btn" style="padding: 0.6rem 1.25rem;">Apply Filters</button>
+                <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
                 <c:if test="${not empty search || selectedRole != 'ALL' || selectedStatus != 'ALL'}">
-                    <a href="${pageContext.request.contextPath}/admin/users" class="action-btn" style="text-align: center; line-height: 1.8; text-decoration: none;">Reset</a>
+                    <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-secondary btn-sm">Reset</a>
                 </c:if>
             </form>
 
             <!-- Users Table -->
             <c:choose>
                 <c:when test="${empty users}">
-                    <div style="text-align: center; padding: 6rem 2rem; border: 1px solid var(--border-dark); background-color: var(--bg-dark-secondary);">
+                    <div class="pc-empty-state">
                         <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No users found</h3>
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem;">No accounts match the specified search and filter criteria.</p>
-                        <a href="${pageContext.request.contextPath}/admin/users" class="action-btn" style="text-decoration: none;">Clear Filters</a>
+                        <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-secondary btn-sm">Clear Filters</a>
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div style="overflow-x: auto; border: 1px solid var(--border-dark);">
+                    <div class="admin-table-shell" tabindex="0" aria-label="Users table">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -232,12 +142,12 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <form action="${pageContext.request.contextPath}/admin/users/${u.id}/status" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
-                                                        <select name="status" class="action-select">
+                                                        <select name="status" class="pc-select" aria-label="Account status for user ${u.id}">
                                                             <option value="ACTIVE" ${u.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
                                                             <option value="INACTIVE" ${u.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                                                             <option value="BANNED" ${u.status == 'BANNED' ? 'selected' : ''}>BANNED</option>
                                                         </select>
-                                                        <button type="submit" class="action-btn" style="padding: 0.35rem 0.6rem; font-size: 0.75rem;">Update</button>
+                                                        <button type="submit" class="btn btn-secondary btn-sm">Update</button>
                                                     </form>
                                                 </c:otherwise>
                                             </c:choose>

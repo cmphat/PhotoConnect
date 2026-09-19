@@ -1,117 +1,46 @@
-# REALTIME_EVENTS.md — WebSocket / STOMP
+# PhotoConnect Realtime Chat Contract
 
-## 1. Phạm vi
+Realtime scope is limited to booking chat. Booking notifications and other events are not implemented.
 
-Realtime chỉ dùng cho:
-- Chat.
-- Booking notification cơ bản.
-
-Không biến mọi thứ thành realtime để tránh tăng độ phức tạp cho đồ án cá nhân.
-
----
-
-## 2. Endpoint
-
-WebSocket handshake:
+## Endpoints and destinations
 
 ```text
-/ws
+SockJS handshake:      /ws
+Raw WebSocket:         /ws-raw
+Client SEND:           /app/chat.send
+Client SUBSCRIBE:      /topic/booking/{bookingId}/chat
+REST history/fallback: GET  /api/bookings/{bookingId}/messages
+REST send/fallback:    POST /api/bookings/{bookingId}/messages
 ```
 
-Khuyến nghị Spring WebSocket + STOMP.
-
-Client subscribe:
-
-```text
-/topic/booking/{bookingId}/chat
-/user/queue/notifications
-```
-
-Client send:
-
-```text
-/app/chat.send
-```
-
----
-
-## 3. Event `chat.message`
-
-Payload:
+The browser sends only the booking identifier and message content:
 
 ```json
 {
-  "type": "CHAT_MESSAGE",
   "bookingId": 101,
-  "messageId": 9001,
-  "senderId": 5,
-  "receiverId": 8,
-  "content": "Chào bạn, lịch 9h nhé.",
-  "sentAt": "2026-09-10T08:30:00"
+  "content": "See you at 09:00."
 }
 ```
 
-Flow:
+The server derives the sender from the HTTP session and the receiver from the booking. The broadcast/persisted DTO contains message ID, booking ID, sender identity/display name, receiver ID, content, and sent-time fields.
+
+## Flow
 
 ```text
-Client SEND /app/chat.send
-→ server validate JWT
-→ verify user belongs to booking
-→ save message DB
-→ publish /topic/booking/{id}/chat
+HTTP-session-authenticated client SEND /app/chat.send
+  -> validate booking participant
+  -> derive receiver
+  -> persist message in SQL Server
+  -> publish /topic/booking/{bookingId}/chat
 ```
 
----
+When SockJS/STOMP browser libraries or the connection are unavailable, the page sends through REST and polls history every three seconds.
 
-## 4. Event `booking.status_changed`
+## Security
 
-Destination:
-
-```text
-/user/queue/notifications
-```
-
-Payload:
-
-```json
-{
-  "type": "BOOKING_STATUS_CHANGED",
-  "bookingId": 101,
-  "oldStatus": "PENDING",
-  "newStatus": "ACCEPTED",
-  "message": "Booking #101 has been accepted"
-}
-```
-
----
-
-## 5. Event `photographer.approved`
-
-Payload:
-
-```json
-{
-  "type": "PHOTOGRAPHER_APPROVED",
-  "photographerId": 12,
-  "message": "Your photographer profile has been approved"
-}
-```
-
----
-
-## 6. Security
-
-- WebSocket connect phải authenticate.
-- User không được subscribe tùy ý vào booking không thuộc mình.
-- Server luôn validate membership của booking.
-- Không tin senderId từ client; lấy từ principal/JWT.
-- Giới hạn message, ví dụ 2000 ký tự.
-
----
-
-## 7. Nếu WebSocket không kịp
-
-Fallback demo:
-- Chat polling 3–5 giây.
-
-Nhưng vì đề tài yêu cầu WebSocket, nên ưu tiên hoàn thành ít nhất chat realtime.
+- The WebSocket handshake copies the HTTP session; there is no JWT/principal contract.
+- Both WebSocket and REST paths validate that the current session user is the booking customer or assigned photographer.
+- Client-provided sender/receiver identity is not trusted.
+- Message content is required and bounded to 2000 characters.
+- `WEBSOCKET_ALLOWED_ORIGINS` is an explicit allowlist; wildcard origins are rejected.
+- The topic name is booking-scoped, while authorization remains enforced before persistence/send.

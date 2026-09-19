@@ -8,55 +8,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View an approved photographer profile on PhotoConnect.">
-    <title><c:out value="${photographer.displayName}"/> – PhotoConnect</title>
-    
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <meta name="description" content="View verified portfolio, reviews, and booking availability for <c:out value="${photographer.displayName}"/> on PhotoConnect.">
+    <title><c:out value="${photographer.displayName}"/> — PhotoConnect Creator Profile</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- PhotoConnect Custom Design System -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-    
+
     <style>
-        .cover-region {
-            height: 60vh;
-            background-color: var(--bg-dark-secondary);
+        .profile-hero-region {
+            padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-subtle);
+        }
+
+        .profile-banner-frame {
+            width: 100%;
+            height: clamp(340px, 48vw, 540px);
             position: relative;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: var(--radius-sm);
+            background-color: var(--surface-subtle);
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+            box-shadow: var(--shadow-subtle);
         }
-        .cover-img {
+
+        .profile-banner-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.6;
+            display: block;
         }
-        .cover-text {
-            position: absolute;
-            bottom: 3rem;
-            left: 3rem;
-            z-index: 10;
-        }
-        .profile-name {
-            font-size: clamp(3rem, 6vw, 6rem);
-            font-weight: 300;
-            line-height: 1;
-            margin-bottom: 1rem;
-            letter-spacing: -0.04em;
-        }
-        .profile-meta {
+
+        .profile-header-meta {
             display: flex;
-            gap: 2rem;
-            font-size: 1rem;
-            color: var(--text-on-dark);
-            opacity: 0.9;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .profile-pills-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            margin-top: 0.75rem;
+            color: var(--muted);
+            font-size: 0.95rem;
         }
 
         .layout-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.8fr) minmax(320px, 390px);
+            grid-template-columns: minmax(0, 1.85fr) minmax(320px, 380px);
             gap: clamp(2.5rem, 5vw, 4.5rem);
             padding: 4rem 1.5rem;
             max-width: 1480px;
@@ -69,49 +78,56 @@
         .booking-sidebar-column {
             min-width: 0;
         }
-        
-        @media (max-width: 991px) {
-            .layout-grid {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-            .cover-text {
-                left: 1.5rem;
-                bottom: 1.5rem;
-            }
-        }
 
         .bio-section {
-            font-size: 1.25rem;
+            font-family: var(--font-primary);
+            font-size: 1.15rem;
             font-weight: 300;
-            line-height: 1.7;
-            color: var(--text-muted);
-            margin-bottom: 4rem;
+            line-height: 1.75;
+            color: var(--text);
+            margin-bottom: 3.5rem;
+            padding: 2rem 2.25rem;
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-sm);
         }
 
         .masonry-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
         }
-        
+
         .masonry-item {
             position: relative;
-            background: var(--bg-dark-secondary);
+            background: var(--surface-subtle);
             overflow: hidden;
             aspect-ratio: 4/5;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .masonry-trigger {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: zoom-in;
         }
 
         .masonry-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            cursor: pointer;
-            transition: transform var(--transition-slow);
+            display: block;
+            transition: transform var(--transition-smooth);
         }
 
-        .masonry-item:hover .masonry-img {
-            transform: scale(1.03);
+        .masonry-item:hover .masonry-img,
+        .masonry-trigger:focus-visible .masonry-img {
+            transform: scale(1.035);
         }
 
         .booking-sidebar-column {
@@ -123,29 +139,86 @@
         .booking-sidebar {
             position: sticky;
             top: 100px;
-            background: var(--bg-dark-secondary);
-            padding: clamp(2rem, 3.5vw, 3rem);
-            border: 1px solid var(--border-dark);
+            background: var(--surface);
+            padding: clamp(2rem, 3.5vw, 2.5rem);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
             width: 100%;
             max-width: 390px;
             margin: 0;
+            box-shadow: var(--shadow-subtle);
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-dark);
+            padding: 0.95rem 0;
+            border-bottom: 1px solid var(--border);
             gap: 1rem;
+            font-size: 0.9rem;
         }
 
         .stat-row > :last-child {
             min-width: 0;
             overflow-wrap: anywhere;
             text-align: right;
+            font-weight: 500;
         }
 
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 14, 12, 0.94);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 2.5rem;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-img {
+            max-width: 88vw;
+            max-height: 82vh;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+        }
+        .lightbox-caption {
+            color: #F8FAFC;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 300;
+            max-width: 60ch;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 2rem;
+            right: 2.5rem;
+            color: #F8FAFC;
+            font-size: 2.5rem;
+            cursor: pointer;
+            line-height: 1;
+            background: transparent;
+            border: 0;
+            padding: 0.5rem;
+            opacity: 0.75;
+            transition: opacity var(--transition-fast);
+        }
+        .lightbox-close:hover { opacity: 1; }
+
         @media (max-width: 991px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+                gap: 3.5rem;
+            }
             .booking-sidebar {
                 position: static;
                 max-width: none;
@@ -160,259 +233,286 @@
             .booking-sidebar {
                 padding: 1.5rem;
             }
-            .profile-meta {
-                flex-wrap: wrap;
-                gap: 0.75rem 1.25rem;
-            }
-            .cover-text {
-                right: 1rem;
+            .profile-header-meta {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
-
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-
-        /* Lightbox */
-        .lightbox-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(10,10,10,0.95);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 2rem;
-        }
-        .lightbox-overlay.active { display: flex; }
-        .lightbox-img {
-            max-width: 90vw;
-            max-height: 85vh;
-        }
-        .lightbox-caption {
-            color: var(--text-on-dark);
-            margin-top: 1.5rem;
-            font-size: 1rem;
-            text-align: center;
-            font-weight: 300;
-        }
-        .lightbox-close {
-            position: absolute;
-            top: 2rem;
-            right: 3rem;
-            color: var(--text-muted);
-            font-size: 2.5rem;
-            cursor: pointer;
-            line-height: 1;
-            transition: color var(--transition-fast);
-        }
-        .lightbox-close:hover { color: var(--text-on-dark); }
     </style>
 </head>
 <body>
 
+    <!-- Global Professional Navigation -->
     <jsp:include page="fragments/navbar.jsp" />
 
     <main>
-        <!-- ── Cover Region ────────────────────────────────────────────── -->
-        <section class="cover-region">
-            <!-- 3D Hook -->
-            <div id="three-hero-container"></div>
+        <!-- ── Artist Header & Hero Cover ────────────────────────────── -->
+        <section class="profile-hero-region">
+            <div class="editorial-container">
+                <div style="margin-bottom: 1.25rem;">
+                    <a href="${pageContext.request.contextPath}/photographers" class="text-link" style="font-size: 0.88rem;">
+                        &larr; Back to Directory
+                    </a>
+                </div>
 
-            <c:choose>
-                <c:when test="${not empty photographer.coverImageUrl}">
-                    <img src="<c:out value='${photographer.coverImageUrl}'/>" alt="Cover" class="cover-img">
-                </c:when>
-                <c:otherwise>
-                    <div style="font-size: 8rem; opacity: 0.1; font-weight: 300;"><c:out value="${fn:toUpperCase(fn:substring(photographer.displayName, 0, 1))}"/></div>
-                </c:otherwise>
-            </c:choose>
+                <div class="profile-header-meta">
+                    <div>
+                        <div style="margin-bottom: 0.5rem;">
+                            <span class="status-badge status-approved">Verified Creator</span>
+                        </div>
+                        <h1 class="editorial-title" style="font-size: clamp(2.5rem, 5vw, 4rem); margin: 0 0 0.5rem 0;">
+                            <c:out value="${photographer.displayName}"/>
+                        </h1>
+                        <div class="profile-pills-row">
+                            <c:if test="${not empty photographer.city}">
+                                <span><c:out value="${photographer.city}"/></span>
+                            </c:if>
+                            <c:if test="${not empty photographer.experienceYears}">
+                                <span>&bull; <c:out value="${photographer.experienceYears}"/> Years Experience</span>
+                            </c:if>
+                            <c:choose>
+                                <c:when test="${photographer.reviewCount > 0}">
+                                    <span style="color: var(--warning); font-weight: 600;">
+                                        ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span style="color: var(--muted);">★ Emerging Artist</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
 
-            <div class="cover-text">
-                <div style="margin-bottom: 1rem;"><span style="border: 1px solid rgba(255,255,255,0.2); padding: 4px 12px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Verified Artist</span></div>
-                <h1 class="profile-name"><c:out value="${photographer.displayName}"/></h1>
-                <div class="profile-meta">
-                    <c:if test="${not empty photographer.city}">
-                        <span><c:out value="${photographer.city}"/></span>
-                    </c:if>
-                    <c:if test="${not empty photographer.experienceYears}">
-                        <span><c:out value="${photographer.experienceYears}"/> Yrs Exp</span>
-                    </c:if>
+                    <div>
+                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="btn btn-primary btn-lg">
+                            Request Booking
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Cover Photograph Banner -->
+                <div class="profile-banner-frame">
                     <c:choose>
-                        <c:when test="${photographer.reviewCount > 0}">
-                            <span>★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)</span>
+                        <c:when test="${not empty photographer.coverImageUrl}">
+                            <img src="<c:out value='${photographer.coverImageUrl}'/>" alt="<c:out value='${photographer.displayName}'/> featured photography" class="profile-banner-img">
                         </c:when>
                         <c:otherwise>
-                            <span>★ New Artist</span>
+                            <div class="pc-card-placeholder">
+                                <div class="placeholder-initial"><c:out value="${fn:toUpperCase(fn:substring(photographer.displayName, 0, 1))}"/></div>
+                                <div class="placeholder-badge">Editorial Artist Profile</div>
+                            </div>
                         </c:otherwise>
                     </c:choose>
                 </div>
             </div>
         </section>
 
-        <!-- ── Main content ───────────────────────────────────────────── -->
+        <!-- ── Main Content Grid: Bio, Gallery, Reviews & Booking Panel ── -->
         <section class="editorial-container">
             <div class="layout-grid">
-                
-                <!-- Left: Bio & Portfolio -->
+
+                <!-- Left: Bio, Selected Work & Client Reviews -->
                 <div class="booking-sidebar-shell">
+
+                    <!-- About the Artist -->
                     <div class="bio-section">
                         <c:choose>
                             <c:when test="${not empty photographer.bio}">
                                 <c:out value="${photographer.bio}"/>
                             </c:when>
                             <c:otherwise>
-                                <em>This artist hasn't added a bio yet.</em>
+                                <em>This creator has not added a written statement yet. Reach out via booking to discuss artistic directions.</em>
                             </c:otherwise>
                         </c:choose>
                     </div>
 
-                    <h2 class="editorial-heading" style="font-size: 2.5rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1.5rem; margin-bottom: 3rem;">Selected Work</h2>
-                    
-                    <c:choose>
-                        <c:when test="${empty portfolioImages}">
-                            <p style="color: var(--text-muted);">This photographer hasn't added portfolio images yet.</p>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="masonry-grid">
-                                <c:forEach var="img" items="${portfolioImages}">
-                                    <div class="masonry-item">
-                                        <img src="<c:out value='${img.imageUrl}'/>" 
-                                             alt="<c:out value='${not empty img.caption ? img.caption : "Portfolio image"}'/>" 
-                                             class="masonry-img"
-                                             loading="lazy"
-                                             onclick="openLightbox(this.src, this.alt)">
-                                    </div>
-                                </c:forEach>
+                    <!-- Selected Work Gallery -->
+                    <div style="margin-bottom: 5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 2.5rem;">
+                            <div>
+                                <span class="section-index">Portfolio Gallery</span>
+                                <h2 class="editorial-heading" style="margin: 0; font-size: 2.2rem;">Selected Work</h2>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
-
-                    <!-- Client Reviews Section -->
-                    <div style="margin-top: 5rem;">
-                        <h2 class="editorial-heading" style="font-size: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1.5rem; margin-bottom: 2.5rem;">
-                            Client Reviews
-                            <c:if test="${photographer.reviewCount > 0}">
-                                <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 400; margin-left: 1rem;">
-                                    ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)
-                                </span>
-                            </c:if>
-                        </h2>
+                            <div style="font-size: 0.88rem; color: var(--muted);">
+                                <c:out value="${fn:length(portfolioImages)}"/> Photographs
+                            </div>
+                        </div>
 
                         <c:choose>
-                            <c:when test="${empty reviews}">
-                                <p style="color: var(--text-muted); font-style: italic;">No reviews yet for this artist.</p>
+                            <c:when test="${empty portfolioImages}">
+                                <div class="pc-empty-state">
+                                    <p>This photographer has not published public portfolio photographs yet.</p>
+                                </div>
                             </c:when>
                             <c:otherwise>
-                                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                                    <c:forEach var="rev" items="${reviews}">
-                                        <div style="border: 1px solid var(--border); padding: 2rem; background: var(--bg-dark-secondary);">
-                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                                                <div>
-                                                    <div style="font-weight: 500; font-size: 1.05rem; color: var(--text-color);"><c:out value="${rev.customerName}"/></div>
-                                                    <div style="color: var(--primary); font-size: 1rem; margin-top: 0.25rem;">
-                                                        <c:forEach begin="1" end="${rev.rating}">★</c:forEach><c:forEach begin="${rev.rating + 1}" end="5">☆</c:forEach>
-                                                    </div>
-                                                </div>
-                                                <c:if test="${not empty rev.createdAt}">
-                                                    <fmt:parseDate value="${fn:substring(rev.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedRevDate" type="date" />
-                                                    <span style="color: var(--text-muted); font-size: 0.85rem;"><fmt:formatDate value="${parsedRevDate}" pattern="MMM d, yyyy" /></span>
-                                                </c:if>
-                                            </div>
-                                            <c:if test="${not empty rev.comment}">
-                                                <div style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">
-                                                    <c:out value="${rev.comment}"/>
-                                                </div>
-                                            </c:if>
+                                <div class="masonry-grid">
+                                    <c:forEach var="img" items="${portfolioImages}">
+                                        <div class="masonry-item">
+                                            <button type="button" class="masonry-trigger" onclick="openLightbox(this.firstElementChild.src, this.firstElementChild.alt)" aria-label="Open portfolio image: <c:out value='${not empty img.caption ? img.caption : "Portfolio image"}'/>">
+                                                <img src="<c:out value='${img.imageUrl}'/>"
+                                                     alt="<c:out value='${not empty img.caption ? img.caption : "Portfolio image"}'/>"
+                                                     class="masonry-img"
+                                                     loading="lazy">
+                                            </button>
                                         </div>
                                     </c:forEach>
                                 </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
+
+                    <!-- Client Reviews Section -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 2.5rem;">
+                            <div>
+                                <span class="section-index">Client Feedback</span>
+                                <h2 class="editorial-heading" style="margin: 0; font-size: 2rem;">
+                                    Client Reviews
+                                </h2>
+                            </div>
+                            <c:if test="${photographer.reviewCount > 0}">
+                                <div style="font-size: 0.95rem; color: var(--warning); font-weight: 600;">
+                                    ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount} <c:out value="${photographer.reviewCount == 1 ? 'review' : 'reviews'}"/>)
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <c:choose>
+                            <c:when test="${empty reviews}">
+                                <div class="pc-empty-state">
+                                    <p>No client reviews have been recorded yet for this creator.</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="pc-review-list">
+                                    <c:forEach var="rev" items="${reviews}">
+                                        <article class="pc-review-card" style="border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface);">
+                                            <div class="pc-review-meta">
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 1rem; color: var(--text);"><c:out value="${rev.customerName}"/></div>
+                                                    <div style="color: var(--warning); font-size: 0.95rem; margin-top: 0.25rem;">
+                                                        <c:forEach begin="1" end="${rev.rating}">★</c:forEach><c:forEach begin="${rev.rating + 1}" end="5">☆</c:forEach>
+                                                    </div>
+                                                </div>
+                                                <c:if test="${not empty rev.createdAt}">
+                                                    <fmt:parseDate value="${fn:substring(rev.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedRevDate" type="date" />
+                                                    <span style="color: var(--muted); font-size: 0.82rem;"><fmt:formatDate value="${parsedRevDate}" pattern="MMM d, yyyy" /></span>
+                                                </c:if>
+                                            </div>
+                                            <c:if test="${not empty rev.comment}">
+                                                <div style="color: var(--muted); line-height: 1.65; font-size: 0.95rem; margin-top: 0.75rem;">
+                                                    &ldquo;<c:out value="${rev.comment}"/>&rdquo;
+                                                </div>
+                                            </c:if>
+                                        </article>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
                 </div>
 
-                <!-- Right: Booking Sidebar -->
+                <!-- Right: Booking Sidebar Panel -->
                 <div class="booking-sidebar-column">
-                    <div class="booking-sidebar">
-                        <h3 style="font-size: 1.5rem; font-weight: 400; margin-bottom: 1rem;">Book a Session</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Reserve a photoshoot directly with this verified artist.</p>
-                        
-                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 3rem;" id="btn-book-photographer">
+                    <aside class="booking-sidebar" aria-label="Booking reservation card">
+                        <span class="section-index" style="margin-bottom: 0.35rem;">Direct Booking</span>
+                        <h3 style="font-family: var(--font-editorial); font-size: 1.6rem; font-weight: 500; margin-bottom: 0.5rem;">Reserve Session</h3>
+                        <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.75rem;">
+                            Request a personalized photoshoot directly with this verified artist.
+                        </p>
+
+                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 2rem;" id="btn-book-photographer">
                             Request Booking
                         </a>
 
                         <div class="stat-row">
-                            <span style="color: var(--text-muted);">Rating</span>
-                            <span>
-                                <c:choose>
-                                    <c:when test="${photographer.reviewCount > 0}">
-                                        ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" /> (${photographer.reviewCount})
-                                    </c:when>
-                                    <c:otherwise>No reviews yet</c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-
-                        <div class="stat-row">
-                            <span style="color: var(--text-muted);">Starting Rate</span>
+                            <span style="color: var(--muted);">Starting Rate</span>
                             <span>
                                 <c:choose>
                                     <c:when test="${not empty photographer.priceFrom}">
                                         <fmt:formatNumber value="${photographer.priceFrom}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
                                     </c:when>
-                                    <c:otherwise>Contact for rates</c:otherwise>
+                                    <c:otherwise>Rates on agreement</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>
                         <div class="stat-row">
-                            <span style="color: var(--text-muted);">Location</span>
+                            <span style="color: var(--muted);">Location</span>
                             <span>
                                 <c:choose>
                                     <c:when test="${not empty photographer.city}"><c:out value="${photographer.city}"/></c:when>
-                                    <c:otherwise>Global</c:otherwise>
+                                    <c:otherwise>Vietnam</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>
                         <div class="stat-row">
-                            <span style="color: var(--text-muted);">Member Since</span>
+                            <span style="color: var(--muted);">Experience</span>
                             <span>
                                 <c:choose>
-                                    <c:when test="${not empty photographer.createdAt}">${photographer.createdAt.year}</c:when>
-                                    <c:otherwise>2026</c:otherwise>
+                                    <c:when test="${not empty photographer.experienceYears}"><c:out value="${photographer.experienceYears}"/> years</c:when>
+                                    <c:otherwise>Professional</c:otherwise>
                                 </c:choose>
                             </span>
                         </div>
-                    </div>
+                        <div class="stat-row">
+                            <span style="color: var(--muted);">Deposit Required</span>
+                            <span>30% Upon Acceptance</span>
+                        </div>
+                        <div class="stat-row">
+                            <span style="color: var(--muted);">Client Rating</span>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${photographer.reviewCount > 0}">
+                                        ★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0" />
+                                    </c:when>
+                                    <c:otherwise>New Roster Member</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </div>
+                    </aside>
                 </div>
 
             </div>
         </section>
     </main>
 
-    <!-- ── Lightbox overlay ────────────────────────────────────────────── -->
-    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
-        <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <!-- ── Accessible Lightbox Modal ────────────────────────────────── -->
+    <div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Portfolio image preview" aria-hidden="true" onclick="closeLightbox()">
+        <button type="button" class="lightbox-close nav-action" onclick="closeLightbox()" aria-label="Close image preview">&times;</button>
         <img src="" alt="" class="lightbox-img" id="lightbox-img" onclick="event.stopPropagation()">
         <div class="lightbox-caption" id="lightbox-caption"></div>
     </div>
 
-    <footer style="border-top: 1px solid var(--border-dark); padding: 3rem 0; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+    <!-- Editorial Footer -->
+    <footer class="pc-footer">
         <div class="editorial-container">
-            © 2026 PhotoConnect. Premium Photography Marketplace. All rights reserved.
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+                <div style="font-family: var(--font-editorial); font-size: 1.25rem; font-weight: 500; color: var(--text);">
+                    PhotoConnect
+                </div>
+                <div style="font-size: 0.85rem; color: var(--muted);">
+                    &copy; 2026 PhotoConnect. Contemporary Editorial Photography Marketplace.
+                </div>
+                <div style="display: flex; gap: 1.5rem;">
+                    <a href="${pageContext.request.contextPath}/photographers" class="text-link">Explore Directory</a>
+                    <a href="${pageContext.request.contextPath}/become-photographer" class="text-link">Join Roster</a>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script>
         function openLightbox(src, alt) {
             document.getElementById('lightbox-img').src = src;
-            document.getElementById('lightbox-caption').textContent = alt !== 'Portfolio image' ? alt : '';
+            document.getElementById('lightbox-caption').textContent = (alt && alt !== 'Portfolio image') ? alt : '';
             document.getElementById('lightbox').classList.add('active');
+            document.getElementById('lightbox').setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
         }
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightbox').setAttribute('aria-hidden', 'true');
             document.getElementById('lightbox-img').src = '';
             document.body.style.overflow = '';
         }

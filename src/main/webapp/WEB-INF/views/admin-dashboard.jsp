@@ -12,112 +12,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-    <style>
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-        .kpi-card {
-            background-color: var(--bg-dark-secondary);
-            border: 1px solid var(--border-dark);
-            padding: 1.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: border-color var(--transition-fast);
-        }
-        .kpi-card:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .kpi-card.pending-alert {
-            border-color: #f59e0b;
-        }
-        .kpi-card.pending-alert .kpi-value {
-            color: #f59e0b;
-        }
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .kpi-title {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin: 0;
-        }
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 300;
-            line-height: 1;
-            margin: 0 0 0.5rem 0;
-            letter-spacing: -0.02em;
-        }
-        .kpi-subtext {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin: 0;
-        }
-        .disclaimer-banner {
-            background-color: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 2.5rem;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #fbbf24;
-        }
-        .quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        .quick-action-btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border-dark);
-            color: var(--text-on-dark);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all var(--transition-fast);
-        }
-        .quick-action-btn:hover {
-            background-color: var(--text-on-dark);
-            color: var(--bg-dark);
-        }
-    </style>
 </head>
 <body>
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 4rem 0 6rem; min-height: 80vh;">
-        <div class="editorial-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
-            
+    <main class="pc-page pc-page-compact">
+        <div class="editorial-container pc-container-admin">
+
             <jsp:include page="fragments/admin-navbar.jsp" />
 
-            <div class="pc-stack-mobile" style="display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+            <div class="pc-page-header pc-stack-mobile">
                 <div>
                     <span class="section-index">Administration Panel</span>
-                    <h1 class="editorial-title" style="font-size: 2.2rem; margin: 0.25rem 0 0;">System Overview & Analytics</h1>
+                    <h1 class="editorial-title">System Overview &amp; Analytics</h1>
                 </div>
-                <div style="color: var(--text-muted); font-size: 0.85rem;">
+                <div class="pc-page-meta">
                     Platform Engine Active
                 </div>
             </div>
 
             <c:if test="${not empty successMessage}">
-                <div style="color: #34d399; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(52, 211, 153, 0.3); background-color: rgba(52, 211, 153, 0.05);">
+                <div class="pc-alert pc-alert-success" role="status">
                     <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
-                <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05);">
+                <div class="pc-alert pc-alert-danger" role="alert">
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
@@ -220,8 +140,8 @@
             <!-- KPI Group 4: Financial Simulation (Explicitly Disclaimed) -->
             <div style="margin-bottom: 2.5rem;">
                 <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem;">Deposit Simulation Metrics</h3>
-                
-                <div class="disclaimer-banner">
+
+                <div class="pc-alert pc-alert-warning" role="note">
                     <strong>Development Simulation Notice:</strong> Deposit transactions and amounts displayed below represent simulated test data (TASK-015 sandbox). They do not represent real-world funds or actual platform revenue.
                 </div>
 
@@ -247,7 +167,7 @@
             </div>
 
             <!-- Quick Management Shortcuts -->
-            <div style="background-color: var(--bg-dark-secondary); border: 1px solid var(--border-dark); padding: 2rem;">
+            <div class="pc-panel">
                 <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Administrative Shortcuts</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Jump directly into specific operational sections:</p>
                 <div class="quick-actions">

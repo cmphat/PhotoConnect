@@ -1,142 +1,38 @@
-# SECURITY.md — Bảo Mật
+# PhotoConnect Security Model
 
-## 1. Authentication
+## Authentication
 
-- Spring Security.
-- JWT.
-- Password BCrypt.
-- JWT chứa tối thiểu:
-  - userId
-  - role
-  - expiration
+- Public registration creates `CUSTOMER` accounts only.
+- Passwords are BCrypt hashes; raw passwords are not stored or placed in the session.
+- Login uses an application-managed server-side HTTP session and rotates the session ID.
+- The session stores user ID, safe display identity, and role name.
+- Inactive and banned accounts cannot authenticate.
 
-Khuyến nghị web MVC:
-- JWT lưu HttpOnly cookie.
-- Không lưu secret trong JavaScript.
+The application uses `spring-security-crypto` for BCrypt. It does not use JWT and does not currently use a Spring Security filter-chain login.
 
----
+## Authorization and ownership
 
-## 2. Authorization
+Controller role checks are backed by service-layer checks for sensitive operations:
 
-### CUSTOMER
-- Quản lý dữ liệu của chính mình.
-- Booking photographer.
-- Review booking của mình.
+- customers access only owned bookings, deposits, receipts, chats, and eligible reviews;
+- photographers access only their profile, portfolio, availability, and assigned bookings/chats;
+- admins alone access `/admin/**` mappings;
+- public repository queries expose only active, approved photographer DTO data;
+- WebSocket and REST chat both validate booking participants and derive the receiver;
+- payment amount, owner, status, and reference remain server-authoritative.
 
-### PHOTOGRAPHER
-- Chỉ sửa profile/portfolio/package của mình.
-- Chỉ xử lý booking gửi tới mình.
-- Chỉ chat booking của mình.
+## Secrets
 
-### ADMIN
-- Quản trị toàn hệ thống.
+Database and Cloudinary credentials are environment variables. Local secret files, `.env*`, logs, build output, and WAR files are ignored. Never commit or print real credential values.
 
-Không chỉ ẩn nút trên frontend; backend phải kiểm tra quyền.
+## Payment data
 
----
+The checkout is a local demo only. No real gateway or transfer exists. Card number, expiry, CVV, and cardholder input are transient and have no persistence columns. Persisted data is limited to the simulated method/status/reference/timestamps and safe failure text.
 
-## 3. Ownership checks
+## Input and upload safety
 
-Các service phải có hàm kiểm tra ownership, ví dụ:
+Bean Validation plus service checks bound account, profile, search, booking, review, chat, payment, availability, and portfolio input. Portfolio uploads accept configured image media types/sizes, store a Cloudinary public ID, and apply owner-only deletion.
 
-```text
-booking.customer.id == currentUser.id
-booking.photographer.user.id == currentUser.id
-portfolio.photographer.user.id == currentUser.id
-```
+## Remaining release review
 
----
-
-## 4. SQL Server Authentication
-
-Không hard-code:
-
-```text
-sa
-password thật
-```
-
-Tạo login riêng `photoconnect`.
-
----
-
-## 5. Secrets
-
-Không commit:
-
-- DB password
-- JWT secret
-- Cloudinary API secret
-
-`.gitignore`:
-
-```gitignore
-.env
-application-local.properties
-application-secret.properties
-secrets.properties
-```
-
----
-
-## 6. Validation
-
-- Email hợp lệ.
-- Password minimum length.
-- Price >= 0.
-- Rating 1..5.
-- Booking start time trong tương lai.
-- File upload giới hạn loại và dung lượng.
-- Message không rỗng và giới hạn chiều dài.
-
----
-
-## 7. File upload
-
-Cloudinary:
-- Chỉ nhận JPG/JPEG/PNG/WebP.
-- Giới hạn dung lượng.
-- Không dùng filename từ client làm path hệ thống.
-- Lưu `public_id` để xóa ảnh đúng.
-
----
-
-## 8. CSRF / JWT
-
-Nếu JWT qua cookie:
-- Xem xét CSRF protection.
-- SameSite cookie.
-- Secure cookie khi deploy HTTPS.
-
-Cho demo local có thể cấu hình đơn giản hơn nhưng phải hiểu lý do.
-
----
-
-## 9. Logging
-
-Không log:
-- password
-- JWT raw
-- API secret
-
-Có thể log:
-- userId
-- action
-- bookingId
-- status changes
-
----
-
-## 10. GitHub checklist
-
-Trước mỗi push:
-
-```bash
-git status
-git diff --cached
-```
-
-Kiểm tra không có:
-- password
-- secret
-- token
+Automated role/ownership tests are green. A human should still rehearse cross-role/cross-owner routes, WebSocket origin behavior, browser validation messages, and real Cloudinary operations before tagging a release.

@@ -1,71 +1,27 @@
-# PhotoConnect
+# PhotoConnect Documentation
 
-**PhotoConnect** là nền tảng web kết nối **khách hàng** với **nhiếp ảnh gia**, hỗ trợ xem hồ sơ/portfolio, tìm kiếm theo nhu cầu, đặt lịch chụp, quản lý booking, chat realtime và đánh giá sau buổi chụp.
+The professional project overview is the repository-root `README.md`.
 
-> Đây là đồ án cá nhân. Toàn bộ phạm vi được thiết kế cho **1 sinh viên thực hiện trong 8 tuần**.
+## Final handoff documents
 
-## Stack chốt
+- `final/ARCHITECTURE.md` — implemented system boundaries and integrations
+- `final/FEATURE_MATRIX.md` — factual implementation/automation/manual status
+- `final/SETUP_GUIDE.md` — clean Windows setup and run procedure
+- `final/DEMO_SCRIPT.md` — 8–12 minute presentation flow
+- `final/DEMO_CHECKLIST.md` — preparation and fallback checklist
+- `final/project-status.md` — current implementation and verification state
+- `ERD.md` — actual JPA/SQL Server model
+- `API_CONTRACT.md` — actual MVC, REST fallback, and WebSocket mappings
+- `SPEC.md` — frozen final functional scope
 
-- Java 26
-- Spring Boot / Spring MVC
-- JSP / JSTL
-- Bootstrap
-- Spring Data JPA / Hibernate
-- SQL Server + SQL Server Authentication
-- Spring Security + JWT
-- WebSocket / STOMP
-- Cloudinary
-- Sitemesh
-- Maven
-- Apache Tomcat 10.1
-- Git / GitHub
+## Supporting records
 
-## Vai trò
+- `development/TASK-001...TASK-033` — chronological implementation/audit notes
+- `development/migrations/` — guarded forward-only SQL scripts
+- `development/seed/` — optional idempotent/non-destructive demo seed
+- `ERROR_CODES.md` and `REALTIME_EVENTS.md` — error/realtime references
+- `PLAN_BE.md`, `PLAN_FE.md`, and `ROADMAP.md` — final plan/completion status
 
-- `CUSTOMER` — khách hàng
-- `PHOTOGRAPHER` — nhiếp ảnh gia
-- `ADMIN` — quản trị viên
+Source code wins if an older historical task note describes the state that existed at that task's completion. Final documents reflect the current application.
 
-## Phạm vi MVP
-
-### Bắt buộc
-- Đăng ký / đăng nhập / phân quyền
-- Hồ sơ photographer
-- Admin duyệt photographer
-- Portfolio + Cloudinary
-- Gói dịch vụ
-- Search / filter photographer
-- Booking + quản lý trạng thái
-- Kiểm tra trùng lịch cơ bản
-- Chat realtime
-- Review
-- Admin dashboard cơ bản
-
-### Bonus nếu còn thời gian
-- Voucher
-- Cọc mô phỏng
-- Notification nâng cao
-- AI nhận xét ảnh
-- Gợi ý photographer
-
-## Tài liệu
-
-| File | Nội dung |
-|---|---|
-| `SPEC.md` | Đặc tả nghiệp vụ gốc |
-| `SETUP.md` | Cài môi trường và chạy project |
-| `ERD.md` | Thiết kế database |
-| `API_CONTRACT.md` | MVC routes + API contract |
-| `ERROR_CODES.md` | Mã lỗi chuẩn hóa |
-| `REALTIME_EVENTS.md` | WebSocket events |
-| `SECURITY.md` | Authentication, authorization, secret |
-| `CODING_CONVENTION.md` | Quy ước code/Git |
-| `PLAN_BE.md` | Kế hoạch backend |
-| `PLAN_FE.md` | Kế hoạch frontend |
-| `ROADMAP.md` | Roadmap 8 tuần |
-| `SOLO_WORKFLOW.md` | Quy trình làm đồ án một mình |
-
-## Nguyên tắc
-
-`SPEC.md` là **nguồn tham chiếu nghiệp vụ gốc**.  
-Các file `ERD.md`, `API_CONTRACT.md`, `REALTIME_EVENTS.md`, `ERROR_CODES.md` phải thống nhất tên role, status và entity với `SPEC.md`.
+The allowed course stack is Java/Spring Boot/MVC/Data JPA/SQL Server with JSP/JSTL, HTML, CSS, and plain JavaScript. React, Vue, Angular, Python, SPA migration, and a Node frontend build pipeline are not used.

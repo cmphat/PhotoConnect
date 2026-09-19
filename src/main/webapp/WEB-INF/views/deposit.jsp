@@ -138,7 +138,7 @@
                             <div><dt>Date</dt><dd><c:out value="${booking.bookingDate}" /></dd></div>
                             <div><dt>Time</dt><dd><c:out value="${booking.bookingTime}" /></dd></div>
                             <div><dt>Location</dt><dd><c:out value="${booking.location}" /></dd></div>
-                            <div><dt>Status</dt><dd><c:out value="${booking.status}" /></dd></div>
+                            <div><dt>Status</dt><dd><span class="status-badge ${booking.status}"><c:out value="${booking.status}" /></span></dd></div>
                         </dl>
                     </div>
                     <div class="price-summary">

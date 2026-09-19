@@ -1,278 +1,126 @@
-# SPEC.md — Đặc Tả Nghiệp Vụ
+# PhotoConnect Functional Specification
 
-**Dự án:** PhotoConnect  
-**Loại đồ án:** Cá nhân — 1 người  
-**Thời gian:** 8 tuần  
-**Mục tiêu:** Xây dựng nền tảng đặt lịch và kết nối nhiếp ảnh gia với khách hàng.
+## 1. Product
 
-> File này là nguồn tham chiếu nghiệp vụ gốc. Mọi file kỹ thuật khác phải khớp với role, status và entity được định nghĩa tại đây.
+PhotoConnect is a photography marketplace where guests discover approved photographers, customers request and manage shoots, photographers manage their professional presence and assigned bookings, and administrators moderate the platform.
 
----
+The final course implementation is server-rendered Java: Spring Boot/MVC/Data JPA, SQL Server, JSP/JSTL, HTML, CSS, plain JavaScript, and STOMP/SockJS. React, Vue, Angular, Python, an SPA architecture, and a Node frontend build pipeline are outside the allowed stack.
 
-## 1. Bối cảnh
+## 2. Roles
 
-Khách hàng hiện thường tìm photographer qua Facebook, Instagram hoặc người quen. Quá trình này có các vấn đề:
+- `CUSTOMER`: default public registration role; owns bookings, payments, chats, and reviews.
+- `PHOTOGRAPHER`: a user with a photographer profile; public/operational actions also require appropriate verification state.
+- `ADMIN`: platform management role.
+- Guest is an unauthenticated browser, not a persisted role.
 
-1. Khó so sánh giá, phong cách và độ uy tín.
-2. Trao đổi lịch chụp thủ công, dễ trùng lịch.
-3. Không có một nơi tập trung portfolio, gói dịch vụ và đánh giá.
-4. Photographer khó quản lý booking và khách hàng.
-5. Thiếu cơ chế quản lý trạng thái buổi chụp và lịch sử giao dịch.
+Account status is `ACTIVE`, `INACTIVE`, or `BANNED`. Photographer verification is independently `PENDING`, `APPROVED`, `REJECTED`, or `SUSPENDED`.
 
-PhotoConnect giải quyết bằng một nền tảng có hồ sơ photographer, portfolio, booking, chat và review.
+## 3. Implemented scope
 
----
+### Authentication
 
-## 2. Vai trò
+- Register a validated customer account with unique normalized email and BCrypt password.
+- Log in through server-side HTTP session; rotate the session ID; reject inactive/banned accounts.
+- Log out by invalidating the session.
+- Enforce roles and ownership in controllers/services, not only in JSP visibility.
 
-| Role | Mô tả |
-|---|---|
-| `CUSTOMER` | Tìm photographer, đặt lịch, chat, theo dõi booking, đánh giá |
-| `PHOTOGRAPHER` | Quản lý hồ sơ, portfolio, dịch vụ, lịch và booking |
-| `ADMIN` | Duyệt photographer, quản lý user/booking/review, xem thống kê |
+### Photographer onboarding and marketplace
 
----
+- An authenticated customer may create at most one photographer profile and becomes role `PHOTOGRAPHER` with verification `PENDING`.
+- Admin may approve or reject a pending application.
+- Only active, `APPROVED` profiles appear publicly.
+- Guests may search/filter by keyword, city, price, and experience and page through 12 results at a time.
+- Public details include profile data, Cloudinary portfolio URLs, visible reviews, and aggregate rating.
 
-## 3. Phạm vi MVP
+### Portfolio and availability
 
-### 3.1 Authentication
-- Đăng ký bằng email/password.
-- Đăng nhập.
-- JWT.
-- Phân quyền theo role.
-- Password lưu BCrypt.
-- Photographer mới đăng ký phải chờ admin duyệt.
-
-### 3.2 Photographer
-- Hồ sơ cá nhân.
-- Avatar.
-- Bio.
-- Khu vực hoạt động.
-- Số năm kinh nghiệm.
-- Giá khởi điểm.
-- Portfolio.
-- Gói dịch vụ.
-- Trạng thái duyệt.
-
-### 3.3 Search
-Khách có thể:
-- Xem danh sách photographer.
-- Tìm theo tên.
-- Lọc theo khu vực.
-- Lọc theo thể loại.
-- Lọc theo khoảng giá.
-- Xem rating.
-
-### 3.4 Booking
-Khách:
-- Chọn photographer.
-- Chọn gói dịch vụ.
-- Chọn ngày giờ.
-- Nhập địa điểm.
-- Gửi yêu cầu booking.
-
-Photographer:
-- Accept.
-- Reject.
-- Chuyển trạng thái theo tiến độ.
-
-Hệ thống:
-- Kiểm tra trùng lịch cơ bản.
-- Lưu lịch sử trạng thái.
-
-### 3.5 Chat
-- Chat realtime giữa customer và photographer.
-- Chat gắn với booking.
-- Lưu message vào SQL Server.
-- Có trạng thái đã đọc/chưa đọc ở mức cơ bản.
-
-### 3.6 Review
-- Chỉ booking `COMPLETED` mới được review.
-- Mỗi booking chỉ được review một lần.
-- Rating 1–5.
-- Cập nhật average rating của photographer.
-
-### 3.7 Admin
-- Danh sách user.
-- Khóa/mở user.
-- Duyệt/từ chối photographer.
-- Xem booking.
-- Ẩn review không phù hợp.
-- Dashboard cơ bản: user count, photographer count, booking count, completed booking count.
-
-### 3.8 Demo deposit checkout
-- Booking `ACCEPTED` requires a server-calculated 30% deposit.
-- Demo QR and demo card methods are local simulations only; no real payment gateway or money transfer.
-- Only the authenticated `CUSTOMER` who owns the booking may initiate or complete checkout.
-- Successful demo payment records `PAID`; failed and cancelled attempts never do.
-
----
-
-## 4. Ngoài phạm vi bắt buộc
-
-Không làm trước khi MVP hoàn thành:
-
-- Thanh toán thật.
-- Ví tiền.
-- Hoàn tiền tự động.
-- Tranh chấp phức tạp.
-- App mobile.
-- Microservices.
-- Recommendation ML.
-- AI nhận xét ảnh.
-- Chống trao đổi số điện thoại ngoài nền tảng bằng AI.
-
-Các mục này chỉ là bonus.
-
----
-
-## 5. Luồng chính end-to-end
-
-### 5.1 Photographer onboarding
-
-```text
-Register PHOTOGRAPHER
-    ↓
-Create photographer profile
-    ↓
-PENDING approval
-    ↓
-Admin APPROVE / REJECT
-    ↓
-APPROVED → xuất hiện trong search
-```
-
-### 5.2 Booking
-
-```text
-Customer xem Photographer
-    ↓
-Chọn Service Package
-    ↓
-Chọn ngày / giờ / địa điểm
-    ↓
-Hệ thống kiểm tra trùng lịch
-    ↓
-PENDING
-    ↓
-Photographer ACCEPT / REJECT
-    ↓
-ACCEPTED
-    ↓
-Ngày chụp → IN_PROGRESS
-    ↓
-Hoàn thành → COMPLETED
-    ↓
-Customer review
-```
-
-### 5.3 Chat
-
-```text
-Booking tồn tại
-    ↓
-Customer / Photographer mở chat
-    ↓
-WebSocket kết nối
-    ↓
-Gửi message realtime
-    ↓
-Lưu SQL Server
-```
-
----
-
-## 6. Status chuẩn
-
-### `users.status`
-- `ACTIVE`
-- `LOCKED`
-
-### `photographer_profiles.approval_status`
-- `PENDING`
-- `APPROVED`
-- `REJECTED`
-
-### `service_packages.status`
-- `ACTIVE`
-- `INACTIVE`
-
-### `bookings.status`
-- `PENDING`
-- `ACCEPTED`
-- `REJECTED`
-- `CANCELLED`
-- `IN_PROGRESS`
-- `COMPLETED`
-
-### `portfolio_items.status`
-- `ACTIVE`
-- `HIDDEN`
-
-### `reviews.status`
-- `VISIBLE`
-- `HIDDEN`
-
-### `deposits.status`
-- `PENDING`
-- `PROCESSING`
-- `PAID`
-- `FAILED`
-- `CANCELLED`
-- Historical states retained: `REFUNDED`, `FORFEITED`
-
----
-
-## 7. Quy tắc nghiệp vụ
+- An approved photographer may upload validated JPG/JPEG/PNG/WebP images up to the configured request limit and delete only owned images.
+- Cloudinary holds binaries; SQL Server holds metadata.
+- A photographer may add/remove unique unavailable dates.
+- Booking creation rejects a blocked date.
 
 ### Booking
-1. Customer không được booking chính mình.
-2. Photographer phải `APPROVED`.
-3. Service package phải `ACTIVE`.
-4. Không được booking thời điểm trong quá khứ.
-5. Không tạo booking nếu photographer đã có booking `ACCEPTED` hoặc `IN_PROGRESS` bị trùng thời gian.
-6. Customer chỉ được cancel khi booking chưa `IN_PROGRESS`.
-7. Photographer chỉ được accept/reject booking của chính mình.
-8. Booking `COMPLETED` không đổi ngược trạng thái.
 
-### Review
-1. Booking phải `COMPLETED`.
-2. Reviewer phải là customer của booking.
-3. Một booking chỉ có tối đa một review.
+- Only a `CUSTOMER` may book an active, approved photographer other than themselves.
+- Date/time must be future-valid and the date must be available.
+- Customer identity and price are server-derived; `agreedPrice` is snapshotted from the profile.
+- Customer sees only owned bookings and may cancel `PENDING` or `ACCEPTED` bookings.
+- Assigned photographer sees only their bookings and may accept/reject `PENDING` or complete `ACCEPTED` bookings.
 
-### Portfolio
-1. Chỉ photographer sở hữu profile được sửa/xóa.
-2. Ảnh lưu Cloudinary; SQL Server chỉ lưu URL/public_id.
-
----
-
-## 8. Yêu cầu phi chức năng
-
-- Password không lưu plaintext.
-- Secret không commit GitHub.
-- Validate input ở server.
-- Phân quyền server-side.
-- Dùng transaction cho các thao tác cập nhật nhiều bảng quan trọng.
-- UI responsive cơ bản.
-- Search/booking trang chính phản hồi ổn trong môi trường demo.
-- Git commit đều theo tiến độ thật.
-
----
-
-## 9. Tiêu chí MVP hoàn thành
-
-MVP được coi là hoàn thành khi có thể demo trọn luồng:
+Lifecycle:
 
 ```text
-Register customer
-→ Login
-→ Tìm photographer
-→ Xem portfolio
-→ Booking
-→ Photographer login
-→ Accept
-→ Chat
-→ Mark completed
-→ Customer review
-→ Admin xem dữ liệu
+PENDING -> ACCEPTED -> COMPLETED
+PENDING -> REJECTED
+PENDING or ACCEPTED -> CANCELLED (customer)
 ```
+
+### Demo deposit checkout
+
+- Checkout is available to the booking customer for an `ACCEPTED` booking.
+- Deposit amount is computed on the server as `agreedPrice x 30%`, rounded to two decimals.
+- One deposit belongs to one booking.
+- Demo QR and Demo Card produce local deterministic outcomes and a server-generated reference.
+- Paid processing is idempotent and protected by pessimistic locking.
+- Result and receipt remain owner-only; compatible legacy paid deposits may have nullable metadata.
+- No real money, bank API, gateway, or merchant account is involved. Card/CVV input is not persisted.
+
+Deposit lifecycle used by the demo:
+
+```text
+PENDING -> PROCESSING -> PAID
+PENDING -> PROCESSING -> FAILED
+PENDING -> CANCELLED
+FAILED or CANCELLED -> PENDING (fresh attempt)
+```
+
+Legacy enum values `REFUNDED` and `FORFEITED` remain readable but are not new demo actions.
+
+### Chat
+
+- Only the booking customer and assigned photographer may view/send messages.
+- Sender identity comes from the HTTP session; receiver is derived from the booking.
+- Messages persist in SQL Server.
+- STOMP/SockJS delivers live messages; REST GET/POST provides a fallback.
+- WebSocket origins use an explicit configurable allowlist.
+
+### Reviews
+
+- Only the booking's customer may review after `COMPLETED`.
+- One review is allowed per booking; rating is 1–5; optional comment is bounded.
+- Admin may hide/unhide reviews.
+- Public list and cached photographer rating/count use only `VISIBLE` reviews.
+
+### Administration
+
+- Dashboard aggregates users, profiles, booking states, reviews, and clearly disclosed simulated-deposit metrics.
+- User search/filter and status updates include self-protection for the logged-in admin.
+- Photographer list/detail supports verification filtering and pending approve/reject.
+- Booking monitoring is read-only.
+- Review moderation supports status filtering and rating recalculation.
+
+## 4. Data model
+
+Implemented entities are `User`, `PhotographerProfile`, `PortfolioImage`, `PhotographerUnavailableDate`, `Booking`, `Deposit`, `Message`, and `Review`. See `docs/ERD.md`.
+
+## 5. Non-functional requirements
+
+- Context-path-safe JSP forms, links, assets, and JavaScript endpoints.
+- Server validation with safe user-facing errors; no stack traces in the custom error view.
+- BCrypt password storage; no committed database/Cloudinary secrets.
+- `open-in-view=false` with explicit repository fetch plans.
+- Transactional multi-write services and explicit compensation for Cloudinary's remote boundary.
+- Responsive UI designed for representative 1440, 1024, 768, and 390 px widths.
+- Keyboard-visible focus, associated labels, meaningful action text, alt text, and semantic status text.
+
+## 6. Frozen exclusions
+
+The final application does not implement service packages, categories, booking status-history entities, advanced notifications, vouchers, AI features, JWT authentication, production payment processing, or a frontend framework migration. No feature task follows TASK-033.
+
+## 7. Completion criteria
+
+- Feature and implementation scope complete through TASK-033.
+- `mvn test` and `mvn clean package` complete with zero failures/errors.
+- WAR artifact exists.
+- Final architecture, feature, setup, database, demo, and status documents agree with source.
+- Final human UI/demo review remains explicitly pending until performed.

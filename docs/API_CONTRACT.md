@@ -1,294 +1,126 @@
-# API_CONTRACT.md — MVC Routes Và API Contract
+# PhotoConnect Route and API Contract
 
-> Vì frontend dùng JSP/JSTL, project có cả **MVC routes trả view** và một số **JSON API** cho thao tác async / realtime.
+This document records implemented controller mappings. PhotoConnect is primarily a server-rendered Spring MVC application; it does not expose a general REST API for every screen.
 
----
+## JSON envelope
 
-## 1. Quy ước response JSON
-
-Success:
+The chat fallback and JSON error handling use:
 
 ```json
 {
   "success": true,
   "data": {},
-  "message": "OK"
+  "message": "Optional message",
+  "timestamp": "ISO-8601"
 }
 ```
 
-Error:
+Errors set `success` to `false`, include a stable `errorCode` and safe `message`, and may include a field-error map.
+
+## Public and authentication routes
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/` | Homepage |
+| GET | `/photographers` | Approved photographer search/filter/pagination |
+| GET | `/photographers/{id}` | Approved photographer detail |
+| GET | `/register` | Registration form; authenticated users are redirected |
+| POST | `/register` | Create a `CUSTOMER` account |
+| GET | `/login` | Login form |
+| POST | `/login` | BCrypt authentication and session creation |
+| POST | `/logout` | Invalidate the session |
+
+Marketplace query fields are `keyword`, `city`, `minPrice`, `maxPrice`, `minExperience`, and zero-based `page`. The MVC page size is 12. Only active, approved photographers are returned.
+
+## Customer booking routes
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/photographers/{id}/book` | Booking form for an approved photographer |
+| POST | `/photographers/{id}/book` | Create a customer-owned `PENDING` booking |
+| GET | `/bookings/{id}/success` | Owned booking confirmation |
+| GET | `/bookings` | Customer's bookings |
+| GET | `/bookings/{id}` | Owned booking detail |
+| POST | `/bookings/{id}/cancel` | Cancel an owned pending/accepted booking |
+
+Customer identity is read from the session. The server loads the photographer and snapshots `agreedPrice`; client-submitted customer IDs/prices/statuses are not trusted.
+
+## Photographer routes
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET/POST | `/become-photographer` | Onboarding form/submission |
+| GET | `/photographer/onboarding-status` | Current user's application status |
+| GET | `/photographer/portfolio` | Approved owner's portfolio management |
+| POST | `/photographer/portfolio/upload` | Validated Cloudinary upload |
+| POST | `/photographer/portfolio/{id}/delete` | Owner-only deletion |
+| GET | `/photographer/schedule` | Availability management |
+| POST | `/photographer/schedule/add` | Add blocked date |
+| POST | `/photographer/schedule/remove/{id}` | Remove owned blocked date |
+| GET | `/photographer/bookings` | Assigned booking requests |
+| GET | `/photographer/bookings/{id}` | Assigned booking detail |
+| POST | `/photographer/bookings/{id}/accept` | `PENDING -> ACCEPTED` |
+| POST | `/photographer/bookings/{id}/reject` | `PENDING -> REJECTED` |
+| POST | `/photographer/bookings/{id}/complete` | `ACCEPTED -> COMPLETED` |
+
+## Demo deposit routes
+
+All routes require the booking's authenticated customer. Unpaid checkout requires `ACCEPTED`; existing paid legacy deposits remain viewable.
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/bookings/{id}/deposit` | Redirect to checkout |
+| GET | `/bookings/{id}/deposit/checkout` | Create/reuse server-calculated 30% deposit and show checkout |
+| POST | `/bookings/{id}/deposit/process` | Process Demo QR or Demo Card outcome |
+| POST | `/bookings/{id}/deposit/cancel` | Cancel a pending demo attempt |
+| GET | `/bookings/{id}/deposit/result` | Owned result page |
+| GET | `/bookings/{id}/deposit/receipt` | Owned printable paid receipt |
+
+No request field can override the deposit amount. No real transfer occurs, and no card/CVV data is persisted.
+
+## Reviews
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/bookings/{id}/review` | Form for the completed booking's customer |
+| POST | `/bookings/{id}/review` | Create the booking's single review |
+
+## Chat
+
+| Transport | Destination/route | Purpose |
+|---|---|---|
+| MVC GET | `/bookings/{bookingId}/chat` | Participant-only chat page/history |
+| SockJS | `/ws` | STOMP handshake with HTTP session |
+| WebSocket | `/ws-raw` | Raw STOMP-compatible endpoint |
+| STOMP SEND | `/app/chat.send` | Validate participant and persist message |
+| STOMP SUBSCRIBE | `/topic/booking/{bookingId}/chat` | Booking-scoped delivery |
+| REST GET | `/api/bookings/{bookingId}/messages` | Participant-only history/fallback polling |
+| REST POST | `/api/bookings/{bookingId}/messages` | Participant-only fallback send |
+
+## Admin routes
+
+Every route requires a session role of `ADMIN`.
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/admin` | Redirect to dashboard |
+| GET | `/admin/dashboard` | Platform metrics |
+| GET | `/admin/users` | Search/filter users |
+| POST | `/admin/users/{id}/status` | Guarded status update |
+| GET | `/admin/photographers` | Filter applications/profiles |
+| GET | `/admin/photographers/{id}` | Profile/application detail |
+| POST | `/admin/photographers/{id}/approve` | Approve pending application |
+| POST | `/admin/photographers/{id}/reject` | Reject pending application |
+| GET | `/admin/bookings` | Read-only booking monitoring |
+| GET | `/admin/reviews` | Review monitoring/filtering |
+| POST | `/admin/reviews/{id}/hide` | Hide visible review and recalculate rating |
+| POST | `/admin/reviews/{id}/unhide` | Restore hidden review and recalculate rating |
+
+## Errors and HTTP behavior
 
-```json
-{
-  "success": false,
-  "errorCode": "BOOKING_002_TIME_CONFLICT",
-  "message": "Photographer is not available at this time"
-}
-```
+- MVC validation failures redisplay forms with server messages or use safe redirect feedback.
+- MVC access failures redirect or render the central error experience according to the controller/error handler contract.
+- JSON failures use appropriate 4xx/5xx status codes and the standard envelope.
+- `/error` maps container errors to the custom JSP without exposing stack traces.
 
----
-
-# 2. Authentication
-
-## MVC
-
-### GET `/login`
-Trang đăng nhập.
-
-### GET `/register`
-Trang đăng ký.
-
-## API
-
-### POST `/api/auth/register`
-
-Request:
-
-```json
-{
-  "fullName": "Nguyen Van A",
-  "email": "a@example.com",
-  "password": "StrongPassword123",
-  "role": "CUSTOMER"
-}
-```
-
-Photographer được phép đăng ký role `PHOTOGRAPHER`, sau đó profile ở trạng thái `PENDING`.
-
-### POST `/api/auth/login`
-
-Request:
-
-```json
-{
-  "email": "a@example.com",
-  "password": "StrongPassword123"
-}
-```
-
-Response:
-- JWT.
-- role.
-- basic user info.
-
-Khuyến nghị lưu JWT trong HttpOnly cookie nếu triển khai web MVC.
-
----
-
-# 3. Photographer
-
-## MVC
-
-### GET `/photographers`
-Danh sách + search/filter.
-
-Query:
-- `keyword`
-- `location`
-- `category`
-- `minPrice`
-- `maxPrice`
-- `page`
-
-`page` is zero-based, defaults to `0`, and is validated in the range `0..10000`. The MVC marketplace returns at most 12 approved photographers per page and preserves active filters in pagination links.
-
-### GET `/photographers/{id}`
-Chi tiết profile + portfolio + packages + review.
-
-### GET `/photographer/profile`
-Trang quản lý profile của photographer.
-
----
-
-## API
-
-### PUT `/api/photographer/profile`
-Role: `PHOTOGRAPHER`
-
-### POST `/api/photographer/portfolio`
-Role: `PHOTOGRAPHER`
-Content-Type: multipart/form-data
-
-### DELETE `/api/photographer/portfolio/{id}`
-Role: owner photographer
-
-### POST `/api/photographer/packages`
-Role: `PHOTOGRAPHER`
-
-### PUT `/api/photographer/packages/{id}`
-Role: owner photographer
-
-### DELETE `/api/photographer/packages/{id}`
-Soft-delete hoặc status `INACTIVE`.
-
----
-
-# 4. Booking
-
-## MVC
-
-### GET `/bookings`
-Danh sách booking của user hiện tại.
-
-### GET `/bookings/{id}`
-Booking detail.
-
----
-
-## API
-
-### POST `/api/bookings`
-Role: `CUSTOMER`
-
-Request:
-
-```json
-{
-  "photographerId": 10,
-  "servicePackageId": 21,
-  "startTime": "2026-09-10T09:00:00",
-  "location": "Thu Duc, HCMC",
-  "note": "Graduation photos"
-}
-```
-
-Server tự tính `endTime` từ `duration_minutes`.
-
-### PATCH `/api/bookings/{id}/accept`
-Role: photographer owner.
-
-### PATCH `/api/bookings/{id}/reject`
-Role: photographer owner.
-
-### PATCH `/api/bookings/{id}/cancel`
-Role: booking customer hoặc rule cho phép.
-
-### PATCH `/api/bookings/{id}/start`
-Role: photographer owner.
-
-### PATCH `/api/bookings/{id}/complete`
-Role: photographer owner.
-
----
-
-# 5. Demo Deposit Checkout
-
-All routes are local simulation routes. They require the authenticated booking-owning `CUSTOMER`; no amount, customer ID, status, or transaction reference is accepted as authoritative browser input.
-
-### GET `/bookings/{id}/deposit`
-
-Compatibility redirect to the canonical checkout route.
-
-### GET `/bookings/{id}/deposit/checkout`
-
-Creates or resumes the single booking deposit, calculated server-side as `agreedPrice × 30%`, and renders Demo QR / Demo Card choices. An already-paid deposit redirects to its receipt.
-
-### POST `/bookings/{id}/deposit/process`
-
-Form input:
-- `paymentMethod`: `DEMO_QR` or `DEMO_CARD`
-- Demo-card fields only when `DEMO_CARD` is selected; these are ephemeral and never persisted or sent externally.
-
-The server moves the deposit through `PROCESSING` to `PAID` or `FAILED`, generates the transaction reference, and redirects to the result route.
-
-### POST `/bookings/{id}/deposit/cancel`
-
-Changes an unpaid `PENDING` attempt to `CANCELLED`. A paid deposit remains immutable.
-
-### GET `/bookings/{id}/deposit/result`
-
-Shows the authoritative `PAID`, `FAILED`, `CANCELLED`, or current status and retry/receipt actions.
-
-### GET `/bookings/{id}/deposit/receipt`
-
-Owner-only printable receipt. Available only for `PAID` deposits.
-
----
-
-# 6. Review
-
-### POST `/api/reviews`
-Role: `CUSTOMER`
-
-Request:
-
-```json
-{
-  "bookingId": 100,
-  "rating": 5,
-  "comment": "Photographer rất nhiệt tình."
-}
-```
-
-### GET `/api/photographers/{id}/reviews`
-Public.
-
----
-
-# 7. Chat
-
-### GET `/api/bookings/{bookingId}/messages`
-Role:
-- booking customer
-- booking photographer
-
-Pagination bằng `beforeId` hoặc `page`.
-
-### PATCH `/api/messages/{id}/read`
-Mark read.
-
-Realtime gửi qua WebSocket, xem `REALTIME_EVENTS.md`.
-
----
-
-# 8. Admin
-
-## MVC
-
-### GET `/admin`
-Dashboard.
-
-### GET `/admin/photographers`
-Danh sách photographer chờ duyệt.
-
-### GET `/admin/users`
-Danh sách user.
-
-### GET `/admin/bookings`
-Danh sách booking.
-
-## API
-
-### PATCH `/api/admin/photographers/{id}/approve`
-
-### PATCH `/api/admin/photographers/{id}/reject`
-
-### PATCH `/api/admin/users/{id}/lock`
-
-### PATCH `/api/admin/users/{id}/unlock`
-
-### PATCH `/api/admin/reviews/{id}/hide`
-
----
-
-# 9. HTTP status
-
-| Case | Status |
-|---|---|
-| Success GET | 200 |
-| Create success | 201 |
-| Validation | 400 |
-| Not authenticated | 401 |
-| Forbidden | 403 |
-| Not found | 404 |
-| Conflict | 409 |
-| Server error | 500 |
-
----
-
-# 10. Nguyên tắc
-
-- Không tin ID gửi từ client nếu có thể lấy user từ JWT.
-- Authorization luôn kiểm tra server-side.
-- Booking status chuyển theo state machine trong `SPEC.md`.
-- Error code phải dùng `ERROR_CODES.md`.
+See `docs/ERROR_CODES.md` for stable error codes. Actual role, ownership, lifecycle, and validation rules remain authoritative in services and tests.

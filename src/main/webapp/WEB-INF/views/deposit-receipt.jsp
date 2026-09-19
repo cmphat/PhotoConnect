@@ -18,7 +18,7 @@
     <main class="payment-main receipt-main">
         <div class="receipt-toolbar">
             <a href="${pageContext.request.contextPath}/bookings/${booking.id}">&larr; Back to Booking</a>
-            <button type="button" onclick="window.print()">Print / Save as PDF</button>
+            <button type="button" class="btn btn-secondary" onclick="window.print()">Print / Save as PDF</button>
         </div>
         <article class="receipt" aria-labelledby="receipt-title">
             <header class="receipt-header">
@@ -26,7 +26,7 @@
                     <span class="receipt-brand">PhotoConnect</span>
                     <h1 id="receipt-title">Payment Receipt</h1>
                 </div>
-                <div class="receipt-status"><span>Payment status</span><strong><c:out value="${deposit.status}" /></strong></div>
+                <div class="receipt-status"><span>Payment status</span><strong class="status-badge ${deposit.status}"><c:out value="${deposit.status}" /></strong></div>
             </header>
 
             <div class="receipt-reference">
@@ -38,7 +38,7 @@
                 <h2>Transaction</h2>
                 <dl class="receipt-grid">
                     <div><dt>Payment method</dt><dd><c:choose><c:when test="${not empty deposit.paymentMethod}"><c:out value="${deposit.paymentMethod.displayName}" /></c:when><c:otherwise>Demo payment (legacy)</c:otherwise></c:choose></dd></div>
-                    <div><dt>Payment timestamp</dt><dd><c:out value="${fn:substring(deposit.paidAt, 0, 16)}" /></dd></div>
+                    <div><dt>Payment timestamp</dt><dd><c:choose><c:when test="${not empty deposit.paidAt}"><c:out value="${fn:substring(deposit.paidAt, 0, 16)}" /></c:when><c:otherwise>Recorded</c:otherwise></c:choose></dd></div>
                     <div><dt>Customer</dt><dd><c:out value="${booking.customerName}" /></dd></div>
                     <div><dt>Photographer</dt><dd><c:out value="${booking.photographerName}" /></dd></div>
                 </dl>

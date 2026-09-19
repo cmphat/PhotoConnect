@@ -1,9 +1,23 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<header class="nav-container">
+<script>
+    (function() {
+        try {
+            var saved = localStorage.getItem('pc-theme');
+            var theme = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch(e) {}
+    })();
+</script>
+<header class="nav-container" id="site-header">
     <div class="nav-left">
-        <a class="nav-brand" href="${pageContext.request.contextPath}/">PhotoConnect</a>
-        <nav class="nav-links">
+        <a class="nav-brand" href="${pageContext.request.contextPath}/" aria-label="PhotoConnect Home">
+            PhotoConnect
+        </a>
+        <button type="button" class="nav-menu-toggle btn btn-secondary btn-sm" id="navToggleBtn" aria-label="Toggle navigation" aria-expanded="false">
+            Menu ▾
+        </button>
+        <nav class="nav-links" id="navLinksMenu" aria-label="Primary navigation">
             <a class="nav-link" href="${pageContext.request.contextPath}/">Home</a>
             <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
             <c:if test="${not empty sessionScope.userId}">
@@ -25,12 +39,30 @@
             </c:if>
         </nav>
     </div>
-    <div class="nav-right">
+    <div class="nav-right" id="navRightSection">
+        <button type="button" class="theme-toggle-btn btn btn-ghost" id="themeToggleBtn" aria-label="Toggle visual theme" title="Toggle theme">
+            <!-- Sun icon for switching to light mode -->
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <!-- Moon icon for switching to dark mode -->
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
         <c:choose>
             <c:when test="${not empty sessionScope.userId}">
-                <span class="nav-user" style="margin-right: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">Account</span>
-                <form action="${pageContext.request.contextPath}/logout" method="post" style="display:inline; margin:0; padding:0;">
-                    <button type="submit" class="nav-link" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-primary);">Sign Out</button>
+                <span class="nav-user">Account</span>
+                <form action="${pageContext.request.contextPath}/logout" method="post" class="nav-form">
+                    <button type="submit" class="nav-link nav-action">Sign Out</button>
                 </form>
             </c:when>
             <c:otherwise>
@@ -40,3 +72,35 @@
         </c:choose>
     </div>
 </header>
+<script>
+    (function() {
+        const toggleBtn = document.getElementById('navToggleBtn');
+        const navLinks = document.getElementById('navLinksMenu');
+        const navRight = document.getElementById('navRightSection');
+        if (toggleBtn && navLinks) {
+            toggleBtn.addEventListener('click', function() {
+                const isOpen = navLinks.classList.toggle('is-open');
+                if (navRight) navRight.classList.toggle('is-open', isOpen);
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                toggleBtn.textContent = isOpen ? 'Close ✕' : 'Menu ▾';
+            });
+        }
+
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) {
+            function updateThemeBtn() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                themeBtn.setAttribute('aria-label', current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+                themeBtn.setAttribute('title', current === 'dark' ? 'Light mode' : 'Dark mode');
+            }
+            updateThemeBtn();
+            themeBtn.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                try { localStorage.setItem('pc-theme', next); } catch(e) {}
+                updateThemeBtn();
+            });
+        }
+    })();
+</script>

@@ -45,7 +45,7 @@
                 <div><span>Booking</span><strong>#<c:out value="${booking.id}" /></strong></div>
                 <div><span>Deposit</span><strong><fmt:formatNumber value="${deposit.amount}" pattern="#,##0" /> VND</strong></div>
                 <div><span>Reference</span><strong><c:out value="${deposit.paymentReference}" /></strong></div>
-                <div><span>Status</span><strong><c:out value="${deposit.status}" /></strong></div>
+                <div><span>Status</span><strong class="status-badge ${deposit.status}"><c:out value="${deposit.status}" /></strong></div>
             </div>
 
             <div class="result-demo-note">Demo transaction — no real money was transferred.</div>

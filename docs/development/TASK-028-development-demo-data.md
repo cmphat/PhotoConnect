@@ -27,7 +27,16 @@ Complete the Week 7 / Phase 9 seed data requirement from `docs/ROADMAP.md` and `
 
 ---
 
-## Seed Dataset Specification
+## Seed variants and intended records
+
+The two mechanisms are intentionally different and must not be treated as equivalent:
+
+- `V009__demo_seed_data.sql` is the **full workflow dataset** described below: 1 admin, 2 customers, 14 approved photographers, 1 pending photographer, plus guarded portfolio, availability, booking, deposit, review, and chat records.
+- `DemoDataSeeder` is a **smaller application-startup dataset**: 1 admin, 1 customer, and 15 approved photographer accounts/profiles. It does not create bookings, deposits, reviews, messages, portfolio images, unavailable dates, or a pending application.
+
+Both are opt-in, idempotent, and non-destructive. Matching existing records are left unchanged. These are intended inserts into an empty compatible database, not guaranteed total row counts after seeding a database that already contains development data.
+
+## Full SQL seed dataset specification
 
 ### Accounts & Credentials
 
@@ -56,7 +65,7 @@ Complete the Week 7 / Phase 9 seed data requirement from `docs/ROADMAP.md` and `
 
 ## How to Activate / Execute the Seed
 
-Two equivalent, safe execution methods are provided:
+Two safe but intentionally different execution methods are provided:
 
 ### Method 1: Direct SQL Script via SSMS or `sqlcmd` (Recommended for Database Admin)
 
@@ -77,7 +86,7 @@ Or using Windows Authentication:
 sqlcmd -S localhost -E -d PhotoConnect -i docs/development/seed/V009__demo_seed_data.sql
 ```
 
-### Method 2: Spring Boot Application Runner (Recommended for Java Developers)
+### Method 2: Spring Boot Application Runner (accounts/profiles only)
 
 The `DemoDataSeeder` component is bundled in the application but dormant unless both the profile and flag are supplied:
 
@@ -114,7 +123,7 @@ mvn spring-boot:run "-Dspring-boot.run.profiles=demo-seed" "-Dspring-boot.run.ar
 
 ## Automated Verification
 
-- `DemoDataSeederTest` verifies the 17-user / 15-profile dataset, idempotence, existing-account preservation, and password bounds.
+- `DemoDataSeederTest` verifies the application runner's intended 17-account / 15-profile creation calls, idempotence, existing-account preservation, and password bounds. Those counts describe an empty database run, not guaranteed total database rows.
 - Full regression suite (`mvn test`) runs cleanly with 0 failures and 0 errors.
 
 ## Human Verification
@@ -124,4 +133,3 @@ mvn spring-boot:run "-Dspring-boot.run.profiles=demo-seed" "-Dspring-boot.run.ar
 ## Status
 
 Implementation complete. Automated tests PASS. Human Verification: PASS (live local SQL Server seed execution and seeded photographer visibility verified in runtime application).
-

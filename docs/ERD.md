@@ -1,270 +1,155 @@
-# ERD.md — Thiết Kế Cơ Sở Dữ Liệu
+# PhotoConnect Database Model
 
-> DBMS: SQL Server  
-> ORM: Spring Data JPA / Hibernate
+> Database: Microsoft SQL Server
+>
+> Mapping: Spring Data JPA / Hibernate
+> Source of truth: entity mappings under `src/main/java/com/photoconnect/entity`
 
----
-
-## 1. Quan hệ tổng quát
-
-```text
-users
-├── 0..1 photographer_profiles
-├── 1..* bookings (customer)
-├── 1..* messages (sender/receiver)
-└── 1..* reviews (customer)
-
-photographer_profiles
-├── 1..* portfolio_items
-├── 1..* service_packages
-├── 1..* photographer_categories
-├── 1..* bookings
-└── 1..* reviews
-
-bookings
-├── 1 service_package
-├── 1 customer
-├── 1 photographer
-├── 0..* messages
-└── 0..1 review
-```
-
----
-
-## 2. Bảng `users`
-
-| Column | Type | Note |
-|---|---|---|
-| id | BIGINT IDENTITY PK | |
-| full_name | NVARCHAR(120) | not null |
-| email | NVARCHAR(150) | unique |
-| password_hash | NVARCHAR(255) | BCrypt |
-| phone | NVARCHAR(20) | nullable |
-| avatar_url | NVARCHAR(500) | nullable |
-| role | VARCHAR(30) | CUSTOMER / PHOTOGRAPHER / ADMIN |
-| status | VARCHAR(20) | ACTIVE / LOCKED |
-| created_at | DATETIME2 | |
-| updated_at | DATETIME2 | |
-
-Index:
-- unique `email`
-
----
-
-## 3. `photographer_profiles`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| user_id | BIGINT FK users(id), unique |
-| bio | NVARCHAR(MAX) |
-| location | NVARCHAR(255) |
-| experience_years | INT |
-| price_from | DECIMAL(18,2) |
-| approval_status | VARCHAR(20) |
-| average_rating | DECIMAL(3,2) |
-| review_count | INT |
-| created_at | DATETIME2 |
-| updated_at | DATETIME2 |
-
----
-
-## 4. `categories`
-
-Ví dụ: Wedding, Portrait, Event, Product, Graduation.
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| name | NVARCHAR(100) UNIQUE |
-| slug | VARCHAR(120) UNIQUE |
-| status | VARCHAR(20) |
-
----
-
-## 5. `photographer_categories`
-
-Many-to-many.
-
-| Column | Type |
-|---|---|
-| photographer_id | BIGINT FK |
-| category_id | BIGINT FK |
-
-Primary key:
-`(photographer_id, category_id)`
-
----
-
-## 6. `portfolio_items`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| photographer_id | BIGINT FK |
-| image_url | NVARCHAR(700) |
-| cloudinary_public_id | NVARCHAR(300) |
-| title | NVARCHAR(150) |
-| description | NVARCHAR(500) |
-| category_id | BIGINT FK nullable |
-| status | VARCHAR(20) |
-| created_at | DATETIME2 |
-
-Không lưu binary ảnh trong SQL Server.
-
----
-
-## 7. `service_packages`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| photographer_id | BIGINT FK |
-| name | NVARCHAR(150) |
-| description | NVARCHAR(MAX) |
-| price | DECIMAL(18,2) |
-| duration_minutes | INT |
-| max_photos | INT nullable |
-| status | VARCHAR(20) |
-| created_at | DATETIME2 |
-| updated_at | DATETIME2 |
-
----
-
-## 8. `bookings`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| customer_id | BIGINT FK users(id) |
-| photographer_id | BIGINT FK photographer_profiles(id) |
-| service_package_id | BIGINT FK service_packages(id) |
-| start_time | DATETIME2 |
-| end_time | DATETIME2 |
-| location | NVARCHAR(500) |
-| note | NVARCHAR(MAX) |
-| total_price | DECIMAL(18,2) |
-| status | VARCHAR(30) |
-| created_at | DATETIME2 |
-| updated_at | DATETIME2 |
-
-Index khuyến nghị:
-- `(photographer_id, start_time, end_time)`
-- `(customer_id, created_at)`
-- `(status)`
-
----
-
-## 9. `booking_status_history`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| booking_id | BIGINT FK |
-| old_status | VARCHAR(30) |
-| new_status | VARCHAR(30) |
-| changed_by_user_id | BIGINT FK users(id) |
-| note | NVARCHAR(500) |
-| created_at | DATETIME2 |
-
-Dùng để audit luồng booking.
-
----
-
-## 10. `messages`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| booking_id | BIGINT FK |
-| sender_id | BIGINT FK users(id) |
-| receiver_id | BIGINT FK users(id) |
-| content | NVARCHAR(2000) |
-| is_read | BIT |
-| sent_at | DATETIME2 |
-
-Index:
-- `(booking_id, sent_at)`
-
----
-
-## 11. `reviews`
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| booking_id | BIGINT FK UNIQUE |
-| customer_id | BIGINT FK users(id) |
-| photographer_id | BIGINT FK photographer_profiles(id) |
-| rating | TINYINT |
-| comment | NVARCHAR(2000) |
-| status | VARCHAR(20) |
-| created_at | DATETIME2 |
-
-Constraint logic:
-- rating 1..5
-- booking unique
-
----
-
-## 12. `notifications` — optional nhưng nên có
-
-| Column | Type |
-|---|---|
-| id | BIGINT IDENTITY PK |
-| user_id | BIGINT FK |
-| type | VARCHAR(50) |
-| title | NVARCHAR(200) |
-| content | NVARCHAR(1000) |
-| reference_id | BIGINT nullable |
-| is_read | BIT |
-| created_at | DATETIME2 |
-
----
-
-## 13. `deposits`
-
-Implemented as one row per booking (`booking_id` unique).
-
-| Column | Type | Note |
-|---|---|---|
-| id | BIGINT IDENTITY PK | |
-| booking_id | BIGINT FK bookings(id), UNIQUE | authoritative booking/owner source |
-| amount | DECIMAL(18,2) | server-calculated 30% snapshot |
-| status | VARCHAR(30) | PENDING / PROCESSING / PAID / FAILED / CANCELLED; historical REFUNDED / FORFEITED retained |
-| payment_reference | VARCHAR(255) NULL | server-generated demo transaction reference |
-| payment_method | VARCHAR(30) NULL | DEMO_QR / DEMO_CARD |
-| failure_reason | NVARCHAR(255) NULL | safe generic demo failure description |
-| paid_at | DATETIME2 NULL | successful demo confirmation time |
-| created_at | DATETIME2 | |
-| updated_at | DATETIME2 | |
-
-Card number, CVV, expiry, and cardholder input are never columns and are never persisted.
-
----
-
-## 14. Bonus tables
-
-Chỉ tạo khi core đã xong:
-
-### vouchers
-### voucher_usages
-
----
-
-## 15. Thứ tự tạo entity
+## Relationships
 
 ```text
-1. User
-2. PhotographerProfile
-3. Category
-4. PhotographerCategory
-5. PortfolioItem
-6. ServicePackage
-7. Booking
-8. BookingStatusHistory
-9. Message
-10. Review
-11. Notification
-12. Deposit
+User 1 -------- 0..1 PhotographerProfile
+User 1 -------- 0..* Booking (as customer)
+User 1 -------- 0..* Message (as sender)
+User 1 -------- 0..* Message (as receiver)
+User 1 -------- 0..* Review (as customer)
+
+PhotographerProfile 1 -------- 0..* PortfolioImage
+PhotographerProfile 1 -------- 0..* PhotographerUnavailableDate
+PhotographerProfile 1 -------- 0..* Booking
+PhotographerProfile 1 -------- 0..* Review
+
+Booking 1 -------- 0..1 Deposit
+Booking 1 -------- 0..1 Review
+Booking 1 -------- 0..* Message
 ```
+
+There are no implemented category, service-package, booking-history, notification, or voucher entities/tables in the final scope.
+
+## `users` — `User`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `email` | string(255) | non-null, unique |
+| `password` | string(255) | non-null BCrypt hash |
+| `full_name` | string(150) | non-null |
+| `phone` | string(20) | nullable |
+| `role` | string enum | `CUSTOMER`, `PHOTOGRAPHER`, `ADMIN` |
+| `status` | string enum | `ACTIVE`, `INACTIVE`, `BANNED` |
+| `created_at` | datetime | creation timestamp |
+| `updated_at` | datetime | update timestamp |
+
+## `photographer_profiles` — `PhotographerProfile`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `user_id` | FK -> `users.id` | non-null, unique |
+| `display_name` | string(150) | non-null |
+| `bio` | `NVARCHAR(MAX)` | nullable |
+| `city` | string(100) | nullable |
+| `experience_years` | integer | nullable |
+| `price_from` | decimal(18,2) | nullable |
+| `verification_status` | string enum | `PENDING`, `APPROVED`, `REJECTED`, `SUSPENDED` |
+| `average_rating` | double | cached visible-review average |
+| `review_count` | integer | non-null cached visible-review count |
+| `created_at` | datetime | creation timestamp |
+| `updated_at` | datetime | update timestamp |
+
+## `portfolio_images` — `PortfolioImage`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `photographer_profile_id` | FK -> `photographer_profiles.id` | non-null |
+| `image_url` | string(2048) | non-null Cloudinary HTTPS URL |
+| `public_id` | string(512) | non-null Cloudinary asset ID |
+| `caption` | string(500) | nullable |
+| `display_order` | integer | default 0 |
+| `created_at` | datetime | creation timestamp |
+
+Image binaries are not stored in SQL Server.
+
+## `bookings` — `Booking`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `customer_id` | FK -> `users.id` | non-null |
+| `photographer_profile_id` | FK -> `photographer_profiles.id` | non-null |
+| `booking_date` | date | non-null |
+| `booking_time` | time | non-null |
+| `location` | string(255) | non-null |
+| `notes` | string(1000) | nullable |
+| `agreed_price` | decimal(18,2) | non-null server snapshot |
+| `status` | string enum | `PENDING`, `ACCEPTED`, `REJECTED`, `CANCELLED`, `COMPLETED` |
+| `created_at` | datetime | non-null |
+| `updated_at` | datetime | nullable/update time |
+
+## `deposits` — `Deposit`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `booking_id` | FK -> `bookings.id` | non-null, unique |
+| `amount` | decimal(18,2) | non-null; server-calculated 30% snapshot |
+| `status` | string enum | `PENDING`, `PROCESSING`, `PAID`, `FAILED`, `CANCELLED`; legacy `REFUNDED`, `FORFEITED` retained |
+| `payment_reference` | string | nullable, server generated |
+| `payment_method` | string enum | nullable `DEMO_QR` or `DEMO_CARD` |
+| `failure_reason` | string(255) | nullable safe demo result |
+| `paid_at` | datetime | nullable |
+| `created_at` | datetime | non-null |
+| `updated_at` | datetime | nullable/update time |
+
+Card number, expiry, CVV, and cardholder input have no entity columns and are never persisted.
+
+## `reviews` — `Review`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `booking_id` | FK -> `bookings.id` | non-null, unique |
+| `customer_id` | FK -> `users.id` | non-null |
+| `photographer_profile_id` | FK -> `photographer_profiles.id` | non-null |
+| `rating` | integer | non-null; validated 1–5 |
+| `comment` | string(1000) | nullable |
+| `status` | string enum | non-null `VISIBLE` or `HIDDEN` |
+| `created_at` | datetime | non-null |
+| `updated_at` | datetime | nullable |
+
+Only reviews for completed, customer-owned bookings are accepted. Public aggregates use visible reviews.
+
+## `messages` — `Message`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `booking_id` | FK -> `bookings.id` | non-null |
+| `sender_id` | FK -> `users.id` | non-null booking participant |
+| `receiver_id` | FK -> `users.id` | non-null derived participant |
+| `content` | string(2000) | non-null |
+| `is_read` | bit | non-null, default false |
+| `sent_at` | datetime | non-null |
+
+Index: `(booking_id, sent_at)`.
+
+## `photographer_unavailable_dates` — `PhotographerUnavailableDate`
+
+| Column | Mapping | Rules |
+|---|---|---|
+| `id` | `BIGINT IDENTITY` | primary key |
+| `photographer_profile_id` | FK -> `photographer_profiles.id` | non-null |
+| `unavailable_date` | date | non-null |
+| `reason` | string(255) | nullable |
+
+Unique constraint: `(photographer_profile_id, unavailable_date)`.
+
+## Schema history through V010
+
+- The base development schema was created/evolved by the JPA mappings with `spring.jpa.hibernate.ddl-auto=update`.
+- `V008__add_review_status.sql` is a guarded SQL Server migration adding non-null `reviews.status` with default `VISIBLE`.
+- `V009__demo_seed_data.sql` is optional, idempotent, non-destructive demo **data**, not a schema migration.
+- `V010__professional_demo_payment.sql` is a forward-only transaction adding nullable `deposits.payment_method` and `deposits.failure_reason` when absent.
+
+Historical scripts were audited but not rewritten. In a controlled environment, apply required manual migrations in version order and use `ddl-auto=validate` or a migration runner once schema management is formalized.

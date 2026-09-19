@@ -1,165 +1,48 @@
-# ROADMAP.md — Roadmap 8 Tuần Cho 1 Người
+# PhotoConnect Roadmap — Final State
 
-> Mỗi tuần phải có code chạy được + commit GitHub. Không để dồn cuối kỳ.
+The application feature set is frozen. TASK-001 through TASK-033 are the complete planned sequence; no TASK-034 or future application feature task is planned.
 
----
+## Foundation and identity
 
-## Tuần 1 — Foundation + SQL Server
+- [x] TASK-001–004: Spring Boot/JSP foundation, SQL Server/JPA, user and photographer profile models
+- [x] TASK-005–006: registration, BCrypt, server-side session login/logout
+- [x] TASK-007–010: photographer profile/onboarding, admin approval, public marketplace
 
-### Mục tiêu
-Project chạy ổn và kết nối DB.
+## Marketplace and booking
 
-### Việc làm
-- [ ] Chốt docs
-- [ ] SQL Server Developer
-- [ ] SSMS
-- [ ] SQL Server Authentication
-- [ ] PhotoConnectDB
-- [ ] Spring datasource
-- [ ] Base package structure
-- [ ] User entity
-- [ ] PhotographerProfile entity skeleton
-- [ ] GitHub
+- [x] TASK-011–012: Cloudinary portfolio and approved-photographer search/filter UI
+- [x] TASK-013–015: customer booking, booking lifecycle, 30% deposit foundation
+- [x] TASK-016–017: UI unification and photographer availability
 
-### Commit gợi ý
-```text
-Add project specification documents
-Configure SQL Server connection
-Create User entity
-Create photographer profile entity
-```
+## Collaboration and administration
 
----
+- [x] TASK-018–019: persistent STOMP/SockJS chat and booking reviews/ratings
+- [x] TASK-020–021: admin dashboard/management and review moderation
 
-## Tuần 2 — Auth + Security
+## Hardening
 
-- [ ] Register
-- [ ] Login
-- [ ] BCrypt
-- [ ] JWT
-- [ ] Spring Security
-- [ ] Role CUSTOMER/PHOTOGRAPHER/ADMIN
-- [ ] Login/register JSP
-- [ ] Authorization test
+- [x] TASK-022: global exception handling and error codes
+- [x] TASK-023: server-side validation hardening
+- [x] TASK-024: role and ownership authorization hardening
+- [x] TASK-025: approved marketplace pagination
+- [x] TASK-026: responsive UI stabilization (human visual verification pending)
+- [x] TASK-027: transaction/service audit
+- [x] TASK-028: optional idempotent, non-destructive demo data
 
-**Kết quả demo:** 3 role login và vào đúng dashboard.
+## Final completion batch
 
----
+- [x] TASK-029: professional, explicitly simulated demo checkout/receipt
+- [x] TASK-030: feature freeze and end-to-end QA fixes
+- [x] TASK-031: final UI/UX/responsive polish across all JSPs
+- [x] TASK-032: final README, architecture, feature, database, setup, demo, and status documentation
+- [x] TASK-033: release-readiness audit, final automated suite, package verification, and handoff record
 
-## Tuần 3 — Photographer
+## Release gate
 
-- [ ] Profile CRUD
-- [ ] Category
-- [ ] Admin approval
-- [ ] Photographer list
-- [ ] Photographer detail
-- [ ] Cloudinary
-- [ ] Portfolio
-- [ ] Service package
+- **IMPLEMENTED:** complete
+- **AUTOMATED PASS:** complete after final TASK-033 run
+- **PACKAGE PASS:** complete after final TASK-033 run
+- **MANUAL PASS:** only previously recorded individual scenarios
+- **MANUAL PENDING:** final cross-browser responsive review, full multi-role rehearsal, live two-session chat, and environment-dependent Cloudinary checks
 
-**Kết quả demo:** photographer được duyệt và xuất hiện công khai.
-
----
-
-## Tuần 4 — Booking
-
-- [ ] Booking schema
-- [ ] Booking create
-- [ ] Conflict check
-- [ ] Accept/reject
-- [ ] Cancel
-- [ ] Start/complete
-- [ ] Booking status history
-- [ ] Customer + photographer booking pages
-
-**Kết quả demo:** booking end-to-end chưa có chat.
-
----
-
-## Tuần 5 — WebSocket Chat
-
-- [ ] Message entity
-- [ ] Message history
-- [ ] WebSocket
-- [ ] STOMP
-- [ ] Chat UI
-- [ ] Persist message
-- [ ] Booking notifications cơ bản
-
-**Kết quả demo:** 2 account chat realtime.
-
----
-
-## Tuần 6 — Review + Admin
-
-- [x] Review (TASK-019)
-- [x] Average rating (TASK-019)
-- [x] Admin dashboard (TASK-020)
-- [x] User management (TASK-020)
-- [x] Booking management (TASK-020)
-- [x] Hide review (TASK-021)
-
-**Kết quả demo:** hoàn chỉnh MVP feature.
-
----
-
-## Tuần 7 — Integration + Quality
-
-- [x] Validate toàn bộ form (TASK-023)
-- [x] Fix authorization (TASK-024)
-- [x] Error handling (TASK-022)
-- [x] Pagination (TASK-025)
-- [x] Responsive code audit and stabilization (TASK-026; human visual verification pending)
-- [x] Seed data (TASK-028; development-only, opt-in)
-- [x] Test all roles (TASK-024)
-- [x] Update docs (TASK-023–028)
-
-Không thêm feature lớn mới nếu core còn bug.
-
----
-
-## Tuần 8 — Freeze + Demo
-
-- [x] Professional demo deposit checkout + receipt (TASK-029; core flow manually verified, edge cases automated)
-- [ ] Feature freeze
-- [ ] Fix bug
-- [ ] Demo data
-- [ ] Screenshots
-- [ ] README
-- [ ] Report
-- [ ] Slide
-- [ ] Demo script
-- [ ] Tag release
-
-### Tag
-```bash
-git tag v1.0-demo
-git push origin v1.0-demo
-```
-
----
-
-# Quy tắc cắt scope
-
-Nếu trễ:
-
-### Giữ bằng mọi giá
-1. Auth
-2. Photographer profile
-3. Portfolio
-4. Service package
-5. Booking
-6. Admin approval
-7. Review
-8. GitHub
-
-### Giảm trước
-1. Notification nâng cao
-2. Search nâng cao
-3. UI animation
-4. Bonus voucher
-5. Deposit
-6. AI
-
-### WebSocket
-Cố giữ vì là công nghệ trong đề tài.
+Do not merge, tag, or publish a release until the human review completes. Screenshots/slides are presentation artifacts, not new application feature tasks.

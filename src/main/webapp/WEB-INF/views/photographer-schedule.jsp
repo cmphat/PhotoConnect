@@ -17,8 +17,8 @@
     <!-- Include Standard Navbar -->
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main class="editorial-container" style="max-width: 900px; margin-top: 4rem;">
-        
+    <main class="editorial-container pc-container-medium pc-page pc-page-compact">
+
         <header style="margin-bottom: 3rem;">
             <h1 class="editorial-title">Availability & Schedule</h1>
             <p class="editorial-subtitle">Block out specific dates when you are unavailable for bookings.</p>
@@ -35,22 +35,22 @@
             </div>
         </c:if>
 
-        <section style="display: grid; grid-template-columns: 1fr 2fr; gap: 3rem;">
-            
+        <section class="pc-schedule-grid">
+
             <!-- Add Unavailable Date Form -->
             <div class="pc-surface" style="padding: 2rem;">
                 <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-light);">Add Unavailable Date</h2>
                 <form action="<c:url value='/photographer/schedule/add'/>" method="post" style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <div class="form-group">
                         <label class="pc-label" for="date">Select Date</label>
-                        <input type="date" id="date" name="date" class="pc-input" required min="${minDate}" style="width: 100%;">
+                        <input type="date" id="date" name="date" class="pc-input" required min="${minDate}">
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="pc-label" for="reason">Reason (Optional)</label>
-                        <input type="text" id="reason" name="reason" class="pc-input" placeholder="e.g. Vacation, Fully Booked" maxlength="255" style="width: 100%;">
+                        <input type="text" id="reason" name="reason" class="pc-input" placeholder="e.g. Vacation, Fully Booked" maxlength="255">
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary btn-block">Block Date</button>
                 </form>
             </div>
@@ -58,16 +58,16 @@
             <!-- List of Unavailable Dates -->
             <div>
                 <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-light);">Blocked Dates</h2>
-                
+
                 <c:choose>
                     <c:when test="${empty unavailableDates}">
-                        <div class="pc-empty-state" style="padding: 3rem; text-align: center; border: 1px dashed var(--border-dark);">
+                        <div class="pc-empty-state">
                             <p style="color: var(--text-muted);">You have no blocked dates.</p>
                             <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Your calendar is currently open for all future dates.</p>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="pc-scroll-region">
+                        <div class="pc-scroll-region" tabindex="0" aria-label="Blocked dates table">
                         <table class="pc-table" style="width: 100%; min-width: 560px;">
                             <thead>
                                 <tr>
@@ -103,7 +103,7 @@
                     </c:otherwise>
                 </c:choose>
             </div>
-            
+
         </section>
 
     </main>

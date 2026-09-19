@@ -1,94 +1,66 @@
-# PLAN_BE.md — Kế Hoạch Backend
+# PhotoConnect Backend Plan — Final State
 
-> Ưu tiên dependency order. Không làm module sau khi module trước chưa ổn.
+This file records the implemented backend scope after feature freeze. Checked items are present in source and automated tests; manual browser status is tracked separately in `docs/final/project-status.md`.
 
-## Phase 1 — Foundation
+## Foundation
 
-- [ ] Spring project compile
-- [ ] SQL Server connection
-- [ ] Base entity timestamps
-- [x] Global exception handler (TASK-022)
-- [x] Common API response (TASK-022)
-- [ ] Enums
-- [ ] Git baseline
+- [x] Spring Boot 3.3 / Java 21 target / Maven WAR
+- [x] SQL Server datasource and Spring Data JPA/Hibernate
+- [x] JSP view resolution and `open-in-view=false`
+- [x] Central MVC/JSON exception handling and standard error codes
 
-## Phase 2 — Authentication
+## Authentication and accounts
 
-- [ ] User entity
-- [ ] UserRepository
-- [ ] Register
-- [ ] BCrypt
-- [ ] Login
-- [ ] JWT service
-- [ ] JWT filter
-- [ ] Spring Security config
-- [ ] Role authorization
-- [ ] Current user helper
+- [x] `User` entity/repository
+- [x] Registration validation, unique email, BCrypt hash
+- [x] Session login/logout and session-ID rotation
+- [x] `CUSTOMER`, `PHOTOGRAPHER`, `ADMIN` role checks
+- [x] Active/inactive/banned account enforcement
+- [x] Admin user search/filter/status management with self-protection
 
-## Phase 3 — Photographer
+The final authentication architecture is server-side HTTP session authentication. JWT and a Spring Security filter-chain login are not implemented or required by the frozen scope; `spring-security-crypto` supplies BCrypt.
 
-- [ ] PhotographerProfile entity
-- [ ] Category
-- [ ] PhotographerCategory
-- [ ] Admin approve/reject
-- [ ] Public photographer list
-- [ ] Search/filter query
-- [ ] Photographer detail
+## Photographer marketplace
 
-## Phase 4 — Portfolio + Package
+- [x] Photographer profile and verification lifecycle
+- [x] Onboarding with one profile per user
+- [x] Admin approve/reject for pending applications
+- [x] Approved-only public list/detail
+- [x] Keyword/city/price/experience search
+- [x] Database pagination
+- [x] Cloudinary portfolio upload/owner deletion
+- [x] Blocked-date availability management
 
-- [ ] Cloudinary config
-- [ ] Portfolio upload
-- [ ] Portfolio delete
-- [ ] ServicePackage CRUD
-- [ ] Ownership validation
+## Booking and payment
 
-## Phase 5 — Booking
+- [x] Booking entity and server-owned price/customer fields
+- [x] Future/availability/self-booking checks
+- [x] Customer and photographer ownership views
+- [x] Accept/reject/cancel/complete state machine
+- [x] One-to-one deposit with server-calculated 30% amount
+- [x] Demo QR/card state flow, locking, idempotency, result, receipt
+- [x] Legacy deposit compatibility
 
-- [ ] Booking entity
-- [ ] BookingStatusHistory
-- [ ] Create booking
-- [ ] Calculate endTime
-- [ ] Time-conflict query
-- [ ] Accept
-- [ ] Reject
-- [ ] Cancel
-- [ ] Start
-- [ ] Complete
-- [ ] Status transition validator
+The payment implementation is local simulation only; no production gateway or real transfer exists.
 
-## Phase 6 — Chat
+## Chat and reviews
 
-- [ ] Message entity
-- [ ] Message history API
-- [ ] WebSocket config
-- [ ] Authentication handshake
-- [ ] Send message
-- [ ] Persist message
-- [ ] Publish realtime
-- [ ] Mark read
+- [x] Persistent booking messages
+- [x] STOMP/SockJS plus REST fallback
+- [x] Session-derived participant validation and explicit origin allowlist
+- [x] Completed-booking review eligibility and uniqueness
+- [x] Visible-review rating aggregation
+- [x] Admin hide/unhide moderation
 
-## Phase 7 — Review
+## Hardening and release preparation
 
-- [ ] Review entity
-- [ ] Validate completed booking
-- [ ] Unique booking review
-- [ ] Average rating update
+- [x] DTO/service validation hardening
+- [x] Role, ownership, payment, receipt, review, admin, and WebSocket authorization tests
+- [x] Transaction-boundary audit
+- [x] Optional, idempotent, non-destructive demo seed paths
+- [x] Final QA fixes, UI contracts, and documentation reconciliation through TASK-032
+- [ ] Final human browser/demo review (outside implementation; required before release tag)
 
-## Phase 8 — Admin
+## Deliberate exclusions
 
-- [x] Admin dashboard stats (TASK-020)
-- [x] User lock/unlock (TASK-020)
-- [x] Photographer approval (TASK-009 / TASK-020)
-- [x] Booking list (TASK-020)
-- [x] Hide review (TASK-021)
-
-## Phase 9 — Hardening
-
-- [x] Validation (TASK-023)
-- [x] Error codes (TASK-022)
-- [x] Transactions (TASK-027)
-- [x] Authorization tests (TASK-024)
-- [x] Search pagination (TASK-025)
-- [x] Seed/demo data (TASK-028; SQL script + opt-in development profile)
-- [x] Professional local-only demo deposit state flow, ownership locking, and receipt metadata (TASK-029)
+Categories, service-package CRUD, booking-history tables, notifications, vouchers, AI, JWT, and production payments are not in the final implemented scope. No TASK-034 is planned.

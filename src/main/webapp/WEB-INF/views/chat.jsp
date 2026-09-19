@@ -15,46 +15,55 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
     <style>
         .chat-container {
-            max-width: 800px;
+            max-width: 860px;
             margin: 0 auto;
         }
         .chat-box {
-            background: var(--bg-dark-secondary, #101014);
-            border: 1px solid var(--border, #26262e);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-subtle);
             display: flex;
             flex-direction: column;
-            height: 520px;
+            height: min(620px, 68vh);
+            min-height: 440px;
+            overflow: hidden;
         }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
         }
         .message-bubble {
             max-width: 75%;
-            padding: 0.85rem 1.15rem;
-            border-radius: 4px;
+            padding: 0.95rem 1.25rem;
+            border-radius: var(--radius-sm);
             font-size: 0.95rem;
-            line-height: 1.5;
+            line-height: 1.55;
             word-wrap: break-word;
         }
         .message-mine {
             align-self: flex-end;
-            background: #1c1c24;
-            border: 1px solid rgba(201, 169, 110, 0.35);
-            color: #f3f4f6;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #FFFFFF;
+            box-shadow: var(--shadow-subtle);
         }
         .message-mine .message-sender {
-            color: var(--accent-gold, #c9a96e);
+            color: rgba(255, 255, 255, 0.95);
+        }
+        .message-mine .message-time {
+            color: rgba(255, 255, 255, 0.75);
         }
         .message-partner {
             align-self: flex-start;
-            background: #14141a;
-            border: 1px solid var(--border, #26262e);
-            color: #e5e7eb;
+            background: var(--surface-raised);
+            border: 1px solid var(--border);
+            color: var(--text);
+            box-shadow: var(--shadow-subtle);
         }
         .message-meta {
             display: flex;
@@ -62,19 +71,19 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 0.35rem;
-            font-size: 0.75rem;
+            font-size: 0.76rem;
             letter-spacing: 0.03em;
         }
         .message-sender {
             font-weight: 600;
         }
         .message-time {
-            color: var(--text-muted, #9ca3af);
+            color: var(--muted);
         }
         .chat-input-bar {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border, #26262e);
-            background: var(--bg-dark, #08080a);
+            padding: 1.25rem 1.75rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
             display: flex;
             gap: 1rem;
             align-items: center;
@@ -83,47 +92,49 @@
             flex: 1;
             min-width: 0;
             padding: 0.85rem 1.15rem;
-            background: #101014;
-            border: 1px solid var(--border, #26262e);
-            color: var(--text-color, #ffffff);
+            background: var(--surface-raised);
+            border: 1px solid var(--border);
+            color: var(--text);
             font-family: inherit;
             font-size: 0.95rem;
-            border-radius: 2px;
+            border-radius: var(--radius-sm);
             outline: none;
-            transition: border-color 0.2s ease;
-        }
-        @media (max-width: 640px) {
-            .chat-box { height: min(520px, 68vh); }
-            .chat-messages { padding: 1rem; }
-            .message-bubble { max-width: 90%; }
-            .chat-input-bar { padding: 0.75rem; gap: 0.75rem; }
-            .chat-input-bar button { padding-inline: 1rem !important; }
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .chat-input-field:focus {
-            border-color: var(--accent-gold, #c9a96e);
+            border-color: var(--text);
+            box-shadow: 0 0 0 1px var(--text);
         }
         .connection-indicator {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted, #9ca3af);
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 500;
         }
         .dot-indicator {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #f59e0b;
+            background: var(--warning);
         }
         .dot-connected {
-            background: #10b981;
+            background: var(--success);
+        }
+        @media (max-width: 640px) {
+            .chat-box { height: min(520px, 68vh); }
+            .chat-messages { padding: 1rem; }
+            .message-bubble { max-width: 90%; }
+            .chat-input-bar { padding: 0.85rem 1rem; gap: 0.75rem; }
+            .chat-input-bar button { padding-inline: 1.15rem !important; }
         }
     </style>
 </head>
 <body>
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 6rem 0; min-height: 85vh;">
+    <main class="pc-page">
         <div class="editorial-container chat-container">
             <div class="pc-stack-mobile" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                 <a href="${backUrl}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking Details</a>
@@ -136,8 +147,8 @@
             <div style="margin-bottom: 2rem;">
                 <h1 class="editorial-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Conversation with <c:out value="${partnerName}"/></h1>
                 <p style="color: var(--text-muted); font-size: 0.95rem;">
-                    Booking #${booking.id} &bull; 
-                    <span style="color: var(--text-color); font-weight: 500;">${booking.status}</span> &bull; 
+                    Booking #${booking.id} &bull;
+                    <span class="status-badge ${booking.status}"><c:out value="${booking.status}"/></span> &bull;
                     Role: <c:out value="${partnerRole}"/>
                 </p>
             </div>
@@ -145,12 +156,15 @@
             <div class="chat-box">
                 <div id="messagesContainer"
                      class="chat-messages"
+                     role="log"
+                     aria-live="polite"
+                     aria-relevant="additions"
                      data-booking-id="${booking.id}"
                      data-current-user-id="${currentUserId}"
                      data-context-path="${pageContext.request.contextPath}">
                     <c:choose>
                         <c:when test="${empty messages}">
-                            <div id="emptyNotice" style="text-align: center; color: var(--text-muted); margin: auto; padding: 2rem;">
+                            <div id="emptyNotice" class="pc-muted" style="text-align: center; margin: auto; padding: 2rem;">
                                 No messages yet. Send a message to begin your conversation.
                             </div>
                         </c:when>
@@ -171,6 +185,7 @@
                 </div>
 
                 <form id="chatForm" class="chat-input-bar">
+                    <label for="messageInput" class="sr-only">Message</label>
                     <input type="text"
                            id="messageInput"
                            class="chat-input-field"

@@ -16,8 +16,8 @@
 <body>
     <jsp:include page="fragments/navbar.jsp" />
 
-    <main style="padding: 6rem 0; min-height: 80vh;">
-        <div class="editorial-container" style="max-width: 700px;">
+    <main class="pc-page">
+        <div class="editorial-container pc-container-copy">
             <div style="margin-bottom: 2rem;">
                 <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking</a>
             </div>
@@ -28,53 +28,53 @@
             </p>
 
             <c:if test="${not empty errorMessage}">
-                <div style="color: #ef4444; margin-bottom: 2rem; padding: 1rem 1.25rem; border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+                <div class="pc-alert pc-alert-danger" role="alert">
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
-            <form action="${pageContext.request.contextPath}/bookings/${booking.id}/review" method="post" style="border: 1px solid var(--border); padding: clamp(1.5rem, 5vw, 3rem); background: var(--bg-dark-secondary);">
-                
+            <form action="${pageContext.request.contextPath}/bookings/${booking.id}/review" method="post" style="border: 1px solid var(--border); padding: clamp(1.5rem, 5vw, 3rem); background: var(--surface); border-radius: var(--radius-sm);">
+
                 <!-- Rating selection (Accessible 1 to 5) -->
-                <div style="margin-bottom: 2.5rem;">
-                    <label style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem;">
+                <fieldset style="margin: 0 0 2.5rem; padding: 0; border: 0;">
+                    <legend class="form-label" style="margin-bottom: 1rem;">
                         Rating (1 to 5 Stars) <span style="color: var(--primary);">*</span>
-                    </label>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-color);">
-                            <input type="radio" name="rating" value="5" ${reviewRequest.rating == 5 || reviewRequest.rating == null ? 'checked' : ''} style="accent-color: var(--primary); width: 1.2rem; height: 1.2rem;">
+                    </legend>
+                    <div class="pc-rating-options">
+                        <label class="pc-rating-option">
+                            <input type="radio" name="rating" value="5" ${reviewRequest.rating == 5 || reviewRequest.rating == null ? 'checked' : ''}>
                             <span>★★★★★ &nbsp; 5 — Exceptional</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-color);">
-                            <input type="radio" name="rating" value="4" ${reviewRequest.rating == 4 ? 'checked' : ''} style="accent-color: var(--primary); width: 1.2rem; height: 1.2rem;">
+                        <label class="pc-rating-option">
+                            <input type="radio" name="rating" value="4" ${reviewRequest.rating == 4 ? 'checked' : ''}>
                             <span>★★★★☆ &nbsp; 4 — Very Good</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-color);">
-                            <input type="radio" name="rating" value="3" ${reviewRequest.rating == 3 ? 'checked' : ''} style="accent-color: var(--primary); width: 1.2rem; height: 1.2rem;">
+                        <label class="pc-rating-option">
+                            <input type="radio" name="rating" value="3" ${reviewRequest.rating == 3 ? 'checked' : ''}>
                             <span>★★★☆☆ &nbsp; 3 — Average</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-color);">
-                            <input type="radio" name="rating" value="2" ${reviewRequest.rating == 2 ? 'checked' : ''} style="accent-color: var(--primary); width: 1.2rem; height: 1.2rem;">
+                        <label class="pc-rating-option">
+                            <input type="radio" name="rating" value="2" ${reviewRequest.rating == 2 ? 'checked' : ''}>
                             <span>★★☆☆☆ &nbsp; 2 — Below Expectations</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--text-color);">
-                            <input type="radio" name="rating" value="1" ${reviewRequest.rating == 1 ? 'checked' : ''} style="accent-color: var(--primary); width: 1.2rem; height: 1.2rem;">
+                        <label class="pc-rating-option">
+                            <input type="radio" name="rating" value="1" ${reviewRequest.rating == 1 ? 'checked' : ''}>
                             <span>★☆☆☆☆ &nbsp; 1 — Poor</span>
                         </label>
                     </div>
-                </div>
+                </fieldset>
 
                 <!-- Comment (Optional, max 1000 characters) -->
                 <div style="margin-bottom: 2.5rem;">
                     <label for="review-comment" style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem;">
                         Feedback / Comments (Optional, max 1,000 characters)
                     </label>
-                    <textarea id="review-comment" name="comment" rows="5" maxlength="1000" class="form-control" style="width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-color); padding: 1rem; font-family: inherit; font-size: 0.95rem; resize: vertical;" placeholder="Tell future clients about your photoshoot experience...">${reviewRequest.comment}</textarea>
+                    <textarea id="review-comment" name="comment" rows="5" maxlength="1000" class="form-control" placeholder="Tell future clients about your photoshoot experience..."><c:out value="${reviewRequest.comment}"/></textarea>
                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: right;">Max 1,000 characters</div>
                 </div>
 
                 <!-- Actions -->
-                <div class="pc-stack-mobile" style="display: flex; gap: 1.5rem; align-items: center;">
+                <div class="pc-actions pc-stack-mobile">
                     <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2.5rem;">
                         Submit Review
                     </button>
