@@ -3,18 +3,10 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Receipt - PhotoConnect</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/payment.css">
 </head>
-<body class="payment-page receipt-page">
-    <jsp:include page="fragments/navbar.jsp" />
     <main class="payment-main receipt-main">
         <div class="receipt-toolbar">
             <a href="${pageContext.request.contextPath}/bookings/${booking.id}">&larr; Back to Booking</a>
@@ -72,5 +64,3 @@
             <a href="${pageContext.request.contextPath}/bookings">My Bookings</a>
         </div>
     </main>
-</body>
-</html>

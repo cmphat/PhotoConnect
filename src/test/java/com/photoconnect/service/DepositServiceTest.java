@@ -34,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class DepositServiceTest {
@@ -62,6 +63,14 @@ class DepositServiceTest {
         booking.setCustomer(customer);
         booking.setStatus(BookingStatus.ACCEPTED);
         booking.setAgreedPrice(new BigDecimal("2000000.00"));
+    }
+
+    @Test
+    void calculateDepositAmountIsSideEffectFreeAndUsesCheckoutRule() {
+        BigDecimal amount = depositService.calculateDepositAmount(new BigDecimal("2000000.00"));
+
+        assertThat(amount).isEqualByComparingTo("600000.00");
+        verifyNoInteractions(depositRepository, bookingRepository);
     }
 
     @Test

@@ -3,8 +3,13 @@ package com.photoconnect.controller;
 import com.photoconnect.dto.PhotographerPublicDto;
 import com.photoconnect.dto.PhotographerSearchRequest;
 import com.photoconnect.dto.PortfolioImagePublicDto;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.service.PortfolioService;
 import com.photoconnect.service.PublicPhotographerService;
+import com.photoconnect.service.SavedPhotographerService;
+import com.photoconnect.util.SessionSecurityUtils;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,13 +44,23 @@ public class PhotographerController {
     private final PublicPhotographerService publicPhotographerService;
     private final PortfolioService portfolioService;
     private final com.photoconnect.service.ReviewService reviewService;
+    private final SavedPhotographerService savedPhotographerService;
 
     public PhotographerController(PublicPhotographerService publicPhotographerService,
                                   PortfolioService portfolioService,
                                   com.photoconnect.service.ReviewService reviewService) {
+        this(publicPhotographerService, portfolioService, reviewService, null);
+    }
+
+    @Autowired
+    public PhotographerController(PublicPhotographerService publicPhotographerService,
+                                  PortfolioService portfolioService,
+                                  com.photoconnect.service.ReviewService reviewService,
+                                  @Autowired(required = false) SavedPhotographerService savedPhotographerService) {
         this.publicPhotographerService = publicPhotographerService;
         this.portfolioService = portfolioService;
         this.reviewService = reviewService;
+        this.savedPhotographerService = savedPhotographerService;
     }
 
     // ── GET /photographers ────────────────────────────────────────────────
@@ -57,6 +72,7 @@ public class PhotographerController {
      */
     @GetMapping
     public String listPhotographers(@ModelAttribute("searchRequest") PhotographerSearchRequest searchRequest,
+                                    HttpSession session,
                                     Model model) {
         Page<PhotographerPublicDto> photographerPage;
         PhotographerSearchRequest effectiveSearchRequest = searchRequest;
@@ -74,7 +90,7 @@ public class PhotographerController {
                 int lastPage = photographerPage.getTotalPages() - 1;
                 effectiveSearchRequest.setPage(lastPage);
                 photographerPage = publicPhotographerService.searchPhotographers(
-                        effectiveSearchRequest, PageRequest.of(lastPage, MARKETPLACE_PAGE_SIZE));
+                    effectiveSearchRequest, PageRequest.of(lastPage, MARKETPLACE_PAGE_SIZE));
                 model.addAttribute("errorMessage", "That results page does not exist. Showing the last available page.");
             }
         }
@@ -88,6 +104,15 @@ public class PhotographerController {
         model.addAttribute("hasPreviousPage", photographerPage.hasPrevious());
         model.addAttribute("hasNextPage", photographerPage.hasNext());
         model.addAttribute("hasFilters", effectiveSearchRequest != null && effectiveSearchRequest.hasFilters());
+
+        if (session != null && savedPhotographerService != null) {
+            Long currentUserId = SessionSecurityUtils.userId(session);
+            if (currentUserId != null && SessionSecurityUtils.hasRole(session, UserRole.CUSTOMER)) {
+                model.addAttribute("savedPhotographerIds",
+                        savedPhotographerService.getSavedPhotographerProfileIds(currentUserId));
+            }
+        }
+
         return "photographers";
     }
 
@@ -100,6 +125,7 @@ public class PhotographerController {
      */
     @GetMapping("/{id}")
     public String photographerDetail(@PathVariable Long id,
+                                     HttpSession session,
                                      Model model,
                                      RedirectAttributes redirectAttributes) {
         try {
@@ -116,6 +142,15 @@ public class PhotographerController {
             List<com.photoconnect.dto.ReviewDto> reviews =
                     reviewService.getReviewsForPhotographer(id);
             model.addAttribute("reviews", reviews);
+
+            boolean isSaved = false;
+            if (session != null && savedPhotographerService != null) {
+                Long currentUserId = SessionSecurityUtils.userId(session);
+                if (currentUserId != null && SessionSecurityUtils.hasRole(session, UserRole.CUSTOMER)) {
+                    isSaved = savedPhotographerService.isSaved(currentUserId, id);
+                }
+            }
+            model.addAttribute("isSaved", isSaved);
 
             return "photographer-detail";
         } catch (IllegalArgumentException e) {

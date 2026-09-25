@@ -3,22 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View verified portfolio, reviews, and booking availability for <c:out value="${photographer.displayName}"/> on PhotoConnect.">
     <title><c:out value="${photographer.displayName}"/> — PhotoConnect Creator Profile</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
+    <meta name="description" content="View verified portfolio, reviews, and booking availability for <c:out value="${photographer.displayName}"/> on PhotoConnect.">
     <style>
         .profile-hero-region {
             padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(2.5rem, 5vw, 4rem);
@@ -240,10 +227,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main>
         <!-- ── Artist Header & Hero Cover ────────────────────────────── -->
@@ -255,17 +238,33 @@
                     </a>
                 </div>
 
-                <div class="profile-header-meta">
+                <c:if test="${not empty successMessage}">
+                    <div class="pc-alert pc-alert-success alert alert-success mb-3" role="alert">
+                        <c:out value="${successMessage}"/>
+                    </div>
+                </c:if>
+                <c:if test="${not empty errorMessage}">
+                    <div class="pc-alert pc-alert-danger alert alert-danger mb-3" role="alert">
+                        <c:out value="${errorMessage}"/>
+                    </div>
+                </c:if>
+
+                <div class="profile-header-meta d-flex justify-content-between align-items-end flex-wrap gap-4">
                     <div>
                         <div style="margin-bottom: 0.5rem;">
-                            <span class="status-badge status-approved">Verified Creator</span>
+                            <span class="status-badge status-approved badge">Verified Creator</span>
                         </div>
                         <h1 class="editorial-title" style="font-size: clamp(2.5rem, 5vw, 4rem); margin: 0 0 0.5rem 0;">
                             <c:out value="${photographer.displayName}"/>
                         </h1>
-                        <div class="profile-pills-row">
+                        <c:if test="${not empty photographer.headline}">
+                            <div style="font-size: 1.15rem; color: var(--muted); font-weight: 400; margin-bottom: 0.75rem;">
+                                <c:out value="${photographer.headline}"/>
+                            </div>
+                        </c:if>
+                        <div class="profile-pills-row d-flex align-items-center flex-wrap gap-2">
                             <c:if test="${not empty photographer.city}">
-                                <span><c:out value="${photographer.city}"/></span>
+                                <span><c:out value="${photographer.city}"/><c:if test="${not empty photographer.country}">, <c:out value="${photographer.country}"/></c:if></span>
                             </c:if>
                             <c:if test="${not empty photographer.experienceYears}">
                                 <span>&bull; <c:out value="${photographer.experienceYears}"/> Years Experience</span>
@@ -280,10 +279,38 @@
                                     <span style="color: var(--muted);">★ Emerging Artist</span>
                                 </c:otherwise>
                             </c:choose>
+                            <c:if test="${photographer.travelAvailable}">
+                                <span class="badge bg-secondary" style="font-size: 0.78rem;">Available for Travel</span>
+                            </c:if>
                         </div>
+                        <c:if test="${not empty photographer.specialtyDisplayNames}">
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                <c:forEach var="specName" items="${photographer.specialtyDisplayNames}">
+                                    <span class="badge bg-light text-dark border" style="font-size: 0.78rem; font-weight: 500;"><c:out value="${specName}"/></span>
+                                </c:forEach>
+                            </div>
+                        </c:if>
                     </div>
 
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <c:choose>
+                            <c:when test="${isSaved}">
+                                <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/unsave" method="post" style="display:inline; margin:0;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                    <button type="submit" class="btn btn-secondary btn-lg" id="btn-hero-unsave-photographer" title="Remove from your saved photographers">
+                                        ✓ Saved
+                                    </button>
+                                </form>
+                            </c:when>
+                            <c:otherwise>
+                                <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/save" method="post" style="display:inline; margin:0;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                    <button type="submit" class="btn btn-secondary btn-lg" id="btn-hero-save-photographer" title="Save this photographer to your favorites">
+                                        + Save Photographer
+                                    </button>
+                                </form>
+                            </c:otherwise>
+                        </c:choose>
                         <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="btn btn-primary btn-lg">
                             Request Booking
                         </a>
@@ -349,7 +376,7 @@
                                     <c:forEach var="img" items="${portfolioImages}">
                                         <div class="masonry-item">
                                             <button type="button" class="masonry-trigger" onclick="openLightbox(this.firstElementChild.src, this.firstElementChild.alt)" aria-label="Open portfolio image: <c:out value='${not empty img.caption ? img.caption : "Portfolio image"}'/>">
-                                                <img src="<c:out value='${img.imageUrl}'/>"
+                                                <img src="<c:out value='${not empty img.thumbnailUrl ? img.thumbnailUrl : img.imageUrl}'/>"
                                                      alt="<c:out value='${not empty img.caption ? img.caption : "Portfolio image"}'/>"
                                                      class="masonry-img"
                                                      loading="lazy">
@@ -422,9 +449,28 @@
                             Request a personalized photoshoot directly with this verified artist.
                         </p>
 
-                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 2rem;" id="btn-book-photographer">
+                        <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book" class="submit-btn" style="text-align: center; display: block; margin-bottom: 0.75rem;" id="btn-book-photographer">
                             Request Booking
                         </a>
+
+                        <c:choose>
+                            <c:when test="${isSaved}">
+                                <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/unsave" method="post" style="margin-bottom: 1.75rem;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                    <button type="submit" class="btn btn-secondary w-100" id="btn-sidebar-unsave-photographer">
+                                        ✓ Saved &bull; Remove
+                                    </button>
+                                </form>
+                            </c:when>
+                            <c:otherwise>
+                                <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/save" method="post" style="margin-bottom: 1.75rem;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                    <button type="submit" class="btn btn-secondary w-100" id="btn-sidebar-save-photographer">
+                                        + Save Photographer
+                                    </button>
+                                </form>
+                            </c:otherwise>
+                        </c:choose>
 
                         <div class="stat-row">
                             <span style="color: var(--muted);">Starting Rate</span>
@@ -470,6 +516,40 @@
                                 </c:choose>
                             </span>
                         </div>
+                        <c:if test="${not empty photographer.languages}">
+                            <div class="stat-row">
+                                <span style="color: var(--muted);">Languages</span>
+                                <span><c:out value="${photographer.languages}"/></span>
+                            </div>
+                        </c:if>
+                        <c:if test="${photographer.travelAvailable}">
+                            <div class="stat-row">
+                                <span style="color: var(--muted);">Travel Bookings</span>
+                                <span style="color: var(--success); font-weight: 500;">Available Worldwide</span>
+                            </div>
+                        </c:if>
+                        <c:if test="${not empty photographer.equipmentSummary}">
+                            <div class="stat-row">
+                                <span style="color: var(--muted);">Studio Equipment</span>
+                                <span style="font-size: 0.85rem;"><c:out value="${photographer.equipmentSummary}"/></span>
+                            </div>
+                        </c:if>
+                        <c:if test="${not empty photographer.websiteUrl or not empty photographer.instagramUrl or not empty photographer.facebookUrl}">
+                            <div class="stat-row" style="border-bottom: none; padding-top: 1.25rem;">
+                                <span style="color: var(--muted);">Channels</span>
+                                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                    <c:if test="${not empty photographer.websiteUrl}">
+                                        <a href="<c:out value='${photographer.websiteUrl}'/>" target="_blank" rel="noopener noreferrer" class="text-link" style="font-size: 0.85rem;">Website ↗</a>
+                                    </c:if>
+                                    <c:if test="${not empty photographer.instagramUrl}">
+                                        <a href="<c:out value='${photographer.instagramUrl}'/>" target="_blank" rel="noopener noreferrer" class="text-link" style="font-size: 0.85rem;">Instagram ↗</a>
+                                    </c:if>
+                                    <c:if test="${not empty photographer.facebookUrl}">
+                                        <a href="<c:out value='${photographer.facebookUrl}'/>" target="_blank" rel="noopener noreferrer" class="text-link" style="font-size: 0.85rem;">Facebook ↗</a>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </c:if>
                     </aside>
                 </div>
 
@@ -520,5 +600,3 @@
             if (e.key === 'Escape') closeLightbox();
         });
     </script>
-</body>
-</html>

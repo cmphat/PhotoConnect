@@ -53,10 +53,8 @@ Set `DB_URL` as well when the default local SQL Server URL is not appropriate.
 
 ## Human Verification
 
-`PENDING`. Real Cloudinary credentials were not available in the verification
-environment. A human still needs to sign in as an approved photographer, upload a
-real image, confirm it appears on both portfolio management and public detail pages,
-delete it, and confirm removal from Cloudinary and SQL Server.
+- **Cloudinary Live Upload (TASK-B01):** **HUMAN VERIFIED**. The real flow (PhotoConnect photographer portfolio -> Spring Boot -> Cloudinary -> real asset appears in Cloudinary Media Library) has been verified by the user uploading real images from PhotoConnect to the active Cloudinary account.
+- **Cloudinary Live Deletion:** **PENDING**. Live deletion of an asset from Cloudinary via browser flow remains pending explicit human confirmation.
 
 ## Runtime Verification
 

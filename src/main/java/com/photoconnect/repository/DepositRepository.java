@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 import jakarta.persistence.LockModeType;
 
 @Repository
@@ -37,4 +38,7 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
             WHERE d.status = :status
             """)
     java.math.BigDecimal sumAmountByStatus(@Param("status") com.photoconnect.entity.DepositStatus status);
+
+    @Query("SELECT d FROM Deposit d JOIN FETCH d.booking b WHERE b.id IN :bookingIds")
+    List<Deposit> findByBookingIdIn(@Param("bookingIds") List<Long> bookingIds);
 }

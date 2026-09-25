@@ -8,7 +8,7 @@ Status vocabulary:
 
 | Area | Implemented behavior | Automated status | Manual status |
 |---|---|---|---|
-| Authentication | Register, BCrypt hash, session login/logout, session rotation, account-status checks | Pass | Earlier login/logout pass recorded |
+| Authentication | Register, BCrypt hash, signed 30-minute JWT in HttpOnly SameSite cookie, session rotation, active-account/persisted-role revalidation, centralized request identity, logout expiry; server-controlled Supabase Google PKCE login/linking maps into the same local JWT identity | Pass with mocked Supabase HTTP | D01 checklist and live Google OAuth verification pending |
 | Photographer onboarding | Customer submits one profile; role promotion; `PENDING` verification | Pass | Pending final rehearsal |
 | Admin approval | Pending application list/detail; approve/reject transition | Pass | Earlier admin moderation pass recorded |
 | Marketplace | Public approved/active photographer list and detail | Pass | Primary flow pass recorded |
@@ -17,6 +17,8 @@ Status vocabulary:
 | Pagination | Database-backed, 12 cards per MVC page, validated page input | Pass | Primary pagination pass; edge cases pending |
 | Booking | Customer-to-approved-photographer request, future date/time checks, price snapshot | Pass | Final browser rehearsal pending |
 | Booking management | Customer cancellation; photographer accept/reject/complete state machine | Pass | `PENDING -> ACCEPTED` pass recorded; completion rehearsal pending |
+| Customer workspace | Validated-JWT-user-scoped dashboard with actionable bookings, summary, deposits, chat/review links, and approved saved preview | Pass | 24-step customer/security/responsive checklist pending |
+| Photographer Studio | Validated-JWT-user/profile-scoped workspace with pending request actions, upcoming shoots, deposit awareness, C01 completeness, portfolio/availability health, rating, and chat links | Pass | 29-step photographer/security/responsive checklist pending |
 | Availability | Owner-managed blocked dates; booking rejection for blocked dates | Pass | Browser block/unblock flow pending |
 | Deposit/payment | Server-calculated 30% demo deposit, QR/card outcomes, locking, idempotency | Pass | Core demo flow pass; edge cases pending |
 | Receipt | Owner-only result and printable receipt with legacy null tolerance | Pass | Core receipt pass recorded |
@@ -26,10 +28,10 @@ Status vocabulary:
 | User management | Search/filter and guarded status update, including admin self-protection | Pass | Final browser rehearsal pending |
 | Review moderation | Hide/unhide with visible-rating recalculation | Pass | Earlier pass recorded |
 | Validation | Bean Validation and service boundaries for account/profile/booking/search/chat/review/upload input | Pass | Partial manual edge-case coverage |
-| Authorization | Session roles plus service ownership/participant checks for booking, portfolio, payment, receipt, review, chat, admin | Pass | Cross-role/cross-owner browser matrix pending |
+| Authorization | JWT-filter route roles, active persisted role revalidation, CSRF, and service ownership/participant checks for booking, portfolio, payment, receipt, review, chat, admin | Pass | Cross-role/cross-owner browser matrix pending |
 | Exception handling | Central MVC error view and JSON `ApiResponse` errors | Pass | Final browser error-page review pending |
 | Demo data | Optional guarded SQL dataset and double-opt-in application seed | Pass | SQL seed/marketplace visibility pass recorded |
-| Responsive UI | Shared design system across all 27 full-page JSPs and navigation fragments | Pass via static contracts | 1440/1024/768/390 px review pending |
+| Responsive UI | Shared design system across all 30 SiteMesh content JSPs plus the self-contained error page and navigation fragments | Pass via static contracts | 1440/1024/768/390 px review pending |
 
 ## Scope exclusions
 

@@ -3,6 +3,7 @@ package com.photoconnect.service;
 import com.photoconnect.dto.PortfolioImagePublicDto;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import com.photoconnect.repository.PhotographerProfileRepository;
 import com.photoconnect.repository.PortfolioImageRepository;
@@ -71,10 +72,14 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     @Transactional
-    public PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption) {
+    public PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption, PortfolioCategory category) {
         if (userId == null) {
             throw new IllegalArgumentException("Authenticated photographer is required.");
         }
+        if (category == null) {
+            throw new IllegalArgumentException("Portfolio category is required.");
+        }
+
         // 1. Load photographer profile for authenticated user
         PhotographerProfile profile = photographerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException(
@@ -98,17 +103,23 @@ public class PortfolioServiceImpl implements PortfolioService {
             normalizedCaption = null;
         }
 
-        // 4. Upload to Cloudinary — binary storage
+        // 4. Automatic cover: if photographer has 0 images, this first image becomes cover
+        long existingCount = portfolioImageRepository.countByPhotographerProfileId(profile.getId());
+        boolean shouldBeCover = (existingCount == 0);
+
+        // 5. Upload to Cloudinary — binary storage
         CloudinaryStorageService.CloudinaryUploadResult uploadResult =
                 cloudinaryStorageService.uploadImage(file, CLOUDINARY_FOLDER);
 
-        // 5. Persist metadata in SQL Server
+        // 6. Persist metadata in SQL Server
         //    If this save fails, attempt to roll back the Cloudinary upload.
         PortfolioImage image = new PortfolioImage();
         image.setPhotographerProfile(profile);
         image.setImageUrl(uploadResult.secureUrl());
         image.setPublicId(uploadResult.publicId());
         image.setCaption(normalizedCaption);
+        image.setCategory(category);
+        image.setCover(shouldBeCover);
         image.setDisplayOrder(0);
 
         try {
@@ -127,6 +138,58 @@ public class PortfolioServiceImpl implements PortfolioService {
             }
             throw new RuntimeException("Failed to save portfolio image to database. Cloudinary asset may have been rolled back.", dbException);
         }
+    }
+
+    @Override
+    @Transactional
+    public PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption) {
+        return addPortfolioImage(userId, file, caption, PortfolioCategory.OTHER);
+    }
+
+    // ── Cover Selection ───────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void setCoverImage(Long userId, Long imageId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("Authenticated photographer is required.");
+        }
+        if (imageId == null) {
+            throw new IllegalArgumentException("Image ID is required.");
+        }
+
+        PhotographerProfile profile = photographerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException(
+                        "No photographer profile found for user id: " + userId));
+
+        if (profile.getVerificationStatus() != PhotographerVerificationStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Only APPROVED photographers can manage portfolio cover images. " +
+                    "Current status: " + profile.getVerificationStatus());
+        }
+
+        PortfolioImage targetImage = portfolioImageRepository
+                .findByIdAndPhotographerProfileId(imageId, profile.getId())
+                .orElseThrow(() -> new SecurityException(
+                        "Image id [" + imageId + "] does not belong to photographer profile [" + profile.getId() + "]"));
+
+        if (targetImage.isCover()) {
+            return; // Already cover, idempotent
+        }
+
+        // Unset any current cover images for this profile to guarantee single-cover invariant
+        List<PortfolioImage> currentCovers = portfolioImageRepository
+                .findByPhotographerProfileIdAndIsCoverTrue(profile.getId());
+        for (PortfolioImage existingCover : currentCovers) {
+            if (!existingCover.getId().equals(targetImage.getId())) {
+                existingCover.setCover(false);
+                portfolioImageRepository.save(existingCover);
+            }
+        }
+
+        targetImage.setCover(true);
+        portfolioImageRepository.save(targetImage);
+        log.info("Set image [{}] as cover for profile [{}]", imageId, profile.getId());
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────
@@ -149,14 +212,33 @@ public class PortfolioServiceImpl implements PortfolioService {
         //    If this fails, we throw and the DB record is NOT deleted.
         //    This prevents the DB from losing track of an asset that still exists in Cloudinary.
         String publicId = image.getPublicId();
+        boolean wasCover = image.isCover();
+
         cloudinaryStorageService.deleteImage(publicId);
 
         // 4. Cloudinary deletion succeeded — now remove the DB record
         portfolioImageRepository.delete(image);
+        portfolioImageRepository.flush();
 
         log.info("Deleted portfolio image [{}] with Cloudinary publicId [{}] for profile [{}]",
                 imageId, publicId, profile.getId());
+
+        // 5. If the deleted image was the cover, assign deterministic fallback cover
+        if (wasCover) {
+            List<PortfolioImage> remaining = portfolioImageRepository
+                    .findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtAsc(profile.getId());
+            if (!remaining.isEmpty()) {
+                PortfolioImage fallbackCover = remaining.get(0);
+                fallbackCover.setCover(true);
+                portfolioImageRepository.save(fallbackCover);
+                log.info("Assigned fallback cover image [{}] for profile [{}]",
+                        fallbackCover.getId(), profile.getId());
+            } else {
+                log.info("Profile [{}] has no remaining portfolio images; no cover set.", profile.getId());
+            }
+        }
     }
+
 
     // ── Queries ───────────────────────────────────────────────────────────────
 

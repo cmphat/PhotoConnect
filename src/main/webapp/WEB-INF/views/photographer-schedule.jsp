@@ -2,20 +2,9 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Schedule - PhotoConnect</title>
-    <!-- Use the shared custom CSS (no Bootstrap) -->
-    <link rel="stylesheet" href="<c:url value='/assets/css/photoconnect.css'/>">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="editorial-body">
-
-    <!-- Include Standard Navbar -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="editorial-container pc-container-medium pc-page pc-page-compact">
 
@@ -41,6 +30,7 @@
             <div class="pc-surface" style="padding: 2rem;">
                 <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-light);">Add Unavailable Date</h2>
                 <form action="<c:url value='/photographer/schedule/add'/>" method="post" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <%@ include file="fragments/csrf-input.jsp" %>
                     <div class="form-group">
                         <label class="pc-label" for="date">Select Date</label>
                         <input type="date" id="date" name="date" class="pc-input" required min="${minDate}">
@@ -90,6 +80,7 @@
                                         </td>
                                         <td style="text-align: right;">
                                             <form action="<c:url value='/photographer/schedule/remove/${dateObj.id}'/>" method="post" style="display: inline;">
+                                                <%@ include file="fragments/csrf-input.jsp" %>
                                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to unblock this date?');">
                                                     Remove
                                                 </button>
@@ -107,6 +98,3 @@
         </section>
 
     </main>
-
-</body>
-</html>

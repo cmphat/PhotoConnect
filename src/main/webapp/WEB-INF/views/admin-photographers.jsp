@@ -3,19 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photographer Management – Admin – PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page pc-page-compact">
         <div class="editorial-container pc-container-admin">
@@ -135,5 +125,3 @@
             </c:choose>
         </div>
     </main>
-</body>
-</html>

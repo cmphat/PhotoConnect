@@ -1,21 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .auth-split-layout {
             display: flex;
@@ -98,10 +85,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <div class="auth-split-layout">
 
@@ -130,26 +113,37 @@
 
                 <!-- Feedback / Error Alert -->
                 <c:if test="${not empty authError}">
-                    <div class="pc-alert pc-alert-danger" role="alert">
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">
                         <c:out value="${authError}"/>
                     </div>
                 </c:if>
+                <c:if test="${param.oauth == 'expired'}">
+                    <div class="alert alert-warning pc-alert" role="alert">Your Google sign-in expired. Please try again.</div>
+                </c:if>
+
+                <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/auth/google">
+                    Continue with Google
+                </a>
+                <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
+                    <span class="border-top flex-grow-1"></span><span class="text-muted small">or use email</span><span class="border-top flex-grow-1"></span>
+                </div>
 
                 <form:form action="${pageContext.request.contextPath}/login" method="post" modelAttribute="loginRequest">
+                    <%@ include file="fragments/csrf-input.jsp" %>
 
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="email" class="form-label">Email Address</label>
-                        <form:input path="email" type="email" class="form-input" id="email" autocomplete="email" required="true" placeholder="your.name@example.com" />
+                        <form:input path="email" type="email" class="form-control form-input" id="email" autocomplete="email" required="true" placeholder="your.name@example.com" />
                         <form:errors path="email" cssClass="field-error" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 2.5rem;">
+                    <div class="form-group mb-4" style="margin-bottom: 2.5rem;">
                         <label for="password" class="form-label">Password</label>
-                        <form:password path="password" class="form-input" id="password" autocomplete="current-password" required="true" placeholder="••••••••" />
+                        <form:password path="password" class="form-control form-input" id="password" autocomplete="current-password" required="true" placeholder="••••••••" />
                         <form:errors path="password" cssClass="field-error" />
                     </div>
 
-                    <button type="submit" class="submit-btn" id="btn-sign-in">
+                    <button type="submit" class="btn btn-primary submit-btn w-100" id="btn-sign-in">
                         Sign In &rarr;
                     </button>
 
@@ -163,6 +157,3 @@
         </div>
 
     </div>
-
-</body>
-</html>

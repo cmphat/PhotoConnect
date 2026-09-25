@@ -1,21 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join the Verified Roster — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .auth-split-layout {
             display: flex;
@@ -98,10 +85,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <div class="auth-split-layout">
 
@@ -139,6 +122,7 @@
                 </c:if>
 
                 <form:form action="${pageContext.request.contextPath}/become-photographer" method="post" modelAttribute="profileRequest">
+                    <%@ include file="fragments/csrf-input.jsp" %>
                     <div class="form-group">
                         <label for="displayName" class="form-label">Professional Display Name *</label>
                         <form:input path="displayName" id="displayName" cssClass="form-input" placeholder="e.g. Linh Nguyen Editorial" required="true" />
@@ -178,6 +162,3 @@
         </div>
 
     </div>
-
-</body>
-</html>

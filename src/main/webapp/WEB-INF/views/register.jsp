@@ -1,21 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .auth-split-layout {
             display: flex;
@@ -98,10 +85,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <div class="auth-split-layout">
 
@@ -119,55 +102,63 @@
 
                 <!-- Feedback Alerts -->
                 <c:if test="${param.success != null}">
-                    <div class="pc-alert pc-alert-success" role="status">
+                    <div class="alert alert-success pc-alert pc-alert-success" role="status">
                         Registration successful! Welcome to PhotoConnect.
                     </div>
                 </c:if>
                 <c:if test="${not empty emailError}">
-                    <div class="pc-alert pc-alert-danger" role="alert">
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">
                         <c:out value="${emailError}"/>
                     </div>
                 </c:if>
                 <c:if test="${not empty passwordError}">
-                    <div class="pc-alert pc-alert-danger" role="alert">
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">
                         <c:out value="${passwordError}"/>
                     </div>
                 </c:if>
 
-                <form:form action="${pageContext.request.contextPath}/register" method="post" modelAttribute="registerRequest">
+                <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/auth/google">
+                    Continue with Google
+                </a>
+                <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
+                    <span class="border-top flex-grow-1"></span><span class="text-muted small">or register with email</span><span class="border-top flex-grow-1"></span>
+                </div>
 
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                <form:form action="${pageContext.request.contextPath}/register" method="post" modelAttribute="registerRequest">
+                    <%@ include file="fragments/csrf-input.jsp" %>
+
+                    <div class="form-group mb-3" style="margin-bottom: 1.25rem;">
                         <label for="fullName" class="form-label">Full Name *</label>
-                        <form:input path="fullName" class="form-input" id="fullName" placeholder="Nguyen Van A" autocomplete="name" required="true" />
+                        <form:input path="fullName" class="form-control form-input" id="fullName" placeholder="Nguyen Van A" autocomplete="name" required="true" />
                         <form:errors path="fullName" cssClass="field-error" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <div class="form-group mb-3" style="margin-bottom: 1.25rem;">
                         <label for="email" class="form-label">Email Address *</label>
-                        <form:input path="email" type="email" class="form-input" id="email" placeholder="name@example.com" autocomplete="email" required="true" />
+                        <form:input path="email" type="email" class="form-control form-input" id="email" placeholder="name@example.com" autocomplete="email" required="true" />
                         <form:errors path="email" cssClass="field-error" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <div class="form-group mb-3" style="margin-bottom: 1.25rem;">
                         <label for="phone" class="form-label">Phone Number (Optional)</label>
-                        <form:input path="phone" type="tel" class="form-input" id="phone" placeholder="+84 901 234 567" autocomplete="tel" />
+                        <form:input path="phone" type="tel" class="form-control form-input" id="phone" placeholder="+84 901 234 567" autocomplete="tel" />
                         <form:errors path="phone" cssClass="field-error" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <div class="form-group mb-3" style="margin-bottom: 1.25rem;">
                         <label for="password" class="form-label">Password *</label>
-                        <input type="password" id="password" name="password" class="form-input" autocomplete="new-password" required placeholder="8–72 characters" />
-                        <div class="form-help">Must contain 8 to 72 characters.</div>
+                        <input type="password" id="password" name="password" class="form-control form-input" autocomplete="new-password" required placeholder="8–72 characters" />
+                        <div class="form-text form-help">Must contain 8 to 72 characters.</div>
                         <form:errors path="password" cssClass="field-error" />
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 2.25rem;">
+                    <div class="form-group mb-4" style="margin-bottom: 2.25rem;">
                         <label for="confirmPassword" class="form-label">Confirm Password *</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" autocomplete="new-password" required placeholder="Re-enter password" />
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control form-input" autocomplete="new-password" required placeholder="Re-enter password" />
                         <form:errors path="confirmPassword" cssClass="field-error" />
                     </div>
 
-                    <button type="submit" class="submit-btn" id="btn-register">
+                    <button type="submit" class="btn btn-primary submit-btn w-100" id="btn-register">
                         Create Account &rarr;
                     </button>
 
@@ -192,6 +183,3 @@
         </div>
 
     </div>
-
-</body>
-</html>

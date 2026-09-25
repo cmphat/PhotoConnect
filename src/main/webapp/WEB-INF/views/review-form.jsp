@@ -2,19 +2,9 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leave a Review - PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container pc-container-copy">
@@ -34,6 +24,7 @@
             </c:if>
 
             <form action="${pageContext.request.contextPath}/bookings/${booking.id}/review" method="post" style="border: 1px solid var(--border); padding: clamp(1.5rem, 5vw, 3rem); background: var(--surface); border-radius: var(--radius-sm);">
+                <%@ include file="fragments/csrf-input.jsp" %>
 
                 <!-- Rating selection (Accessible 1 to 5) -->
                 <fieldset style="margin: 0 0 2.5rem; padding: 0; border: 0;">
@@ -83,5 +74,3 @@
             </form>
         </div>
     </main>
-</body>
-</html>

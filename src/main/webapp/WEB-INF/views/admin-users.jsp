@@ -3,19 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management – Admin – PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page pc-page-compact">
         <div class="editorial-container pc-container-admin">
@@ -142,6 +132,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <form action="${pageContext.request.contextPath}/admin/users/${u.id}/status" method="post" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
                                                         <select name="status" class="pc-select" aria-label="Account status for user ${u.id}">
                                                             <option value="ACTIVE" ${u.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
                                                             <option value="INACTIVE" ${u.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
@@ -162,5 +153,3 @@
 
         </div>
     </main>
-</body>
-</html>

@@ -1,5 +1,6 @@
 package com.photoconnect.controller;
 
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import com.photoconnect.service.PortfolioService;
 import org.junit.jupiter.api.Test;
@@ -222,6 +223,93 @@ class PhotographerPortfolioControllerTest {
                 .when(portfolioService).deletePortfolioImage(1L, 99L);
 
         mockMvc.perform(post("/photographer/portfolio/99/delete")
+                        .session(photographerSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/photographer/portfolio"))
+                .andExpect(flash().attributeExists("errorMessage"));
+    }
+
+    // ── TASK-B02 Enhancements: Category and Cover Actions ─────────────────────
+
+    @Test
+    void uploadImage_withCategory_shouldCallServiceAndRedirectWithFlash() throws Exception {
+        PortfolioImage savedImage = new PortfolioImage();
+        savedImage.setImageUrl("https://res.cloudinary.com/test/portrait.jpg");
+
+        when(portfolioService.addPortfolioImage(eq(1L), any(), eq("Portrait series"), eq(PortfolioCategory.PORTRAIT)))
+                .thenReturn(savedImage);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "imageFile", "photo.jpg", "image/jpeg", new byte[100]);
+
+        mockMvc.perform(multipart("/photographer/portfolio/upload")
+                        .file(file)
+                        .param("category", "PORTRAIT")
+                        .param("caption", "Portrait series")
+                        .session(photographerSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/photographer/portfolio"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        verify(portfolioService).addPortfolioImage(eq(1L), any(), eq("Portrait series"), eq(PortfolioCategory.PORTRAIT));
+    }
+
+    @Test
+    void uploadImage_withInvalidCategory_shouldRedirectWithErrorFlash() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "imageFile", "photo.jpg", "image/jpeg", new byte[100]);
+
+        mockMvc.perform(multipart("/photographer/portfolio/upload")
+                        .file(file)
+                        .param("category", "INVALID_CAT")
+                        .session(photographerSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/photographer/portfolio"))
+                .andExpect(flash().attributeExists("errorMessage"));
+
+        verify(portfolioService, never()).addPortfolioImage(any(), any(), any(), any());
+    }
+
+    @Test
+    void setCoverImage_authenticatedPhotographer_shouldCallServiceAndRedirect() throws Exception {
+        doNothing().when(portfolioService).setCoverImage(1L, 10L);
+
+        mockMvc.perform(post("/photographer/portfolio/10/cover")
+                        .session(photographerSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/photographer/portfolio"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        verify(portfolioService).setCoverImage(1L, 10L);
+    }
+
+    @Test
+    void setCoverImage_noSession_shouldRedirectToLogin() throws Exception {
+        mockMvc.perform(post("/photographer/portfolio/10/cover"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        verify(portfolioService, never()).setCoverImage(any(), any());
+    }
+
+    @Test
+    void setCoverImage_customerRole_shouldRedirectToRoot() throws Exception {
+        MockHttpSession session = photographerSession();
+        session.setAttribute("userRole", "CUSTOMER");
+
+        mockMvc.perform(post("/photographer/portfolio/10/cover").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        verify(portfolioService, never()).setCoverImage(any(), any());
+    }
+
+    @Test
+    void setCoverImage_unownedImage_shouldRedirectWithErrorFlash() throws Exception {
+        doThrow(new SecurityException("You do not own this image."))
+                .when(portfolioService).setCoverImage(1L, 999L);
+
+        mockMvc.perform(post("/photographer/portfolio/999/cover")
                         .session(photographerSession()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/photographer/portfolio"))

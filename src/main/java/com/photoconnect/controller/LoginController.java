@@ -5,8 +5,10 @@ import com.photoconnect.entity.User;
 import com.photoconnect.exception.AccountDisabledException;
 import com.photoconnect.exception.InvalidCredentialsException;
 import com.photoconnect.service.AuthService;
+import com.photoconnect.security.JwtCookieService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +21,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class LoginController {
 
     private final AuthService authService;
+    private final JwtCookieService jwtCookieService;
 
-    public LoginController(AuthService authService) {
+    public LoginController(AuthService authService, JwtCookieService jwtCookieService) {
         this.authService = authService;
+        this.jwtCookieService = jwtCookieService;
     }
 
     @GetMapping("/login")
@@ -40,6 +44,7 @@ public class LoginController {
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest loginRequest,
                                BindingResult bindingResult,
                                HttpServletRequest httpRequest,
+                               HttpServletResponse httpResponse,
                                HttpSession session,
                                Model model) {
         if (bindingResult.hasErrors()) {
@@ -53,7 +58,12 @@ public class LoginController {
             session.setAttribute("userEmail", user.getEmail());
             session.setAttribute("userFullName", user.getFullName());
             session.setAttribute("userRole", user.getRole().name());
-            
+            jwtCookieService.issue(httpRequest, httpResponse, user);
+
+            if (session.getAttribute(GoogleAuthController.LINK_EMAIL_KEY) != null) {
+                session.removeAttribute(GoogleAuthController.LINK_EMAIL_KEY);
+                return "redirect:/auth/google/link";
+            }
             return "redirect:/";
         } catch (InvalidCredentialsException | AccountDisabledException e) {
             model.addAttribute("authError", e.getMessage());
@@ -62,7 +72,8 @@ public class LoginController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        jwtCookieService.clear(request, response);
         session.invalidate();
         return "redirect:/";
     }

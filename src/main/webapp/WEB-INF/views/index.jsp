@@ -3,21 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PhotoConnect is a curated editorial marketplace connecting discerning clients with verified professional photographers across Vietnam.">
     <title>PhotoConnect — Contemporary Editorial Photography Marketplace</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    <meta name="description" content="PhotoConnect is a curated editorial marketplace connecting discerning clients with verified professional photographers across Vietnam.">
 
     <style>
         /* ── Homepage Editorial Hero ────────────────────────────────────────── */
@@ -321,10 +309,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main>
         <!-- ── 00 / Editorial Hero Section ───────────────────────────── -->
@@ -341,7 +325,7 @@
                         <p class="hero-lead-text">
                             PhotoConnect brings together Vietnam&rsquo;s most distinctive visual artists for editorial portraiture, intimate weddings, and commercial storytelling.
                         </p>
-                        <div class="hero-actions-row">
+                        <div class="hero-actions-row d-flex flex-wrap align-items-center gap-3">
                             <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary btn-lg">
                                 Explore Photographers &rarr;
                             </a>
@@ -376,7 +360,7 @@
         <!-- ── 01 / Featured Photographers ───────────────────────────── -->
         <section class="pc-section" style="padding: clamp(4rem, 7vw, 6rem) 0; border-bottom: 1px solid var(--border);">
             <div class="editorial-container">
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem; flex-wrap: wrap; gap: 1.5rem;">
+                <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4" style="margin-bottom: 3.5rem;">
                     <div>
                         <span class="section-index">01 / Verified Artists</span>
                         <h2 class="editorial-heading" style="margin-bottom: 0;">Featured Photographers</h2>
@@ -590,5 +574,3 @@
             });
         })();
     </script>
-</body>
-</html>

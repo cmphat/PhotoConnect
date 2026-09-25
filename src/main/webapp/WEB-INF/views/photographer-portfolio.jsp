@@ -3,21 +3,8 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio — PhotoConnect Creator Studio</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .portfolio-header-strip {
             display: flex;
@@ -42,7 +29,7 @@
         }
 
         .upload-expandable-panel.is-expanded {
-            max-height: 600px;
+            max-height: 850px;
             opacity: 1;
             margin-bottom: 3.5rem;
         }
@@ -53,6 +40,124 @@
             border-radius: var(--radius-sm);
             padding: clamp(1.75rem, 4vw, 2.5rem);
             box-shadow: var(--shadow-subtle);
+        }
+
+        /* ── Local Upload Preview Box ───────────────────────────────────────── */
+        .upload-preview-box {
+            display: none;
+            background: var(--surface-subtle);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+            margin-bottom: 1.25rem;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .upload-preview-box.has-preview {
+            display: flex;
+        }
+
+        .upload-preview-thumb {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .upload-preview-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            min-width: 0;
+        }
+
+        .upload-preview-filename {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        /* ── Dedicated Cover Hero Showcase ──────────────────────────────────── */
+        .portfolio-cover-showcase {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: clamp(1.5rem, 3vw, 2.25rem);
+            margin-bottom: 3.5rem;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .cover-showcase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .cover-frame {
+            position: relative;
+            width: 100%;
+            height: clamp(240px, 32vw, 420px);
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+        }
+
+        .cover-frame-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .cover-meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* ── Category Filter Bar ────────────────────────────────────────────── */
+        .category-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .filter-tab-btn {
+            background: var(--surface);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.45rem 1rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-tab-btn:hover {
+            color: var(--text);
+            border-color: var(--border-strong);
+            background: var(--surface-hover);
+        }
+
+        .filter-tab-btn.is-active {
+            background: var(--deep-navy);
+            color: #FFFFFF;
+            border-color: var(--deep-navy);
         }
 
         /* ── Editorial Masonry Gallery ──────────────────────────────────────── */
@@ -71,15 +176,11 @@
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
             box-shadow: var(--shadow-subtle);
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
         }
 
-        /* Dynamic aspect ratios for visual variety */
-        .portfolio-card-frame:nth-child(5n+1) {
-            aspect-ratio: 3/4;
-        }
-
-        .portfolio-card-frame:nth-child(5n+3) {
-            aspect-ratio: 1/1;
+        .portfolio-card-frame:hover {
+            box-shadow: var(--shadow-medium);
         }
 
         .portfolio-card-img {
@@ -98,11 +199,11 @@
         .portfolio-hover-scrim {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(7, 11, 18, 0.25) 0%, rgba(7, 11, 18, 0.88) 100%);
+            background: linear-gradient(180deg, rgba(7, 11, 18, 0.45) 0%, rgba(7, 11, 18, 0.92) 100%);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 1.5rem;
+            padding: 1.25rem;
             opacity: 0;
             transition: opacity var(--transition-fast);
             z-index: 2;
@@ -113,36 +214,61 @@
             opacity: 1;
         }
 
+        .scrim-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .scrim-actions-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
         .scrim-caption-text {
             color: #F8FAFC;
             font-size: 0.92rem;
             font-weight: 400;
             line-height: 1.4;
+            margin-bottom: 0.75rem;
         }
 
-        .scrim-top-actions {
-            display: flex;
-            justify-content: flex-end;
+        /* ── Badge Indicators ───────────────────────────────────────────────── */
+        .pc-badge-category {
+            background: rgba(37, 99, 235, 0.85);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .pc-badge-cover-tag {
+            background: rgba(16, 185, 129, 0.9);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
         }
 
         @media (hover: none), (max-width: 640px) {
             .portfolio-hover-scrim {
                 opacity: 1;
-                background: linear-gradient(180deg, transparent 40%, rgba(7, 11, 18, 0.92) 100%);
-            }
-            .scrim-top-actions {
-                background: rgba(7, 11, 18, 0.7);
-                border-radius: var(--radius-sm);
-                padding: 0.35rem;
-                align-self: flex-end;
+                background: linear-gradient(180deg, rgba(7, 11, 18, 0.35) 0%, rgba(7, 11, 18, 0.92) 100%);
             }
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container pc-container-wide">
@@ -160,7 +286,7 @@
                     <span class="section-index">Creator Studio</span>
                     <h1 class="editorial-title" style="margin: 0 0 0.4rem 0;">My Portfolio</h1>
                     <p class="pc-lead" style="font-size: 1.05rem;">
-                        Manage the work clients see first. Your portfolio defines your presence on the public marketplace.
+                        Manage the work clients see on your public profile. Select categories, establish your signature cover photograph, and build your visual presence.
                     </p>
                 </div>
                 <div>
@@ -186,7 +312,12 @@
             <div class="upload-expandable-panel" id="uploadDrawerPanel" aria-hidden="true">
                 <div class="upload-card-inner">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h2 class="editorial-heading" style="font-size: 1.4rem; margin: 0;">Upload New Photograph</h2>
+                        <div>
+                            <h2 class="editorial-heading" style="font-size: 1.4rem; margin: 0 0 0.25rem 0;">Upload New Photograph</h2>
+                            <div style="color: var(--muted); font-size: 0.88rem;">
+                                Binaries are stored securely on Cloudinary CDN; metadata and category are recorded in PhotoConnect.
+                            </div>
+                        </div>
                         <button type="button" class="btn btn-ghost btn-sm" id="btnCloseUpload">Close ✕</button>
                     </div>
 
@@ -194,45 +325,121 @@
                           method="post"
                           enctype="multipart/form-data"
                           id="upload-form">
-                        <div class="pc-upload-grid">
-                            <div>
-                                <label for="imageFile" class="pc-label">Image File *</label>
+                        <%@ include file="fragments/csrf-input.jsp" %>
+                        <div class="row g-3">
+                            <!-- Image file selection -->
+                            <div class="col-12 col-md-4">
+                                <label for="imageFile" class="pc-label">Photograph File *</label>
                                 <input type="file"
                                        id="imageFile"
                                        name="imageFile"
                                        accept="image/jpeg,image/png,image/webp"
-                                       class="pc-input"
+                                       class="form-control pc-input"
                                        required>
-                                <div class="form-help">JPEG, PNG, or WEBP &middot; Max 10 MB file size</div>
+                                <div class="form-help">JPEG, PNG, or WEBP &middot; Max 10 MB</div>
                             </div>
-                            <div>
-                                <label for="caption" class="pc-label">Photograph Caption (optional)</label>
+
+                            <!-- Photography Category Selection -->
+                            <div class="col-12 col-md-4">
+                                <label for="category" class="pc-label">Photography Category *</label>
+                                <select id="category" name="category" class="form-select pc-input" required>
+                                    <option value="" disabled selected>-- Select Category --</option>
+                                    <c:forEach var="cat" items="${categories}">
+                                        <option value="${cat.name()}"><c:out value="${cat.displayName}"/></option>
+                                    </c:forEach>
+                                </select>
+                                <div class="form-help">Curated style discipline for discovery</div>
+                            </div>
+
+                            <!-- Optional Caption -->
+                            <div class="col-12 col-md-4">
+                                <label for="caption" class="pc-label">Caption (optional)</label>
                                 <input type="text"
                                        id="caption"
                                        name="caption"
                                        maxlength="500"
-                                       placeholder="Describe context, location, or equipment…"
-                                       class="pc-input">
+                                       placeholder="Describe context, location, or lens…"
+                                       class="form-control pc-input">
+                                <div class="form-help">Up to 500 characters</div>
                             </div>
-                            <div>
-                                <button type="submit" class="btn btn-primary" id="btn-upload-submit" style="min-height: 46px;">
-                                    Upload Photograph
-                                </button>
+                        </div>
+
+                        <!-- Local Image Preview Box (Vanilla JavaScript) -->
+                        <div class="upload-preview-box" id="uploadPreviewRegion">
+                            <img src="" alt="Photograph preview" class="upload-preview-thumb" id="uploadPreviewImg">
+                            <div class="upload-preview-info">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="pc-badge-category" id="previewCategoryBadge">Category</span>
+                                    <span style="font-size: 0.78rem; color: var(--muted);">Ready to upload</span>
+                                </div>
+                                <div class="upload-preview-filename" id="previewFileName">filename.jpg</div>
+                                <div style="font-size: 0.82rem; color: var(--muted);" id="previewFileSize"></div>
                             </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                            <button type="submit" class="btn btn-primary" id="btn-upload-submit" style="min-height: 44px; padding-inline: 2rem;">
+                                Upload Photograph
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Gallery Dominant Content -->
+            <!-- ── COVER AREA ───────────────────────────────────────────────── -->
+            <c:if test="${not empty currentCover}">
+                <section class="portfolio-cover-showcase">
+                    <div class="cover-showcase-header">
+                        <div>
+                            <span class="section-index" style="font-size: 0.78rem;">Public Presentation</span>
+                            <h2 class="editorial-heading" style="font-size: 1.5rem; margin: 0;">Portfolio Cover</h2>
+                        </div>
+                        <div>
+                            <span class="pc-badge-cover-tag">★ Current Cover</span>
+                        </div>
+                    </div>
+
+                    <div class="cover-frame">
+                        <img src="<c:out value='${currentCover.coverTransformedUrl}'/>"
+                             alt="<c:out value='${not empty currentCover.caption ? currentCover.caption : \"Portfolio Cover\"}'/>"
+                             class="cover-frame-img"
+                             loading="eager">
+                    </div>
+
+                    <div class="cover-meta-strip">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <span class="pc-badge-category">
+                                <c:out value="${currentCover.categoryDisplayName}"/>
+                            </span>
+                            <c:choose>
+                                <c:when test="${not empty currentCover.caption}">
+                                    <span style="font-size: 0.95rem; color: var(--text); font-weight: 500;">
+                                        &ldquo;<c:out value="${currentCover.caption}"/>&rdquo;
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span style="font-size: 0.85rem; color: var(--muted); font-style: italic;">
+                                        No caption set
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div style="font-size: 0.82rem; color: var(--muted);">
+                            Displayed on your public profile header &amp; search directory card.
+                        </div>
+                    </div>
+                </section>
+            </c:if>
+
+            <!-- ── GALLERY SECTION ──────────────────────────────────────────── -->
             <c:choose>
                 <c:when test="${empty images}">
                     <!-- Intentional Empty State -->
-                    <div class="pc-empty-state" style="max-width: 620px; margin: 2rem auto;">
+                    <div class="pc-empty-state" style="max-width: 620px; margin: 3rem auto;">
                         <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent);">✦</div>
-                        <h2 class="editorial-heading" style="font-size: 1.75rem; margin-bottom: 0.75rem;">Your portfolio starts here.</h2>
+                        <h2 class="editorial-heading" style="font-size: 1.75rem; margin-bottom: 0.75rem;">Your portfolio is empty.</h2>
                         <p style="font-size: 1.05rem; margin-bottom: 2rem;">
-                            Upload your first photograph to show prospective clients what makes your eye, craft, and vision distinctive.
+                            Upload your first photograph to start building your profile. Your first photograph will automatically serve as your portfolio cover.
                         </p>
                         <button type="button" class="btn btn-primary btn-lg" id="btnEmptyStateAdd">
                             + Add Your First Photograph
@@ -240,34 +447,92 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <!-- Dominant Editorial Masonry Grid -->
-                    <div class="portfolio-editorial-grid">
+                    <!-- Category Filter Tabs -->
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                        <h2 class="editorial-heading" style="font-size: 1.6rem; margin: 0;">
+                            Gallery (<span id="visibleCount"><c:out value="${fn:length(images)}"/></span> of <c:out value="${fn:length(images)}"/>)
+                        </h2>
+                    </div>
+
+                    <div class="category-filter-bar" role="tablist" aria-label="Filter gallery by category">
+                        <button type="button" class="filter-tab-btn is-active" data-filter="ALL" id="filter-all">
+                            All
+                        </button>
+                        <c:forEach var="cat" items="${categories}">
+                            <button type="button" class="filter-tab-btn" data-filter="${cat.name()}" id="filter-${fn:toLowerCase(cat.name())}">
+                                <c:out value="${cat.displayName}"/>
+                            </button>
+                        </c:forEach>
+                    </div>
+
+                    <!-- Category empty notice (hidden by default) -->
+                    <div id="categoryEmptyNotice" class="pc-empty-state" style="display: none; padding: 2.5rem 1rem; margin-bottom: 2rem;">
+                        <p style="color: var(--muted); margin: 0;">No photographs found in this category.</p>
+                    </div>
+
+                    <!-- Dominant Editorial Grid -->
+                    <div class="portfolio-editorial-grid" id="portfolioGrid">
                         <c:forEach var="img" items="${images}">
-                            <div class="portfolio-card-frame">
-                                <img src="<c:out value='${img.imageUrl}'/>"
+                            <div class="portfolio-card-frame portfolio-card-item"
+                                 data-category="${img.category != null ? img.category.name() : 'OTHER'}"
+                                 id="portfolio-card-${img.id}">
+                                <img src="<c:out value='${img.thumbnailUrl}'/>"
                                      alt="<c:out value='${not empty img.caption ? img.caption : \"Portfolio image\"}'/>"
                                      class="portfolio-card-img"
                                      loading="lazy">
                                 <div class="portfolio-hover-scrim">
-                                    <div class="scrim-top-actions">
-                                        <form action="${pageContext.request.contextPath}/photographer/portfolio/${img.id}/delete"
-                                              method="post"
-                                              onsubmit="return confirm('Delete this photograph from your public portfolio? This cannot be undone.');"
-                                              style="margin: 0;">
-                                            <button type="submit" class="btn btn-danger btn-sm" id="btn-delete-${img.id}">
-                                                Delete
-                                            </button>
-                                        </form>
+                                    <div class="scrim-top-row">
+                                        <span class="pc-badge-category">
+                                            <c:out value="${img.categoryDisplayName}"/>
+                                        </span>
+                                        <c:if test="${img.isCover}">
+                                            <span class="pc-badge-cover-tag">★ Cover</span>
+                                        </c:if>
                                     </div>
-                                    <div class="scrim-caption-text">
-                                        <c:choose>
-                                            <c:when test="${not empty img.caption}">
-                                                <c:out value="${img.caption}"/>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <em style="opacity: 0.7;">No caption provided</em>
-                                            </c:otherwise>
-                                        </c:choose>
+
+                                    <div>
+                                        <div class="scrim-caption-text">
+                                            <c:choose>
+                                                <c:when test="${not empty img.caption}">
+                                                    <c:out value="${img.caption}"/>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <em style="opacity: 0.7;">No caption provided</em>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <div class="scrim-actions-row">
+                                            <!-- Set as Cover Action (only if not already cover) -->
+                                            <c:choose>
+                                                <c:when test="${!img.isCover}">
+                                                    <form action="${pageContext.request.contextPath}/photographer/portfolio/${img.id}/cover"
+                                                          method="post"
+                                                          style="margin: 0;">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
+                                                        <button type="submit" class="btn btn-outline-light btn-sm" id="btn-cover-${img.id}">
+                                                            Set as Cover
+                                                        </button>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-white-50" style="font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.5rem;">
+                                                        Current Cover
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <!-- Delete Action -->
+                                            <form action="${pageContext.request.contextPath}/photographer/portfolio/${img.id}/delete"
+                                                  method="post"
+                                                  onsubmit="return confirm('Delete this photograph from your portfolio? This removes the Cloudinary asset and cannot be undone.');"
+                                                  style="margin: 0;">
+                                                <%@ include file="fragments/csrf-input.jsp" %>
+                                                <button type="submit" class="btn btn-danger btn-sm" id="btn-delete-${img.id}">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -286,19 +551,28 @@
                 PhotoConnect Creator Studio
             </div>
             <div style="color: var(--muted); font-size: 0.85rem;">
-                &copy; 2026 PhotoConnect. Portfolio images are displayed on your public verified profile.
+                &copy; 2026 PhotoConnect. Portfolio images and cover photographs are verified and displayed across the public marketplace.
             </div>
         </div>
     </footer>
 
-    <!-- Plain JavaScript for Expandable Upload Drawer -->
+    <!-- Plain JavaScript for Expandable Upload Drawer, Live Preview, and Category Filter -->
     <script>
         (function() {
+            // ── Upload Drawer Controls ──
             const toggleBtn = document.getElementById('btnToggleUpload');
             const emptyAddBtn = document.getElementById('btnEmptyStateAdd');
             const closeBtn = document.getElementById('btnCloseUpload');
             const panel = document.getElementById('uploadDrawerPanel');
             const fileInput = document.getElementById('imageFile');
+            const categorySelect = document.getElementById('category');
+
+            // ── Live Upload Preview ──
+            const previewBox = document.getElementById('uploadPreviewRegion');
+            const previewImg = document.getElementById('uploadPreviewImg');
+            const previewFileName = document.getElementById('previewFileName');
+            const previewFileSize = document.getElementById('previewFileSize');
+            const previewCategoryBadge = document.getElementById('previewCategoryBadge');
 
             function openPanel() {
                 if (!panel) return;
@@ -342,7 +616,82 @@
             if (closeBtn) {
                 closeBtn.addEventListener('click', closePanel);
             }
+
+            function updateCategoryPreview() {
+                if (!categorySelect || !previewCategoryBadge) return;
+                const selectedOpt = categorySelect.options[categorySelect.selectedIndex];
+                if (selectedOpt && selectedOpt.value) {
+                    previewCategoryBadge.textContent = selectedOpt.textContent;
+                } else {
+                    previewCategoryBadge.textContent = 'Category';
+                }
+            }
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', updateCategoryPreview);
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                        previewFileName.textContent = file.name;
+                        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                        previewFileSize.textContent = sizeMb + ' MB';
+                        updateCategoryPreview();
+
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            if (previewImg) {
+                                previewImg.src = evt.target.result;
+                            }
+                            if (previewBox) {
+                                previewBox.classList.add('has-preview');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        if (previewBox) {
+                            previewBox.classList.remove('has-preview');
+                        }
+                    }
+                });
+            }
+
+            // ── Gallery Category Filtering ──
+            const filterBtns = document.querySelectorAll('.filter-tab-btn');
+            const cardItems = document.querySelectorAll('.portfolio-card-item');
+            const emptyNotice = document.getElementById('categoryEmptyNotice');
+            const visibleCountElem = document.getElementById('visibleCount');
+
+            filterBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const targetCategory = this.getAttribute('data-filter');
+
+                    filterBtns.forEach(function(b) {
+                        b.classList.remove('is-active');
+                    });
+                    this.classList.add('is-active');
+
+                    let visibleCount = 0;
+                    cardItems.forEach(function(card) {
+                        const itemCategory = card.getAttribute('data-category');
+                        if (targetCategory === 'ALL' || itemCategory === targetCategory) {
+                            card.style.display = '';
+                            visibleCount++;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    if (visibleCountElem) {
+                        visibleCountElem.textContent = visibleCount;
+                    }
+
+                    if (emptyNotice) {
+                        emptyNotice.style.display = (visibleCount === 0) ? 'block' : 'none';
+                    }
+                });
+            });
         })();
     </script>
-</body>
-</html>

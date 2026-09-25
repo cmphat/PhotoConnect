@@ -48,6 +48,9 @@ class PhotographerControllerTest {
     @MockBean
     private com.photoconnect.service.ReviewService reviewService;
 
+    @MockBean
+    private com.photoconnect.service.SavedPhotographerService savedPhotographerService;
+
     private PhotographerPublicDto sampleDto() {
         com.photoconnect.entity.User user = new com.photoconnect.entity.User();
         user.setId(10L);
@@ -268,5 +271,38 @@ class PhotographerControllerTest {
         mockMvc.perform(get("/photographers/999"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/photographers"));
+    }
+
+    @Test
+    void getPhotographerDetail_whenCustomerSaved_shouldPopulateIsSavedTrue() throws Exception {
+        PhotographerPublicDto dto = sampleDto();
+        when(publicPhotographerService.getApprovedPhotographerById(10L)).thenReturn(dto);
+        when(savedPhotographerService.isSaved(100L, 10L)).thenReturn(true);
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 100L);
+        session.setAttribute("userRole", com.photoconnect.entity.UserRole.CUSTOMER.name());
+
+        mockMvc.perform(get("/photographers/10").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("photographer-detail"))
+                .andExpect(model().attribute("isSaved", true));
+    }
+
+    @Test
+    void listPhotographers_whenCustomerLoggedIn_shouldPopulateSavedPhotographerIds() throws Exception {
+        when(publicPhotographerService.searchPhotographers(any(), any()))
+                .thenReturn(new PageImpl<>(List.of(sampleDto()), PageRequest.of(0, 12), 1));
+        when(savedPhotographerService.getSavedPhotographerProfileIds(100L))
+                .thenReturn(java.util.Set.of(10L));
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 100L);
+        session.setAttribute("userRole", com.photoconnect.entity.UserRole.CUSTOMER.name());
+
+        mockMvc.perform(get("/photographers").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("photographers"))
+                .andExpect(model().attribute("savedPhotographerIds", java.util.Set.of(10L)));
     }
 }

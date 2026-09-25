@@ -3,7 +3,16 @@ package com.photoconnect.service;
 import com.photoconnect.dto.DemoPaymentRequest;
 import com.photoconnect.dto.DepositViewDto;
 
+import java.math.BigDecimal;
+
 public interface DepositService {
+
+    /**
+     * Calculates the required deposit using the same server-side rule as checkout.
+     * This is side-effect free so read-only views can show the amount without
+     * creating a payment record.
+     */
+    BigDecimal calculateDepositAmount(BigDecimal agreedPrice);
 
     /**
      * Creates a new PENDING deposit for an ACCEPTED booking if one doesn't exist,

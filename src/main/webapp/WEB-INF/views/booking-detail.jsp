@@ -3,21 +3,8 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking #${booking.id} — Photography Session Workspace — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .workspace-shell {
             max-width: 980px;
@@ -96,10 +83,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container workspace-shell">
@@ -124,12 +107,12 @@
 
             <!-- Feedback Alerts -->
             <c:if test="${not empty successMessage}">
-                <div class="pc-alert pc-alert-success" role="status">
+                <div class="alert alert-success pc-alert pc-alert-success" role="status">
                     <c:out value="${successMessage}"/>
                 </div>
             </c:if>
             <c:if test="${not empty errorMessage}">
-                <div class="pc-alert pc-alert-danger" role="alert">
+                <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
@@ -248,28 +231,28 @@
                 </div>
 
                 <!-- Structured Specification Grid -->
-                <div class="session-meta-spec">
-                    <div>
+                <div class="session-meta-spec row g-4">
+                    <div class="col-12 col-md-6">
                         <div class="spec-item-label">Date &amp; Time</div>
                         <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
                         <div class="spec-item-value">
                             <fmt:formatDate value="${parsedBookingDate}" pattern="EEEE, MMMM d, yyyy" /> at ${booking.bookingTime}
                         </div>
                     </div>
-                    <div>
+                    <div class="col-12 col-md-6">
                         <div class="spec-item-label">Agreed Rate</div>
                         <div class="spec-item-value" style="color: var(--text); font-weight: 600;">
                             <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
                         </div>
                     </div>
-                    <div style="grid-column: span 2;">
+                    <div class="col-12">
                         <div class="spec-item-label">Shoot Location</div>
                         <div class="spec-item-value">
                             <c:out value="${booking.location}"/>
                         </div>
                     </div>
                     <c:if test="${not empty booking.notes}">
-                        <div style="grid-column: span 2;">
+                        <div class="col-12">
                             <div class="spec-item-label">Additional Notes</div>
                             <div style="font-size: 0.95rem; color: var(--muted); line-height: 1.6;">
                                 <c:out value="${booking.notes}"/>
@@ -391,6 +374,7 @@
                             Need to modify plans? You may cancel this session while it remains unfulfilled.
                         </div>
                         <form action="${pageContext.request.contextPath}/bookings/${booking.id}/cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this photography booking?');" style="margin: 0;">
+                            <%@ include file="fragments/csrf-input.jsp" %>
                             <button type="submit" class="btn btn-danger" id="btn-cancel-booking">
                                 Cancel Booking
                             </button>
@@ -411,6 +395,3 @@
             </div>
         </div>
     </footer>
-
-</body>
-</html>

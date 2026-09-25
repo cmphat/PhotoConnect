@@ -1,7 +1,11 @@
 package com.photoconnect.service;
 
+import com.photoconnect.dto.PhotographerProfileEditRequest;
 import com.photoconnect.dto.PhotographerProfileRequest;
 import com.photoconnect.entity.PhotographerProfile;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface PhotographerProfileService {
 
@@ -19,5 +23,32 @@ public interface PhotographerProfileService {
     /**
      * Returns the PhotographerProfile associated with the given userId, if any.
      */
-    java.util.Optional<PhotographerProfile> findByUserId(Long userId);
+    Optional<PhotographerProfile> findByUserId(Long userId);
+
+    /**
+     * Updates professional profile information for the authenticated photographer.
+     * Strictly verifies ownership, validates specialties against controlled taxonomy,
+     * and validates URL schemes.
+     * Preserves verificationStatus, ratings, review count, and account role.
+     *
+     * @param userId  ID of the currently logged-in user (from session)
+     * @param request validated form data from the profile edit form
+     * @return the persisted PhotographerProfile
+     */
+    PhotographerProfile updateProfile(Long userId, PhotographerProfileEditRequest request);
+
+    /**
+     * Calculates the profile completeness percentage (0 to 100) based on actual profile state.
+     *
+     * @param profile             the photographer profile entity
+     * @param portfolioImageCount number of portfolio images uploaded
+     * @param hasCoverImage       whether a dedicated cover image is designated
+     * @return completeness percentage from 0 to 100
+     */
+    int calculateProfileCompleteness(PhotographerProfile profile, int portfolioImageCount, boolean hasCoverImage);
+
+    /**
+     * Returns actionable, human-friendly recommendations for completing the profile.
+     */
+    List<String> getCompletenessRecommendations(PhotographerProfile profile, int portfolioImageCount, boolean hasCoverImage);
 }

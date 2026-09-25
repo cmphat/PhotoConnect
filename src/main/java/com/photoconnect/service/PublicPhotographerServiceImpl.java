@@ -21,11 +21,20 @@ public class PublicPhotographerServiceImpl implements PublicPhotographerService 
 
     private final PhotographerProfileRepository photographerProfileRepository;
     private final PortfolioImageRepository portfolioImageRepository;
+    private final PhotographerProfileService photographerProfileService;
 
     public PublicPhotographerServiceImpl(PhotographerProfileRepository photographerProfileRepository,
                                          @Autowired(required = false) PortfolioImageRepository portfolioImageRepository) {
+        this(photographerProfileRepository, portfolioImageRepository, null);
+    }
+
+    @Autowired
+    public PublicPhotographerServiceImpl(PhotographerProfileRepository photographerProfileRepository,
+                                         @Autowired(required = false) PortfolioImageRepository portfolioImageRepository,
+                                         @Autowired(required = false) PhotographerProfileService photographerProfileService) {
         this.photographerProfileRepository = photographerProfileRepository;
         this.portfolioImageRepository = portfolioImageRepository;
+        this.photographerProfileService = photographerProfileService;
     }
 
     /**
@@ -107,13 +116,29 @@ public class PublicPhotographerServiceImpl implements PublicPhotographerService 
 
     private PhotographerPublicDto toPublicDtoWithCover(PhotographerProfile profile) {
         String coverImageUrl = null;
+        int portfolioCount = 0;
+        boolean hasCover = false;
         if (portfolioImageRepository != null && profile.getId() != null) {
             List<PortfolioImage> images = portfolioImageRepository
                     .findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtDesc(profile.getId());
+            portfolioCount = images.size();
             if (!images.isEmpty()) {
-                coverImageUrl = images.get(0).getImageUrl();
+                for (PortfolioImage img : images) {
+                    if (img.isCover()) {
+                        coverImageUrl = img.getImageUrl();
+                        hasCover = true;
+                        break;
+                    }
+                }
+                if (coverImageUrl == null) {
+                    coverImageUrl = images.get(0).getImageUrl();
+                }
             }
         }
-        return PhotographerPublicDto.from(profile, coverImageUrl);
+        Integer completeness = null;
+        if (photographerProfileService != null) {
+            completeness = photographerProfileService.calculateProfileCompleteness(profile, portfolioCount, hasCover);
+        }
+        return PhotographerPublicDto.from(profile, coverImageUrl, completeness);
     }
 }

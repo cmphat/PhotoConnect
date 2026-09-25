@@ -3,19 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Detail – Admin – PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container pc-container-narrow">
@@ -89,11 +79,13 @@
                         <c:if test="${profile.verificationStatus == 'PENDING'}">
                             <div class="pc-actions" style="border-top: 1px solid var(--border); padding-top: 3rem;">
                                 <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/approve" method="post" style="margin: 0;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
                                     <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this application?')">
                                         Approve Application
                                     </button>
                                 </form>
                                 <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/reject" method="post" style="margin: 0;">
+                                    <%@ include file="fragments/csrf-input.jsp" %>
                                     <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this application?')">
                                         Reject
                                     </button>
@@ -117,5 +109,3 @@
             </c:choose>
         </div>
     </main>
-</body>
-</html>

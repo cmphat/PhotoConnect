@@ -3,7 +3,11 @@ package com.photoconnect.util;
 import com.photoconnect.entity.UserRole;
 import jakarta.servlet.http.HttpSession;
 
-/** Shared role checks for the project's server-side HTTP session authentication model. */
+/**
+ * Compatibility access for legacy controllers/JSPs. TASK-D01's JWT filter is the
+ * sole writer of these identity values on normal requests; new security-sensitive
+ * code should use CurrentUserContext instead.
+ */
 public final class SessionSecurityUtils {
 
     private SessionSecurityUtils() {

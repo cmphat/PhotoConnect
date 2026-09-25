@@ -3,6 +3,7 @@ package com.photoconnect.service;
 import com.photoconnect.dto.PortfolioImagePublicDto;
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
@@ -383,5 +384,178 @@ class PortfolioServiceTest {
         assertThat(dtos.get(0).getImageUrl()).isEqualTo("https://res.cloudinary.com/test/image1.jpg");
         assertThat(dtos.get(0).getCaption()).isEqualTo("First shot");
         assertThat(dtos.get(1).getCaption()).isNull();
+    }
+
+    // ── Category and Cover Tests (TASK-B02) ───────────────────────────────────
+
+    @Test
+    void addPortfolioImage_firstImage_shouldAutomaticallyBecomeCover() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+        when(portfolioImageRepository.countByPhotographerProfileId(10L))
+                .thenReturn(0L);
+        when(cloudinaryStorageService.uploadImage(any(), any()))
+                .thenReturn(new CloudinaryStorageService.CloudinaryUploadResult("https://res.cloudinary.com/test/first.jpg", "public-first"));
+        when(portfolioImageRepository.save(any(PortfolioImage.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PortfolioImage result = portfolioService.addPortfolioImage(1L, validJpegFile(), "My first shot", PortfolioCategory.PORTRAIT);
+
+        assertThat(result.isCover()).isTrue();
+        assertThat(result.getCategory()).isEqualTo(PortfolioCategory.PORTRAIT);
+    }
+
+    @Test
+    void addPortfolioImage_secondImage_shouldNotAutomaticallyBecomeCover() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+        when(portfolioImageRepository.countByPhotographerProfileId(10L))
+                .thenReturn(1L);
+        when(cloudinaryStorageService.uploadImage(any(), any()))
+                .thenReturn(new CloudinaryStorageService.CloudinaryUploadResult("https://res.cloudinary.com/test/second.jpg", "public-second"));
+        when(portfolioImageRepository.save(any(PortfolioImage.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PortfolioImage result = portfolioService.addPortfolioImage(1L, validJpegFile(), "Second shot", PortfolioCategory.WEDDING);
+
+        assertThat(result.isCover()).isFalse();
+        assertThat(result.getCategory()).isEqualTo(PortfolioCategory.WEDDING);
+    }
+
+    @Test
+    void addPortfolioImage_nullCategory_shouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> portfolioService.addPortfolioImage(1L, validJpegFile(), "Shot", null));
+
+        verifyNoInteractions(cloudinaryStorageService, photographerProfileRepository);
+    }
+
+    @Test
+    void setCoverImage_changesPreviousCoverToFalse_andEnsuresSingleCover() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PortfolioImage oldCover = new PortfolioImage();
+        oldCover.setId(101L);
+        oldCover.setCover(true);
+        oldCover.setPhotographerProfile(approvedProfile);
+
+        PortfolioImage newCover = new PortfolioImage();
+        newCover.setId(102L);
+        newCover.setCover(false);
+        newCover.setPhotographerProfile(approvedProfile);
+
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(102L, 10L))
+                .thenReturn(Optional.of(newCover));
+        when(portfolioImageRepository.findByPhotographerProfileIdAndIsCoverTrue(10L))
+                .thenReturn(List.of(oldCover));
+
+        portfolioService.setCoverImage(1L, 102L);
+
+        assertThat(oldCover.isCover()).isFalse();
+        assertThat(newCover.isCover()).isTrue();
+        verify(portfolioImageRepository).save(oldCover);
+        verify(portfolioImageRepository).save(newCover);
+    }
+
+    @Test
+    void setCoverImage_alreadyCover_shouldBeIdempotent() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PortfolioImage currentCover = new PortfolioImage();
+        currentCover.setId(101L);
+        currentCover.setCover(true);
+
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(101L, 10L))
+                .thenReturn(Optional.of(currentCover));
+
+        portfolioService.setCoverImage(1L, 101L);
+
+        verify(portfolioImageRepository, never()).findByPhotographerProfileIdAndIsCoverTrue(any());
+        verify(portfolioImageRepository, never()).save(any());
+    }
+
+    @Test
+    void setCoverImage_anotherPhotographersImage_shouldThrowSecurityException() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(999L, 10L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(SecurityException.class,
+                () -> portfolioService.setCoverImage(1L, 999L));
+    }
+
+    @Test
+    void deletePortfolioImage_nonCover_shouldNotTriggerCoverFallback() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PortfolioImage nonCover = new PortfolioImage();
+        nonCover.setId(201L);
+        nonCover.setCover(false);
+        nonCover.setPublicId("pub201");
+        nonCover.setPhotographerProfile(approvedProfile);
+
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(201L, 10L))
+                .thenReturn(Optional.of(nonCover));
+
+        portfolioService.deletePortfolioImage(1L, 201L);
+
+        verify(cloudinaryStorageService).deleteImage("pub201");
+        verify(portfolioImageRepository).delete(nonCover);
+        verify(portfolioImageRepository, never()).findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtAsc(any());
+    }
+
+    @Test
+    void deletePortfolioImage_currentCover_shouldAssignDeterministicFallback() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PortfolioImage currentCover = new PortfolioImage();
+        currentCover.setId(201L);
+        currentCover.setCover(true);
+        currentCover.setPublicId("pub201");
+        currentCover.setPhotographerProfile(approvedProfile);
+
+        PortfolioImage remainingImage = new PortfolioImage();
+        remainingImage.setId(202L);
+        remainingImage.setCover(false);
+        remainingImage.setPublicId("pub202");
+        remainingImage.setDisplayOrder(0);
+
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(201L, 10L))
+                .thenReturn(Optional.of(currentCover));
+        when(portfolioImageRepository.findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtAsc(10L))
+                .thenReturn(List.of(remainingImage));
+
+        portfolioService.deletePortfolioImage(1L, 201L);
+
+        verify(cloudinaryStorageService).deleteImage("pub201");
+        verify(portfolioImageRepository).delete(currentCover);
+        assertThat(remainingImage.isCover()).isTrue();
+        verify(portfolioImageRepository).save(remainingImage);
+    }
+
+    @Test
+    void deletePortfolioImage_finalImage_shouldLeaveNoCover() {
+        when(photographerProfileRepository.findByUserId(1L))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PortfolioImage lastImage = new PortfolioImage();
+        lastImage.setId(201L);
+        lastImage.setCover(true);
+        lastImage.setPublicId("pub201");
+        lastImage.setPhotographerProfile(approvedProfile);
+
+        when(portfolioImageRepository.findByIdAndPhotographerProfileId(201L, 10L))
+                .thenReturn(Optional.of(lastImage));
+        when(portfolioImageRepository.findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtAsc(10L))
+                .thenReturn(List.of());
+
+        portfolioService.deletePortfolioImage(1L, 201L);
+
+        verify(cloudinaryStorageService).deleteImage("pub201");
+        verify(portfolioImageRepository).delete(lastImage);
+        verify(portfolioImageRepository, never()).save(any());
     }
 }

@@ -44,6 +44,12 @@ public class DepositServiceImpl implements DepositService {
     }
 
     @Override
+    public BigDecimal calculateDepositAmount(BigDecimal agreedPrice) {
+        BigDecimal price = agreedPrice != null ? agreedPrice : BigDecimal.ZERO;
+        return price.multiply(DEPOSIT_RATE).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Override
     @Transactional
     public DepositViewDto getOrCreateDepositForBooking(Long bookingId, Long customerUserId) {
         requireSimulationEnabled();
@@ -73,9 +79,7 @@ public class DepositServiceImpl implements DepositService {
         }
 
         requireAccepted(booking);
-        BigDecimal depositAmount = booking.getAgreedPrice()
-                .multiply(DEPOSIT_RATE)
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal depositAmount = calculateDepositAmount(booking.getAgreedPrice());
         Deposit deposit = new Deposit(booking, depositAmount);
         deposit.setPaymentReference(generateTransactionReference());
         return mapToDto(depositRepository.save(deposit));

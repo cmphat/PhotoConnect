@@ -1,5 +1,6 @@
 package com.photoconnect.dto;
 
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 
 /**
@@ -11,21 +12,34 @@ import com.photoconnect.entity.PortfolioImage;
  *   Cloudinary path and potentially use it in API calls. It is strictly internal metadata.
  *
  * Fields included:
- *   id        — needed for delete actions on the PRIVATE portfolio management page
- *               (re-used intentionally; delete is access-controlled server-side)
- *   imageUrl  — the HTTPS Cloudinary URL for rendering in an <img> tag
- *   caption   — optional photographer-supplied description
+ *   id                  — identifier for portfolio management actions
+ *   imageUrl            — the HTTPS Cloudinary URL for rendering
+ *   caption             — optional photographer-supplied description
+ *   category            — controlled photography category
+ *   categoryDisplayName — human-readable category name
+ *   isCover             — whether this is the chosen portfolio cover
+ *   thumbnailUrl        — Cloudinary delivery-transformed URL for optimized card display
  */
 public class PortfolioImagePublicDto {
 
     private final Long id;
     private final String imageUrl;
     private final String caption;
+    private final PortfolioCategory category;
+    private final String categoryDisplayName;
+    private final boolean isCover;
+    private final String thumbnailUrl;
 
-    private PortfolioImagePublicDto(Long id, String imageUrl, String caption) {
+    private PortfolioImagePublicDto(Long id, String imageUrl, String caption,
+                                    PortfolioCategory category, String categoryDisplayName,
+                                    boolean isCover, String thumbnailUrl) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.caption = caption;
+        this.category = category;
+        this.categoryDisplayName = categoryDisplayName;
+        this.isCover = isCover;
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     /**
@@ -36,7 +50,11 @@ public class PortfolioImagePublicDto {
         return new PortfolioImagePublicDto(
                 image.getId(),
                 image.getImageUrl(),
-                image.getCaption()
+                image.getCaption(),
+                image.getCategory(),
+                image.getCategoryDisplayName(),
+                image.isCover(),
+                image.getThumbnailUrl()
         );
     }
 
@@ -50,5 +68,25 @@ public class PortfolioImagePublicDto {
 
     public String getCaption() {
         return caption;
+    }
+
+    public PortfolioCategory getCategory() {
+        return category;
+    }
+
+    public String getCategoryDisplayName() {
+        return categoryDisplayName;
+    }
+
+    public boolean isCover() {
+        return isCover;
+    }
+
+    public Boolean getIsCover() {
+        return isCover;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 }

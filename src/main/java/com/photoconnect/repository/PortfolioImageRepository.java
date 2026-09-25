@@ -3,6 +3,9 @@ package com.photoconnect.repository;
 import com.photoconnect.entity.PortfolioImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,4 +46,48 @@ public interface PortfolioImageRepository extends JpaRepository<PortfolioImage, 
      * Count images for a profile — useful for future portfolio limits.
      */
     long countByPhotographerProfileId(Long profileId);
+
+    /**
+     * Finds all images marked as cover for a profile (should be at most 1).
+     */
+    List<PortfolioImage> findByPhotographerProfileIdAndIsCoverTrue(Long profileId);
+
+    /**
+     * Finds the single cover image for a profile if one exists.
+     */
+    Optional<PortfolioImage> findFirstByPhotographerProfileIdAndIsCoverTrue(Long profileId);
+
+    /**
+     * Returns all images for fallback cover determination: displayOrder ASC, then oldest createdAt ASC.
+     */
+    List<PortfolioImage> findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtAsc(Long profileId);
+
+    /** Bulk cover/fallback candidates for the small set of profiles shown on a dashboard. */
+    @Query("""
+            SELECT i FROM PortfolioImage i
+            JOIN FETCH i.photographerProfile p
+            WHERE p.id IN :profileIds
+            ORDER BY p.id ASC,
+                     CASE WHEN i.isCover = true THEN 0 ELSE 1 END ASC,
+                     i.displayOrder ASC,
+                     i.createdAt ASC
+            """)
+    List<PortfolioImage> findDashboardImageCandidates(@Param("profileIds") List<Long> profileIds);
+
+    @Query("""
+            SELECT COUNT(DISTINCT i.category) FROM PortfolioImage i
+            WHERE i.photographerProfile.id = :profileId
+              AND i.category IS NOT NULL
+            """)
+    long countDistinctCategoriesByProfileId(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT i FROM PortfolioImage i
+            WHERE i.photographerProfile.id = :profileId
+            ORDER BY CASE WHEN i.isCover = true THEN 0 ELSE 1 END,
+                     i.displayOrder ASC,
+                     i.createdAt DESC,
+                     i.id DESC
+            """)
+    List<PortfolioImage> findStudioPreview(@Param("profileId") Long profileId, Pageable pageable);
 }

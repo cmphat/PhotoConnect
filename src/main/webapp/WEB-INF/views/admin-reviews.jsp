@@ -3,19 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Moderation – Admin – PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page pc-page-compact">
         <div class="editorial-container pc-container-admin">
@@ -133,6 +123,7 @@
                                             <c:choose>
                                                 <c:when test="${r.status == 'HIDDEN'}">
                                                     <form method="post" action="${pageContext.request.contextPath}/admin/reviews/${r.id}/unhide" style="display: inline;">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
                                                         <input type="hidden" name="currentStatus" value="${activeStatus}" />
                                                         <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Restore Review #${r.id} to public visibility?');">
                                                             Unhide
@@ -141,6 +132,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <form method="post" action="${pageContext.request.contextPath}/admin/reviews/${r.id}/hide" style="display: inline;">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
                                                         <input type="hidden" name="currentStatus" value="${activeStatus}" />
                                                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hide Review #${r.id} from public display?');">
                                                             Hide
@@ -159,5 +151,3 @@
 
         </div>
     </main>
-</body>
-</html>

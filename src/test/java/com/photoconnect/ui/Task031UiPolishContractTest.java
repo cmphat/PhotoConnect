@@ -32,22 +32,43 @@ class Task031UiPolishContractTest {
                 .contains("@media (max-width: 991px)", "@media (max-width: 640px)", "focus-visible");
     }
 
+    private static final Path DECORATORS = ROOT.resolve("src/main/webapp/WEB-INF/decorators");
+
     @Test
     void everyFullPageJspLoadsTheSharedStylesheetAndActionButtonsAreClassed() throws IOException {
         Pattern unclassedButton = Pattern.compile("<button(?![^>]*\\bclass=)[^>]*>", Pattern.CASE_INSENSITIVE);
 
+        // Decorators own the shared stylesheet under SiteMesh architecture
+        try (var files = Files.walk(DECORATORS)) {
+            List<Path> decorators = files
+                    .filter(path -> path.toString().endsWith(".jsp"))
+                    .toList();
+
+            assertThat(decorators).isNotEmpty();
+            for (Path decorator : decorators) {
+                String jsp = Files.readString(decorator);
+                assertThat(jsp)
+                        .as("shared stylesheet in decorator %s", decorator.getFileName())
+                        .contains("/assets/css/photoconnect.css");
+            }
+        }
+
+        // Error page is excluded from SiteMesh and retains its own stylesheet import
+        String errorJsp = Files.readString(VIEWS.resolve("error.jsp"));
+        assertThat(errorJsp)
+                .as("shared stylesheet in self-contained error.jsp")
+                .contains("/assets/css/photoconnect.css");
+
+        // All buttons across all 27 JSPs must have proper classes
         try (var files = Files.walk(VIEWS)) {
             List<Path> pages = files
                     .filter(path -> path.toString().endsWith(".jsp"))
                     .filter(path -> !path.toString().contains("fragments"))
                     .toList();
 
-            assertThat(pages).hasSize(27);
+            assertThat(pages).hasSize(32);
             for (Path page : pages) {
                 String jsp = Files.readString(page);
-                assertThat(jsp)
-                        .as("shared stylesheet in %s", page.getFileName())
-                        .contains("/assets/css/photoconnect.css");
                 assertThat(unclassedButton.matcher(jsp).find())
                         .as("unclassed button in %s", page.getFileName())
                         .isFalse();

@@ -70,4 +70,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByIdWithDetails(@Param("id") Long id);
 
     long countByStatus(ReviewStatus status);
+
+    @Query("SELECT r.booking.id FROM Review r WHERE r.booking.id IN :bookingIds")
+    List<Long> findReviewedBookingIds(@Param("bookingIds") List<Long> bookingIds);
 }

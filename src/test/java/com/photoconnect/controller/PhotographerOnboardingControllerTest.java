@@ -7,6 +7,7 @@ import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.PhotographerProfileAlreadyExistsException;
 import com.photoconnect.service.PhotographerProfileService;
+import com.photoconnect.security.JwtCookieService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,6 +30,9 @@ class PhotographerOnboardingControllerTest {
 
     @MockBean
     private PhotographerProfileService photographerProfileService;
+
+    @MockBean
+    private JwtCookieService jwtCookieService;
 
     // --- GET /become-photographer ---
 

@@ -3,21 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover and connect with top-tier verified professional photographers on PhotoConnect. Search by location, style, price, and experience.">
     <title>Discover Photographers — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    <meta name="description" content="Discover and connect with top-tier verified professional photographers on PhotoConnect. Search by location, style, price, and experience.">
 
     <style>
         .marketplace-header-region {
@@ -128,10 +116,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main>
         <!-- ── Marketplace Editorial Header ──────────────────────────── -->
@@ -153,50 +137,50 @@
             <!-- Deliberate Search & Filter Toolbar -->
             <div class="search-toolbar-shell">
                 <form action="${pageContext.request.contextPath}/photographers" method="get" id="search-form">
-                    <div class="search-toolbar-grid">
-                        <div class="search-field-group">
-                            <label for="keyword">Search Artist</label>
+                    <div class="search-toolbar-grid row g-3 align-items-end">
+                        <div class="search-field-group col-12 col-md-3">
+                            <label for="keyword" class="form-label">Search Artist</label>
                             <input type="text"
                                    id="keyword"
                                    name="keyword"
                                    maxlength="100"
-                                   class="search-field-input"
+                                   class="search-field-input form-control"
                                    placeholder="Name, style, or discipline…"
                                    value="<c:out value='${searchRequest.keyword}'/>">
                         </div>
-                        <div class="search-field-group">
-                            <label for="city">City</label>
+                        <div class="search-field-group col-12 col-md-2">
+                            <label for="city" class="form-label">City</label>
                             <input type="text"
                                    id="city"
                                    name="city"
                                    maxlength="100"
-                                   class="search-field-input"
+                                   class="search-field-input form-control"
                                    placeholder="e.g. Hanoi, Saigon…"
                                    value="<c:out value='${searchRequest.city}'/>">
                         </div>
-                        <div class="search-field-group">
-                            <label for="minPrice">Min Rate (VND)</label>
+                        <div class="search-field-group col-12 col-md-2">
+                            <label for="minPrice" class="form-label">Min Rate (VND)</label>
                             <input type="number"
                                    id="minPrice"
                                    name="minPrice"
                                    min="0"
                                    step="100000"
-                                   class="search-field-input"
+                                   class="search-field-input form-control"
                                    placeholder="0"
                                    value="<c:out value='${searchRequest.minPrice}'/>">
                         </div>
-                        <div class="search-field-group">
-                            <label for="maxPrice">Max Rate (VND)</label>
+                        <div class="search-field-group col-12 col-md-2">
+                            <label for="maxPrice" class="form-label">Max Rate (VND)</label>
                             <input type="number"
                                    id="maxPrice"
                                    name="maxPrice"
                                    min="0"
                                    step="100000"
-                                   class="search-field-input"
+                                   class="search-field-input form-control"
                                    placeholder="Any"
                                    value="<c:out value='${searchRequest.maxPrice}'/>">
                         </div>
-                        <div class="toolbar-actions-cell pc-actions" style="margin-bottom: 2px;">
+                        <div class="toolbar-actions-cell pc-actions col-12 col-md-auto" style="margin-bottom: 2px;">
                             <button type="submit" class="btn btn-primary" id="btn-apply-filters">
                                 Apply Filters
                             </button>
@@ -212,7 +196,7 @@
 
             <!-- Error Banner -->
             <c:if test="${not empty errorMessage}">
-                <div class="pc-alert pc-alert-danger" role="alert">
+                <div class="pc-alert pc-alert-danger alert alert-danger" role="alert">
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
@@ -272,11 +256,21 @@
                                 </div>
                                 <div class="card-meta">
                                     <div>
-                                        <h2 class="card-name" style="font-size: 1.3rem;"><c:out value="${p.displayName}"/></h2>
+                                        <div class="d-flex align-items-center justify-content-between gap-2">
+                                            <h2 class="card-name" style="font-size: 1.3rem; margin: 0;"><c:out value="${p.displayName}"/></h2>
+                                            <c:if test="${not empty savedPhotographerIds && savedPhotographerIds.contains(p.id)}">
+                                                <span class="badge bg-secondary" style="font-size: 0.7rem; padding: 0.2rem 0.45rem; font-weight: 500;" title="Saved in your favorites">Saved</span>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${not empty p.headline}">
+                                            <div style="font-size: 0.84rem; color: var(--muted); margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                <c:out value="${p.headline}"/>
+                                            </div>
+                                        </c:if>
                                         <div class="artist-card-spec">
                                             <span>
                                                 <c:choose>
-                                                    <c:when test="${not empty p.city}"><c:out value="${p.city}"/></c:when>
+                                                    <c:when test="${not empty p.city}"><c:out value="${p.city}"/><c:if test="${not empty p.country}">, <c:out value="${p.country}"/></c:if></c:when>
                                                     <c:otherwise>Vietnam</c:otherwise>
                                                 </c:choose>
                                             </span>
@@ -291,6 +285,13 @@
                                                 </span>
                                             </c:if>
                                         </div>
+                                        <c:if test="${not empty p.specialtyDisplayNames}">
+                                            <div class="d-flex flex-wrap gap-1 my-1">
+                                                <c:forEach var="spec" items="${p.specialtyDisplayNames}" end="2">
+                                                    <span class="badge bg-light text-dark border" style="font-size: 0.72rem; padding: 0.2rem 0.45rem;"><c:out value="${spec}"/></span>
+                                                </c:forEach>
+                                            </div>
+                                        </c:if>
                                         <div class="artist-rate-label">
                                             <c:choose>
                                                 <c:when test="${not empty p.priceFrom}">
@@ -359,6 +360,3 @@
             </div>
         </div>
     </footer>
-
-</body>
-</html>

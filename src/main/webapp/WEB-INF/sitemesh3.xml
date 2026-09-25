@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemesh>
+    <!-- Decorator directory prefix -->
+    <decorator-prefix>/WEB-INF/decorators/</decorator-prefix>
+
+    <!-- Exclusions: Static assets, WebSockets, API endpoints, Error routes -->
+    <mapping path="/assets/*" exclude="true"/>
+    <mapping path="/ws/*" exclude="true"/>
+    <mapping path="/api/*" exclude="true"/>
+    <mapping path="/error" exclude="true"/>
+    <mapping path="/error/*" exclude="true"/>
+
+    <!-- Decorator Mappings (relative to decorator-prefix) -->
+    <mapping path="/admin/*" decorator="admin.jsp"/>
+    <mapping path="/*" decorator="default.jsp"/>
+</sitemesh>

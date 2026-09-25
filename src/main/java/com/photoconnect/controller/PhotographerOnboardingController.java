@@ -4,6 +4,10 @@ import com.photoconnect.dto.PhotographerProfileRequest;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.PhotographerProfileAlreadyExistsException;
 import com.photoconnect.service.PhotographerProfileService;
+import com.photoconnect.entity.PhotographerProfile;
+import com.photoconnect.security.JwtCookieService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,9 +21,12 @@ import jakarta.validation.Valid;
 public class PhotographerOnboardingController {
 
     private final PhotographerProfileService photographerProfileService;
+    private final JwtCookieService jwtCookieService;
 
-    public PhotographerOnboardingController(PhotographerProfileService photographerProfileService) {
+    public PhotographerOnboardingController(PhotographerProfileService photographerProfileService,
+                                            JwtCookieService jwtCookieService) {
         this.photographerProfileService = photographerProfileService;
+        this.jwtCookieService = jwtCookieService;
     }
 
     @GetMapping("/become-photographer")
@@ -45,6 +52,8 @@ public class PhotographerOnboardingController {
     @PostMapping("/become-photographer")
     public String processOnboarding(@Valid @ModelAttribute("profileRequest") PhotographerProfileRequest profileRequest,
                                     BindingResult bindingResult,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response,
                                     HttpSession session,
                                     Model model) {
         Long userId = (Long) session.getAttribute("userId");
@@ -62,8 +71,9 @@ public class PhotographerOnboardingController {
         }
 
         try {
-            photographerProfileService.createProfile(userId, profileRequest);
-            // Update session role so the UI reflects the change immediately without re-login
+            PhotographerProfile profile = photographerProfileService.createProfile(userId, profileRequest);
+            // The persisted role changed, so rotate the cookie immediately; the old role claim is never trusted.
+            jwtCookieService.issue(request, response, profile.getUser());
             session.setAttribute("userRole", UserRole.PHOTOGRAPHER.name());
             return "redirect:/photographer/onboarding-status";
         } catch (PhotographerProfileAlreadyExistsException e) {

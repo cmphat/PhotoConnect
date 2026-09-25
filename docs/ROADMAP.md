@@ -46,3 +46,12 @@ The application feature set is frozen. TASK-001 through TASK-033 are the complet
 - **MANUAL PENDING:** final cross-browser responsive review, full multi-role rehearsal, live two-session chat, and environment-dependent Cloudinary checks
 
 Do not merge, tag, or publish a release until the human review completes. Screenshots/slides are presentation artifacts, not new application feature tasks.
+
+## V2 customer experience
+
+- [x] TASK-C03: authenticated customer workspace/dashboard aggregation and navigation
+- [x] TASK-C04: authenticated photographer Studio with scoped requests, shoots, deposit awareness, profile/portfolio/availability health, and navigation
+- [x] TASK-D01: authoritative signed JWT cookie authentication, active-account/role revalidation, centralized request identity, CSRF protection, and secure session/WebSocket compatibility
+- [x] TASK-D02: server-controlled Supabase Google OAuth with PKCE/state, safe SQL Server identity mapping/linking, local onboarding, and existing JWT issuance (live provider QA pending)
+
+Human browser QA for TASK-C03, TASK-C04, and TASK-D01 remains pending. TASK-D02 automated implementation is complete, while live Google/Supabase configuration and browser verification remain pending. Visual V2, production-payment, notification, and ERD work is not marked complete here.

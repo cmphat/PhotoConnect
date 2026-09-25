@@ -2,19 +2,11 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demo Checkout - PhotoConnect</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/payment.css">
     <script src="${pageContext.request.contextPath}/assets/js/demo-checkout.js" defer></script>
 </head>
-<body class="payment-page">
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="payment-main">
         <div class="payment-shell">
@@ -43,6 +35,7 @@
                     </div>
 
                     <form id="demo-payment-form" action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/process" method="post" novalidate>
+                        <%@ include file="fragments/csrf-input.jsp" %>
                         <div class="method-selector" role="radiogroup" aria-label="Demo payment method">
                             <label class="method-option">
                                 <input type="radio" name="paymentMethod" value="DEMO_QR" checked>
@@ -121,6 +114,7 @@
                     </form>
 
                     <form action="${pageContext.request.contextPath}/bookings/${booking.id}/deposit/cancel" method="post" class="cancel-payment-form">
+                        <%@ include file="fragments/csrf-input.jsp" %>
                         <button type="submit" class="payment-cancel-btn btn btn-secondary">Cancel payment and return</button>
                     </form>
                 </section>
@@ -162,5 +156,3 @@
             </div>
         </div>
     </main>
-</body>
-</html>

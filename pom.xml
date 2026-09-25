@@ -86,6 +86,31 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- CSRF primitives for the server-rendered, cookie-authenticated MVC application. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+
+        <!-- Signed JWT support (TASK-D01). Implementation/Jackson stay runtime-only. -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.13.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.13.0</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Cloudinary SDK — image upload/delete for portfolio feature (TASK-011) -->
         <!-- cloudinary-http5 is the modern transport; cloudinary-core is included transitively -->
         <dependency>
@@ -105,6 +130,13 @@
             <artifactId>core</artifactId>
             <version>3.5.3</version>
         </dependency>
+
+        <!-- SiteMesh 3 Decorator Integration (TASK-A03) -->
+        <dependency>
+            <groupId>org.sitemesh</groupId>
+            <artifactId>sitemesh</artifactId>
+            <version>3.3.0-RC1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -120,6 +152,16 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Explicit test-only key; never use outside automated tests. -->
+                        <photoconnect.jwt.secret>UGhvdG9Db25uZWN0LUQwMS10ZXN0LW9ubHktc2VjcmV0LWtleS0yMDI2</photoconnect.jwt.secret>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

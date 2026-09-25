@@ -68,6 +68,20 @@ public class PortfolioImage {
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
+    /**
+     * Indicates whether this image is selected as the photographer's portfolio cover.
+     * At most one image per photographer profile may have is_cover = true.
+     */
+    @Column(name = "is_cover", nullable = false)
+    private boolean isCover = false;
+
+    /**
+     * Controlled photography category for this portfolio image.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 50)
+    private PortfolioCategory category;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -125,11 +139,63 @@ public class PortfolioImage {
         this.displayOrder = displayOrder;
     }
 
+    public boolean isCover() {
+        return isCover;
+    }
+
+    public Boolean getIsCover() {
+        return isCover;
+    }
+
+    public void setCover(boolean cover) {
+        this.isCover = cover;
+    }
+
+    public void setIsCover(boolean isCover) {
+        this.isCover = isCover;
+    }
+
+    public PortfolioCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(PortfolioCategory category) {
+        this.category = category;
+    }
+
+    public String getCategoryDisplayName() {
+        return category != null ? category.getDisplayName() : "General";
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    /**
+     * Cloudinary delivery-transformed URL for grid/card thumbnails (600x750, fill, auto quality/format).
+     */
+    public String getThumbnailUrl() {
+        return buildTransformedUrl(this.imageUrl, "c_fill,w_600,h_750,q_auto,f_auto");
+    }
+
+    /**
+     * Cloudinary delivery-transformed URL for cover hero banners (1200x600, fill, auto quality/format).
+     */
+    public String getCoverTransformedUrl() {
+        return buildTransformedUrl(this.imageUrl, "c_fill,w_1200,h_600,q_auto,f_auto");
+    }
+
+    public static String buildTransformedUrl(String url, String transformation) {
+        if (url == null || !url.contains("/upload/")) {
+            return url;
+        }
+        if (url.contains("/upload/c_") || url.contains("/upload/w_")) {
+            return url;
+        }
+        return url.replaceFirst("/upload/", "/upload/" + transformation + "/");
     }
 }

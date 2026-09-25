@@ -5,6 +5,7 @@ import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidCredentialsException;
 import com.photoconnect.service.AuthService;
+import com.photoconnect.security.JwtCookieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,6 +29,9 @@ public class LoginControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private JwtCookieService jwtCookieService;
 
     private User validUser;
 
@@ -69,6 +75,7 @@ public class LoginControllerTest {
                 .andExpect(view().name("login"))
                 .andExpect(model().attributeExists("authError"))
                 .andExpect(request().sessionAttributeDoesNotExist("userId"));
+        verify(jwtCookieService, never()).issue(any(), any(), any());
     }
 
     @Test
@@ -84,6 +91,49 @@ public class LoginControllerTest {
                 .andExpect(request().sessionAttribute("userEmail", "test@example.com"))
                 .andExpect(request().sessionAttribute("userFullName", "Test User"))
                 .andExpect(request().sessionAttribute("userRole", "CUSTOMER"));
+        verify(jwtCookieService).issue(any(), any(), org.mockito.ArgumentMatchers.same(validUser));
+    }
+
+    @Test
+    public void passwordLoginAfterDuplicateEmailStartsExplicitGoogleLinkVerification() throws Exception {
+        when(authService.authenticate(any(LoginRequest.class))).thenReturn(validUser);
+
+        mockMvc.perform(post("/login")
+                        .sessionAttr(GoogleAuthController.LINK_EMAIL_KEY, "pending")
+                        .param("email", "test@example.com")
+                        .param("password", "correctpass"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/auth/google/link"))
+                .andExpect(request().sessionAttributeDoesNotExist(GoogleAuthController.LINK_EMAIL_KEY));
+        verify(jwtCookieService).issue(any(), any(), org.mockito.ArgumentMatchers.same(validUser));
+    }
+
+    @Test
+    public void photographerLoginIssuesAuthenticationCookie() throws Exception {
+        validUser.setRole(UserRole.PHOTOGRAPHER);
+        when(authService.authenticate(any(LoginRequest.class))).thenReturn(validUser);
+
+        mockMvc.perform(post("/login")
+                        .param("email", "test@example.com")
+                        .param("password", "correctpass"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(request().sessionAttribute("userRole", "PHOTOGRAPHER"));
+
+        verify(jwtCookieService).issue(any(), any(), org.mockito.ArgumentMatchers.same(validUser));
+    }
+
+    @Test
+    public void adminLoginIssuesAuthenticationCookie() throws Exception {
+        validUser.setRole(UserRole.ADMIN);
+        when(authService.authenticate(any(LoginRequest.class))).thenReturn(validUser);
+
+        mockMvc.perform(post("/login")
+                        .param("email", "test@example.com")
+                        .param("password", "correctpass"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(request().sessionAttribute("userRole", "ADMIN"));
+
+        verify(jwtCookieService).issue(any(), any(), org.mockito.ArgumentMatchers.same(validUser));
     }
 
     @Test
@@ -92,5 +142,6 @@ public class LoginControllerTest {
         mockMvc.perform(post("/logout").sessionAttr("userId", 1L))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
+        verify(jwtCookieService).clear(any(), any());
     }
 }

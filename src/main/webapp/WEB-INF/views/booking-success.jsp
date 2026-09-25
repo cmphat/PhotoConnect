@@ -3,23 +3,10 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Booking request submitted successfully on PhotoConnect.">
     <title>Booking Submitted – PhotoConnect</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    <meta name="description" content="Booking request submitted successfully on PhotoConnect.">
 </head>
-<body>
-
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page" style="display: flex; align-items: center; justify-content: center;">
         <div class="editorial-container pc-container-copy" style="text-align: center;">
@@ -107,5 +94,3 @@
             © 2026 PhotoConnect. Premium Photography Marketplace. All rights reserved.
         </div>
     </footer>
-</body>
-</html>

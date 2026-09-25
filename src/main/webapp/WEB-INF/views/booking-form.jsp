@@ -4,23 +4,10 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Request a photography booking on PhotoConnect.">
     <title>Book <c:out value="${photographer.displayName}"/> – PhotoConnect</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
+    <meta name="description" content="Request a photography booking on PhotoConnect.">
 </head>
-<body>
-
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page pc-page-compact">
         <div class="editorial-container">
@@ -99,6 +86,7 @@
                     </c:if>
 
                     <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/book" method="post" id="booking-form">
+                        <%@ include file="fragments/csrf-input.jsp" %>
 
                         <!-- Date & Time Row -->
                         <div class="pc-booking-datetime-grid">
@@ -195,5 +183,3 @@
             © 2026 PhotoConnect. Premium Photography Marketplace. All rights reserved.
         </div>
     </footer>
-</body>
-</html>

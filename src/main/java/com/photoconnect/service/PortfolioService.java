@@ -1,6 +1,7 @@
 package com.photoconnect.service;
 
 import com.photoconnect.dto.PortfolioImagePublicDto;
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,22 +16,41 @@ import java.util.List;
 public interface PortfolioService {
 
     /**
-     * Uploads a portfolio image for an authenticated, approved photographer.
+     * Uploads a portfolio image with category for an authenticated, approved photographer.
      *
      * Business rules enforced:
      * 1. The user must have a PhotographerProfile.
      * 2. The profile must have verificationStatus = APPROVED.
      * 3. The file must be a non-empty image (JPEG, PNG, WEBP).
+     * 4. If this is the photographer's first portfolio image, it automatically becomes the cover.
      *
-     * @param userId  the authenticated user's id (from session)
-     * @param file    the uploaded image file
-     * @param caption optional caption
+     * @param userId   the authenticated user's id (from session)
+     * @param file     the uploaded image file
+     * @param caption  optional caption
+     * @param category the controlled portfolio category
      * @return the saved PortfolioImage entity
      * @throws IllegalStateException    if profile does not exist or is not APPROVED
-     * @throws IllegalArgumentException if the file is invalid
+     * @throws IllegalArgumentException if the file or category is invalid
      * @throws RuntimeException         if Cloudinary upload fails
      */
+    PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption, PortfolioCategory category);
+
+    /**
+     * Backward-compatible upload overload (defaults category to OTHER).
+     */
     PortfolioImage addPortfolioImage(Long userId, MultipartFile file, String caption);
+
+    /**
+     * Selects an image as the portfolio cover for the authenticated photographer.
+     * Atomically ensures that at most one image has isCover = true for this profile.
+     *
+     * @param userId  the authenticated user's id (from session)
+     * @param imageId the id of the image to set as cover
+     * @throws IllegalStateException    if profile does not exist or is not APPROVED
+     * @throws SecurityException        if the image does not belong to this user's profile
+     * @throws IllegalArgumentException if the image does not exist
+     */
+    void setCoverImage(Long userId, Long imageId);
 
     /**
      * Deletes a portfolio image, verifying ownership.
@@ -39,6 +59,8 @@ public interface PortfolioService {
      * 1. The image must belong to the photographer profile owned by userId.
      * 2. Cloudinary asset is deleted before the DB record.
      * 3. If Cloudinary deletion fails, the DB record is NOT deleted (consistency).
+     * 4. If the deleted image was the cover, a deterministic fallback cover is assigned
+     *    (lowest displayOrder, oldest createdAt).
      *
      * @param userId  the authenticated user's id (from session)
      * @param imageId the id of the image to delete

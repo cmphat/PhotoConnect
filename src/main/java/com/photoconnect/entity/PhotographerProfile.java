@@ -6,6 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "photographer_profiles")
@@ -28,6 +29,33 @@ public class PhotographerProfile {
 
     @Column(length = 100)
     private String city;
+
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 255)
+    private String headline;
+
+    @Column(length = 255)
+    private String specialties;
+
+    @Column(name = "website_url", length = 255)
+    private String websiteUrl;
+
+    @Column(name = "instagram_url", length = 255)
+    private String instagramUrl;
+
+    @Column(name = "facebook_url", length = 255)
+    private String facebookUrl;
+
+    @Column(name = "equipment_summary", length = 500)
+    private String equipmentSummary;
+
+    @Column(length = 150)
+    private String languages;
+
+    @Column(name = "travel_available", nullable = false)
+    private boolean travelAvailable = false;
 
     @Column(name = "experience_years")
     private Integer experienceYears;
@@ -160,5 +188,101 @@ public class PhotographerProfile {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getHeadline() {
+        return headline;
+    }
+
+    public void setHeadline(String headline) {
+        this.headline = headline;
+    }
+
+    public String getSpecialties() {
+        return specialties;
+    }
+
+    public void setSpecialties(String specialties) {
+        this.specialties = specialties;
+    }
+
+    public List<PhotographerSpecialty> getSpecialtiesList() {
+        return PhotographerSpecialty.parseSpecialties(specialties);
+    }
+
+    public void setSpecialtiesList(List<PhotographerSpecialty> list) {
+        this.specialties = PhotographerSpecialty.toCommaSeparated(list);
+    }
+
+    public List<String> getSpecialtyDisplayNames() {
+        return PhotographerSpecialty.toDisplayNames(specialties);
+    }
+
+    public String getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(String websiteUrl) {
+        this.websiteUrl = websiteUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
+    public void setInstagramUrl(String instagramUrl) {
+        this.instagramUrl = instagramUrl;
+    }
+
+    public String getFacebookUrl() {
+        return facebookUrl;
+    }
+
+    public void setFacebookUrl(String facebookUrl) {
+        this.facebookUrl = facebookUrl;
+    }
+
+    public String getEquipmentSummary() {
+        return equipmentSummary;
+    }
+
+    public void setEquipmentSummary(String equipmentSummary) {
+        this.equipmentSummary = equipmentSummary;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(String languages) {
+        this.languages = languages;
+    }
+
+    public boolean isTravelAvailable() {
+        return travelAvailable;
+    }
+
+    public boolean getTravelAvailable() {
+        return travelAvailable;
+    }
+
+    public void setTravelAvailable(boolean travelAvailable) {
+        this.travelAvailable = travelAvailable;
+    }
+
+    public BigDecimal getStartingPrice() {
+        return priceFrom;
+    }
+
+    public void setStartingPrice(BigDecimal startingPrice) {
+        this.priceFrom = startingPrice;
     }
 }

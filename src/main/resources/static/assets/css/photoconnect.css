@@ -59,6 +59,24 @@
     --primary: var(--accent);
     --accent-gold: var(--accent);
 
+    /* ── Bootstrap 5 Theme Mapping ── */
+    --bs-primary: var(--accent);
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-body-font-family: var(--font-primary);
+    --bs-body-bg: var(--background);
+    --bs-body-color: var(--text);
+    --bs-border-color: var(--border);
+    --bs-border-radius: var(--radius-sm);
+    --bs-border-radius-sm: var(--radius-sm);
+    --bs-border-radius-lg: var(--radius-md);
+    --bs-link-color: var(--accent);
+    --bs-link-hover-color: var(--accent-hover);
+    --bs-secondary-color: var(--muted);
+    --bs-card-bg: var(--surface);
+    --bs-card-border-color: var(--border);
+    --bs-card-color: var(--text);
+    --bs-tertiary-bg: var(--surface-subtle);
+
     /* ── Spacing Rhythm & Geometry ── */
     --space-1: 0.5rem;
     --space-2: 0.75rem;
@@ -136,6 +154,21 @@
     --text-light: var(--text);
     --primary: var(--accent);
     --accent-gold: var(--accent);
+
+    /* ── Bootstrap 5 Dark Theme Mapping ── */
+    --bs-primary: var(--accent);
+    --bs-primary-rgb: 59, 130, 246;
+    --bs-body-font-family: var(--font-primary);
+    --bs-body-bg: var(--background);
+    --bs-body-color: var(--text);
+    --bs-border-color: var(--border);
+    --bs-link-color: var(--accent);
+    --bs-link-hover-color: var(--accent-hover);
+    --bs-secondary-color: var(--muted);
+    --bs-card-bg: var(--surface);
+    --bs-card-border-color: var(--border);
+    --bs-card-color: var(--text);
+    --bs-tertiary-bg: var(--surface-subtle);
 
     --shadow-subtle: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
     --shadow-raised: 0 14px 36px -4px rgba(0, 0, 0, 0.6);
@@ -1282,7 +1315,8 @@ input[type="time"].form-input {
 
 /* ── Feedback, Alerts, Badges ─────────────────────────────────────────── */
 .pc-alert,
-.alert-banner {
+.alert-banner,
+.alert {
     margin-bottom: var(--space-5);
     padding: 1rem 1.25rem;
     border: 1px solid var(--border);
@@ -1302,18 +1336,28 @@ input[type="time"].form-input {
 }
 
 .pc-alert-danger,
-.alert-error {
+.alert-error,
+.alert-danger {
     border-color: var(--danger-border);
     border-left-color: var(--danger);
     background: var(--danger-bg);
     color: var(--danger);
 }
 
-.pc-alert-warning {
+.pc-alert-warning,
+.alert-warning {
     border-color: var(--warning-border);
     border-left-color: var(--warning);
     background: var(--warning-bg);
     color: var(--warning);
+}
+
+.alert-info,
+.alert-primary {
+    border-color: var(--accent-subtle);
+    border-left-color: var(--accent);
+    background: var(--accent-subtle);
+    color: var(--text);
 }
 
 .status-badge,

@@ -274,6 +274,27 @@ class PublicPhotographerServiceTest {
     }
 
     @Test
+    void searchPhotographers_withExplicitCoverImage_shouldPrioritizeExplicitCoverOverFirstImage() {
+        PortfolioImage img1 = new PortfolioImage();
+        img1.setImageUrl("https://res.cloudinary.com/test/image1.jpg");
+        img1.setCover(false);
+
+        PortfolioImage img2Cover = new PortfolioImage();
+        img2Cover.setImageUrl("https://res.cloudinary.com/test/cover.jpg");
+        img2Cover.setCover(true);
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(approvedProfile));
+        when(portfolioImageRepository.findByPhotographerProfileIdOrderByDisplayOrderAscCreatedAtDesc(10L))
+                .thenReturn(List.of(img1, img2Cover));
+
+        List<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(null);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCoverImageUrl()).isEqualTo("https://res.cloudinary.com/test/cover.jpg");
+    }
+
+    @Test
     void searchPhotographers_withoutPortfolioImage_shouldHaveNullCoverImageUrl() {
         when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(approvedProfile));
@@ -415,5 +436,35 @@ class PublicPhotographerServiceTest {
         assertThat(dto.getCity()).isEqualTo("Hanoi");
         assertThat(dto.getExperienceYears()).isEqualTo(5);
         assertThat(dto.getPriceFrom()).isEqualByComparingTo(new BigDecimal("3000000"));
+    }
+
+    @Test
+    void publicDto_withProfessionalFields_shouldMapAllProfessionalData() {
+        approvedProfile.setHeadline("Editorial Fine Art");
+        approvedProfile.setCountry("Vietnam");
+        approvedProfile.setSpecialties("PORTRAIT,WEDDING");
+        approvedProfile.setWebsiteUrl("https://studio.art");
+        approvedProfile.setInstagramUrl("https://instagram.com/studio");
+        approvedProfile.setFacebookUrl("https://facebook.com/studio");
+        approvedProfile.setEquipmentSummary("Sony A7IV, 35mm GM");
+        approvedProfile.setLanguages("English, Vietnamese");
+        approvedProfile.setTravelAvailable(true);
+
+        when(photographerProfileRepository.findByIdAndVerificationStatusWithUser(
+                10L, PhotographerVerificationStatus.APPROVED))
+                .thenReturn(Optional.of(approvedProfile));
+
+        PhotographerPublicDto dto = publicPhotographerService.getApprovedPhotographerById(10L);
+
+        assertThat(dto.getHeadline()).isEqualTo("Editorial Fine Art");
+        assertThat(dto.getCountry()).isEqualTo("Vietnam");
+        assertThat(dto.getSpecialties()).isEqualTo("PORTRAIT,WEDDING");
+        assertThat(dto.getSpecialtyDisplayNames()).containsExactly("Portrait", "Wedding");
+        assertThat(dto.getWebsiteUrl()).isEqualTo("https://studio.art");
+        assertThat(dto.getInstagramUrl()).isEqualTo("https://instagram.com/studio");
+        assertThat(dto.getFacebookUrl()).isEqualTo("https://facebook.com/studio");
+        assertThat(dto.getEquipmentSummary()).isEqualTo("Sony A7IV, 35mm GM");
+        assertThat(dto.getLanguages()).isEqualTo("English, Vietnamese");
+        assertThat(dto.isTravelAvailable()).isTrue();
     }
 }

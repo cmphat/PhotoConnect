@@ -2,6 +2,7 @@ package com.photoconnect.repository;
 
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
+import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
@@ -202,5 +203,47 @@ class PortfolioImageRepositoryIntegrationTest {
         portfolioImageRepository.save(img2);
 
         assertThat(portfolioImageRepository.countByPhotographerProfileId(testProfile.getId())).isEqualTo(2);
+    }
+
+    // ── Category and Cover Persistence (TASK-B02) ─────────────────────────────
+
+    @Test
+    void shouldSaveAndRetrieveCoverAndCategory() {
+        PortfolioImage image = new PortfolioImage();
+        image.setPhotographerProfile(testProfile);
+        image.setImageUrl("https://res.cloudinary.com/test/image/upload/v1/wedding.jpg");
+        image.setPublicId("photoconnect/portfolio/wedding");
+        image.setCaption("Bridal portrait");
+        image.setCategory(PortfolioCategory.WEDDING);
+        image.setCover(true);
+
+        PortfolioImage saved = portfolioImageRepository.save(image);
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getCategory()).isEqualTo(PortfolioCategory.WEDDING);
+        assertThat(saved.isCover()).isTrue();
+    }
+
+    @Test
+    void findByPhotographerProfileIdAndIsCoverTrue_shouldReturnOnlyCover() {
+        PortfolioImage img1 = new PortfolioImage();
+        img1.setPhotographerProfile(testProfile);
+        img1.setImageUrl("https://res.cloudinary.com/test/normal.jpg");
+        img1.setPublicId("photoconnect/portfolio/normal");
+        img1.setCover(false);
+        portfolioImageRepository.save(img1);
+
+        PortfolioImage img2 = new PortfolioImage();
+        img2.setPhotographerProfile(testProfile);
+        img2.setImageUrl("https://res.cloudinary.com/test/cover.jpg");
+        img2.setPublicId("photoconnect/portfolio/cover");
+        img2.setCover(true);
+        portfolioImageRepository.save(img2);
+
+        List<PortfolioImage> covers = portfolioImageRepository
+                .findByPhotographerProfileIdAndIsCoverTrue(testProfile.getId());
+
+        assertThat(covers).hasSize(1);
+        assertThat(covers.get(0).getPublicId()).isEqualTo("photoconnect/portfolio/cover");
     }
 }

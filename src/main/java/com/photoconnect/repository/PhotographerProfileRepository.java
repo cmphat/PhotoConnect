@@ -17,6 +17,13 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
 
     Optional<PhotographerProfile> findByUserId(Long userId);
 
+    @Query("""
+            SELECT p FROM PhotographerProfile p
+            JOIN FETCH p.user
+            WHERE p.user.id = :userId
+            """)
+    Optional<PhotographerProfile> findByUserIdWithUser(@Param("userId") Long userId);
+
     boolean existsByUserId(Long userId);
 
     Optional<PhotographerProfile> findByUserEmail(String email);
@@ -71,6 +78,8 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
             WHERE p.verificationStatus = :status
             AND (:keyword IS NULL OR :keyword = ''
                  OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR (p.headline IS NOT NULL AND LOWER(p.headline) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                 OR (p.specialties IS NOT NULL AND LOWER(p.specialties) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.bio IS NOT NULL AND LOWER(p.bio) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:city IS NULL OR :city = ''
@@ -94,6 +103,8 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
             WHERE p.verificationStatus = :status
             AND (:keyword IS NULL OR :keyword = ''
                  OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR (p.headline IS NOT NULL AND LOWER(p.headline) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                 OR (p.specialties IS NOT NULL AND LOWER(p.specialties) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.bio IS NOT NULL AND LOWER(p.bio) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:city IS NULL OR :city = ''
@@ -108,6 +119,8 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
             WHERE p.verificationStatus = :status
             AND (:keyword IS NULL OR :keyword = ''
                  OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR (p.headline IS NOT NULL AND LOWER(p.headline) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                 OR (p.specialties IS NOT NULL AND LOWER(p.specialties) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.bio IS NOT NULL AND LOWER(p.bio) LIKE LOWER(CONCAT('%', :keyword, '%')))
                  OR (p.city IS NOT NULL AND LOWER(p.city) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:city IS NULL OR :city = ''

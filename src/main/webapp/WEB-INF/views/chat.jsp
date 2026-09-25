@@ -3,16 +3,8 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Booking #${booking.id} - PhotoConnect</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
     <style>
         .chat-container {
             max-width: 860px;
@@ -131,8 +123,6 @@
         }
     </style>
 </head>
-<body>
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container chat-container">
@@ -219,6 +209,8 @@
             const chatForm = document.getElementById('chatForm');
             const connDot = document.getElementById('connDot');
             const connText = document.getElementById('connText');
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfHeaderMeta = document.querySelector('meta[name="csrf-header"]');
 
             let stompClient = null;
             let isStompConnected = false;
@@ -341,7 +333,10 @@
                         fetch(contextPath + '/api/bookings/' + bookingId + '/messages', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                ...(csrfTokenMeta && csrfHeaderMeta
+                                    ? { [csrfHeaderMeta.content]: csrfTokenMeta.content }
+                                    : {})
                             },
                             body: JSON.stringify({
                                 bookingId: bookingId,
@@ -369,5 +364,3 @@
             connectWebSocket();
         })();
     </script>
-</body>
-</html>

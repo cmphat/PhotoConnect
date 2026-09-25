@@ -3,21 +3,8 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Request #${booking.id} — Creator Workspace — PhotoConnect</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PhotoConnect Custom Design System -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/photoconnect.css">
-
     <style>
         .workspace-shell {
             max-width: 980px;
@@ -80,10 +67,6 @@
         }
     </style>
 </head>
-<body>
-
-    <!-- Global Professional Navigation -->
-    <jsp:include page="fragments/navbar.jsp" />
 
     <main class="pc-page">
         <div class="editorial-container workspace-shell">
@@ -266,11 +249,13 @@
                 <c:if test="${booking.status == 'PENDING'}">
                     <div class="pc-actions pc-stack-mobile" style="padding-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/accept" method="post" style="margin: 0;">
+                            <%@ include file="fragments/csrf-input.jsp" %>
                             <button type="submit" class="btn btn-primary btn-lg" id="btn-accept-booking">
                                 Accept Booking
                             </button>
                         </form>
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reject" method="post" onsubmit="return confirm('Are you sure you want to decline this request?');" style="margin: 0;">
+                            <%@ include file="fragments/csrf-input.jsp" %>
                             <button type="submit" class="btn btn-danger btn-lg" id="btn-reject-booking">
                                 Decline Request
                             </button>
@@ -284,6 +269,7 @@
                             Session accepted. Once the shoot concludes, mark it completed below.
                         </div>
                         <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/complete" method="post" onsubmit="return confirm('Mark this photoshoot session as completed?');" style="margin: 0;">
+                            <%@ include file="fragments/csrf-input.jsp" %>
                             <button type="submit" class="btn btn-primary" id="btn-complete-booking">
                                 Mark as Completed
                             </button>
@@ -304,6 +290,3 @@
             </div>
         </div>
     </footer>
-
-</body>
-</html>

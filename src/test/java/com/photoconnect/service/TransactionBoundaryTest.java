@@ -11,6 +11,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TransactionBoundaryTest {
 
     @Test
+    void customerDashboardAggregationIsReadOnlyForOpenInViewFalseCompatibility() throws Exception {
+        Method method = CustomerDashboardServiceImpl.class.getMethod("getDashboard", Long.class);
+        Transactional transaction = AnnotatedElementUtils.findMergedAnnotation(method, Transactional.class);
+        if (transaction == null) {
+            transaction = AnnotatedElementUtils.findMergedAnnotation(CustomerDashboardServiceImpl.class, Transactional.class);
+        }
+        assertThat(transaction).isNotNull();
+        assertThat(transaction.readOnly()).isTrue();
+    }
+
+    @Test
+    void photographerDashboardAggregationIsReadOnlyForOpenInViewFalseCompatibility() throws Exception {
+        Method method = PhotographerDashboardServiceImpl.class.getMethod("getDashboard", Long.class);
+        Transactional transaction = AnnotatedElementUtils.findMergedAnnotation(method, Transactional.class);
+        if (transaction == null) {
+            transaction = AnnotatedElementUtils.findMergedAnnotation(PhotographerDashboardServiceImpl.class, Transactional.class);
+        }
+        assertThat(transaction).isNotNull();
+        assertThat(transaction.readOnly()).isTrue();
+    }
+
+    @Test
     void multiWriteBusinessOperationsHaveTransactionBoundaries() throws Exception {
         assertTransactional(BookingServiceImpl.class, "createBooking", Long.class, Long.class,
                 com.photoconnect.dto.BookingRequest.class);
@@ -27,6 +49,10 @@ class TransactionBoundaryTest {
                 java.time.LocalDate.class, String.class);
         assertTransactional(PortfolioServiceImpl.class, "addPortfolioImage", Long.class,
                 org.springframework.web.multipart.MultipartFile.class, String.class);
+        assertTransactional(PhotographerProfileServiceImpl.class, "updateProfile", Long.class,
+                com.photoconnect.dto.PhotographerProfileEditRequest.class);
+        assertTransactional(SavedPhotographerServiceImpl.class, "savePhotographer", Long.class, Long.class);
+        assertTransactional(SavedPhotographerServiceImpl.class, "removeSavedPhotographer", Long.class, Long.class);
     }
 
     private static void assertTransactional(Class<?> serviceType, String methodName, Class<?>... parameterTypes)
