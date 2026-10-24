@@ -36,6 +36,7 @@ public class RegisterController {
     @PostMapping
     public String processRegistration(@Valid @ModelAttribute("registerRequest") RegisterRequest registerRequest,
                                       BindingResult bindingResult,
+                                      jakarta.servlet.http.HttpServletRequest httpRequest,
                                       HttpSession session,
                                       Model model) {
         if (session.getAttribute("userId") != null) {

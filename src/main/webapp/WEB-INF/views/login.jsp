@@ -117,15 +117,30 @@
                         <c:out value="${authError}"/>
                     </div>
                 </c:if>
+                <c:if test="${param.verified == 'true'}">
+                    <div class="alert alert-success pc-alert pc-alert-success" role="alert">
+                        Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.
+                    </div>
+                </c:if>
+                <c:if test="${param.reset == 'true'}">
+                    <div class="alert alert-success pc-alert pc-alert-success" role="alert">
+                        Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập bằng mật khẩu mới.
+                    </div>
+                </c:if>
+                <c:if test="${param.deactivated == 'true'}">
+                    <div class="alert alert-info pc-alert" role="alert">
+                        Tài khoản của bạn đã được vô hiệu hóa thành công.
+                    </div>
+                </c:if>
                 <c:if test="${param.oauth == 'expired'}">
-                    <div class="alert alert-warning pc-alert" role="alert">Your Google sign-in expired. Please try again.</div>
+                    <div class="alert alert-warning pc-alert" role="alert">Phiên đăng nhập Google đã hết hạn. Vui lòng thử lại.</div>
                 </c:if>
 
                 <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/auth/google">
                     Continue with Google
                 </a>
                 <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
-                    <span class="border-top flex-grow-1"></span><span class="text-muted small">or use email</span><span class="border-top flex-grow-1"></span>
+                    <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc dùng email</span><span class="border-top flex-grow-1"></span>
                 </div>
 
                 <form:form action="${pageContext.request.contextPath}/login" method="post" modelAttribute="loginRequest">
@@ -138,7 +153,10 @@
                     </div>
 
                     <div class="form-group mb-4" style="margin-bottom: 2.5rem;">
-                        <label for="password" class="form-label">Password</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="password" class="form-label mb-0">Password</label>
+                            <a href="${pageContext.request.contextPath}/forgot-password" class="small text-muted text-decoration-none">Quên mật khẩu?</a>
+                        </div>
                         <form:password path="password" class="form-control form-input" id="password" autocomplete="current-password" required="true" placeholder="••••••••" />
                         <form:errors path="password" cssClass="field-error" />
                     </div>

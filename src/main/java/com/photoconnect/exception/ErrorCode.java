@@ -14,6 +14,11 @@ public enum ErrorCode {
     AUTH_003_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "Invalid authentication token"),
     AUTH_004_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Authentication token has expired"),
     AUTH_005_ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied: insufficient permissions"),
+    AUTH_006_OTP_INVALID(HttpStatus.BAD_REQUEST, "Invalid verification code"),
+    AUTH_007_OTP_EXPIRED(HttpStatus.BAD_REQUEST, "Verification code has expired"),
+    AUTH_008_OTP_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "Please wait before requesting a new code"),
+    AUTH_009_OTP_MAX_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "Maximum attempts exceeded for this verification code"),
+    AUTH_010_OTP_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "Too many verification attempts. Please try again later"),
 
     // ── USER ─────────────────────────────────────────────────────────────────
     USER_001_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),

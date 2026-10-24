@@ -414,6 +414,16 @@
                 <c:out value="${errorMessage}"/>
             </div>
         </c:if>
+        <c:if test="${not empty securitySuccess}">
+            <div class="alert alert-success pc-alert pc-alert-success mb-4 rounded-3" role="status">
+                <c:out value="${securitySuccess}"/>
+            </div>
+        </c:if>
+        <c:if test="${not empty securityError}">
+            <div class="alert alert-danger pc-alert pc-alert-danger mb-4 rounded-3" role="alert">
+                <c:out value="${securityError}"/>
+            </div>
+        </c:if>
 
         <div class="profile-layout-grid">
 
@@ -588,6 +598,13 @@
                             <span class="profile-tab-count"><c:out value="${fn:length(profile.portfolioImages)}"/></span>
                         </button>
                     </c:if>
+
+                    <c:if test="${isOwner}">
+                        <button type="button" class="profile-nav-tab btn" id="tab-security" onclick="switchProfileTab('security')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Bảo Mật Tài Khoản
+                        </button>
+                    </c:if>
                 </div>
 
                 <!-- Tab Pane 1: Interactive FullCalendar Component -->
@@ -666,6 +683,93 @@
                                     </c:if>
                                 </div>
                             </c:forEach>
+                        </div>
+                    </div>
+                </c:if>
+
+                <!-- Tab Pane 3: Security & Account Management (if Owner) -->
+                <c:if test="${isOwner}">
+                    <div id="pane-security" class="calendar-card-shell" style="display: none;">
+                        <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-strong); margin: 0 0 1.5rem 0;">
+                            Bảo Mật &amp; Cài Đặt Tài Khoản
+                        </h2>
+
+                        <div class="row g-4">
+                            <!-- Section 1: Change Password -->
+                            <div class="col-12 col-lg-6">
+                                <div class="card h-100 border p-4 rounded-3 shadow-none bg-light">
+                                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                        Đổi Mật Khẩu
+                                    </h5>
+                                    <form action="${pageContext.request.contextPath}/profile/security/password" method="post">
+                                        <%@ include file="fragments/csrf-input.jsp" %>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Mật khẩu hiện tại</label>
+                                            <input type="password" name="currentPassword" class="form-control" required placeholder="••••••••" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Mật khẩu mới (tối thiểu 8 ký tự)</label>
+                                            <input type="password" name="newPassword" minlength="8" class="form-control" required placeholder="••••••••" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Xác nhận mật khẩu mới</label>
+                                            <input type="password" name="confirmPassword" minlength="8" class="form-control" required placeholder="••••••••" />
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Lưu Mật Khẩu</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Change Email with OTP -->
+                            <div class="col-12 col-lg-6">
+                                <div class="card h-100 border p-4 rounded-3 shadow-none bg-light">
+                                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                        Cập Nhật Email
+                                    </h5>
+                                    <p class="small text-muted mb-3">Email hiện tại: <strong><c:out value="${profile.email}"/></strong></p>
+
+                                    <c:choose>
+                                        <c:when test="${emailChangePending}">
+                                            <form action="${pageContext.request.contextPath}/profile/security/email/confirm" method="post">
+                                                <%@ include file="fragments/csrf-input.jsp" %>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold">Nhập mã OTP 6 chữ số gửi tới email</label>
+                                                    <input type="text" name="otpCode" maxlength="6" class="form-control font-monospace text-center fw-bold fs-5" required placeholder="••••••" />
+                                                    <div class="form-text small">Mã OTP đã được gửi tới email cũ của bạn để xác nhận cập nhật thành: <strong><c:out value="${targetNewEmail}"/></strong>.</div>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary btn-sm">Xác Nhận Đổi Email</button>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <form action="${pageContext.request.contextPath}/profile/security/email/request" method="post">
+                                                <%@ include file="fragments/csrf-input.jsp" %>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold">Địa chỉ email mới</label>
+                                                    <input type="email" name="newEmail" class="form-control" required placeholder="new.email@example.com" />
+                                                    <div class="form-text small">Hệ thống sẽ gửi mã OTP xác nhận tới email của bạn.</div>
+                                                </div>
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">Gửi Mã Xác Thực OTP</button>
+                                            </form>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Deactivate Account -->
+                            <div class="col-12">
+                                <div class="card border border-danger p-4 rounded-3 shadow-none bg-white">
+                                    <h5 class="fw-bold text-danger mb-2">Vùng Nguy Hiểm: Vô Hiệu Hóa Tài Khoản</h5>
+                                    <p class="small text-muted mb-3">
+                                        Khi vô hiệu hóa tài khoản, bạn sẽ bị đăng xuất khỏi hệ thống ngay lập tức và hồ sơ sẽ bị tạm ẩn khỏi danh mục tìm kiếm. Bạn có thể liên hệ quản trị viên để mở lại.
+                                    </p>
+                                    <form action="${pageContext.request.contextPath}/profile/security/deactivate" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn vô hiệu hóa tài khoản này? Bạn sẽ bị đăng xuất ngay lập tức.');">
+                                        <%@ include file="fragments/csrf-input.jsp" %>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Vô Hiệu Hóa Tài Khoản</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </c:if>
@@ -904,6 +1008,9 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         initFullCalendar();
+        if (window.location.hash === '#security') {
+            switchProfileTab('security');
+        }
     });
 
     function initFullCalendar() {
@@ -966,12 +1073,15 @@
     function switchProfileTab(tab) {
         document.getElementById('tab-calendar')?.classList.toggle('active', tab === 'calendar');
         document.getElementById('tab-portfolio')?.classList.toggle('active', tab === 'portfolio');
+        document.getElementById('tab-security')?.classList.toggle('active', tab === 'security');
 
         const paneCal = document.getElementById('pane-calendar');
         const panePort = document.getElementById('pane-portfolio');
+        const paneSec = document.getElementById('pane-security');
 
         if (paneCal) paneCal.style.display = tab === 'calendar' ? 'block' : 'none';
         if (panePort) panePort.style.display = tab === 'portfolio' ? 'block' : 'none';
+        if (paneSec) paneSec.style.display = tab === 'security' ? 'block' : 'none';
 
         if (tab === 'calendar' && calendarInstance) {
             setTimeout(() => calendarInstance.updateSize(), 50);

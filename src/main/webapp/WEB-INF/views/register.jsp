@@ -102,8 +102,13 @@
 
                 <!-- Feedback Alerts -->
                 <c:if test="${param.success != null}">
-                    <div class="alert alert-success pc-alert pc-alert-success" role="status">
-                        Registration successful! Welcome to PhotoConnect.
+                    <div class="alert alert-success pc-alert pc-alert-success d-flex align-items-center justify-content-between flex-wrap gap-2" role="status">
+                        <div>
+                            <strong>Đăng ký thành công!</strong> Mã xác thực OTP 6 chữ số đã được gửi tới email của bạn. Vui lòng kích hoạt tài khoản để đăng nhập.
+                        </div>
+                        <a href="${pageContext.request.contextPath}/verify-otp" class="btn btn-primary btn-sm text-nowrap">
+                            Xác thực ngay
+                        </a>
                     </div>
                 </c:if>
                 <c:if test="${not empty emailError}">

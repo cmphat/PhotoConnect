@@ -3,5 +3,6 @@ package com.photoconnect.entity;
 public enum UserStatus {
     ACTIVE,
     INACTIVE,
-    BANNED
+    BANNED,
+    PENDING_VERIFICATION
 }

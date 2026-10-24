@@ -173,13 +173,13 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.setUsername(newUsername);
         }
 
-        user.setBio(request.getBio());
-        user.setLocation(request.getLocation());
-        user.setWebsiteUrl(request.getWebsiteUrl());
-        user.setFacebookUrl(request.getFacebookUrl());
-        user.setInstagramUrl(request.getInstagramUrl());
-        user.setTiktokUrl(request.getTiktokUrl());
-        user.setYoutubeUrl(request.getYoutubeUrl());
+        user.setBio(request.getBio() != null ? request.getBio().trim() : null);
+        user.setLocation(request.getLocation() != null ? request.getLocation().trim() : null);
+        user.setWebsiteUrl(sanitizeUrl(request.getWebsiteUrl()));
+        user.setFacebookUrl(sanitizeUrl(request.getFacebookUrl()));
+        user.setInstagramUrl(sanitizeUrl(request.getInstagramUrl()));
+        user.setTiktokUrl(sanitizeUrl(request.getTiktokUrl()));
+        user.setYoutubeUrl(sanitizeUrl(request.getYoutubeUrl()));
 
         userRepository.save(user);
 
@@ -262,5 +262,24 @@ public class UserProfileServiceImpl implements UserProfileService {
         user.setAvatarPublicId(null);
         userRepository.save(user);
         log.info("Removed avatar for user [{}]", userId);
+    }
+
+    private String sanitizeUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return null;
+        }
+        String trimmed = url.trim();
+        String lower = trimmed.toLowerCase();
+        if (lower.startsWith("javascript:") || lower.startsWith("data:") || lower.startsWith("vbscript:")) {
+            throw new IllegalArgumentException("Giao thức URL không an toàn.");
+        }
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) {
+            if (!trimmed.contains("://")) {
+                trimmed = "https://" + trimmed;
+            } else {
+                throw new IllegalArgumentException("Đường dẫn liên kết phải sử dụng giao thức HTTP hoặc HTTPS hợp lệ.");
+            }
+        }
+        return trimmed;
     }
 }

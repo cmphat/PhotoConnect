@@ -9,10 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErrorCodeTest {
 
     @Test
-    @DisplayName("Should have exactly 39 standardized error codes defined in docs/ERROR_CODES.md")
+    @DisplayName("Should have exactly 44 standardized error codes defined in docs/ERROR_CODES.md")
     void shouldHaveExpectedNumberOfErrorCodes() {
         ErrorCode[] codes = ErrorCode.values();
-        assertThat(codes).hasSize(39);
+        assertThat(codes).hasSize(44);
     }
 
     @Test

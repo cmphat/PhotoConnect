@@ -245,7 +245,7 @@ class SiteMeshIntegrationContractTest {
                     .filter(path -> !path.getFileName().toString().equals("error.jsp"))
                     .toList();
 
-            assertThat(contentPages).hasSize(39);
+            assertThat(contentPages).hasSize(42);
 
             for (Path page : contentPages) {
                 String jsp = Files.readString(page);

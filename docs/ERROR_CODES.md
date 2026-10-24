@@ -15,6 +15,11 @@ Format:
 | `AUTH_003_TOKEN_INVALID` | JWT không hợp lệ |
 | `AUTH_004_TOKEN_EXPIRED` | JWT hết hạn |
 | `AUTH_005_ACCESS_DENIED` | Không đủ quyền |
+| `AUTH_006_OTP_INVALID` | Mã OTP không chính xác |
+| `AUTH_007_OTP_EXPIRED` | Mã OTP đã hết hạn |
+| `AUTH_008_OTP_COOLDOWN` | Yêu cầu OTP quá nhanh (chưa hết 60s chờ) |
+| `AUTH_009_OTP_MAX_ATTEMPTS` | Vượt quá số lần thử OTP cho phép |
+| `AUTH_010_OTP_RATE_LIMITED` | Giới hạn số lần gửi OTP trong khoảng thời gian |
 
 ## USER
 

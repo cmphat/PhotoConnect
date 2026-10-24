@@ -37,6 +37,10 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Email or password is incorrect.");
         }
 
+        if (user.getStatus() == UserStatus.PENDING_VERIFICATION) {
+            throw new AccountDisabledException("Tài khoản chưa được xác thực email. Vui lòng kiểm tra email và nhập mã xác thực OTP.");
+        }
+
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new AccountDisabledException("Your account is currently " + user.getStatus().name().toLowerCase() + ".");
         }

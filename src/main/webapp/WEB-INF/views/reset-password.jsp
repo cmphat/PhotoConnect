@@ -1,0 +1,210 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<head>
+    <title>Đặt Lại Mật Khẩu — PhotoConnect</title>
+    <style>
+        .auth-split-layout {
+            display: flex;
+            min-height: calc(100vh - 74px);
+            width: 100%;
+        }
+
+        .auth-image-pane {
+            flex: 0 0 52%;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+        }
+
+        .auth-image-pane img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.92;
+        }
+
+        .auth-overlay-quote {
+            position: absolute;
+            bottom: 3.5rem;
+            left: 3.5rem;
+            right: 3.5rem;
+            background: rgba(7, 11, 18, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 2rem 2.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #F8FAFC;
+        }
+
+        .auth-overlay-quote blockquote {
+            margin: 0 0 0.5rem 0;
+            font-family: var(--font-editorial);
+            font-size: 1.35rem;
+            font-weight: 400;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .auth-overlay-quote cite {
+            font-family: var(--font-primary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .auth-form-pane {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(2.5rem, 6vw, 5rem);
+            background-color: var(--background);
+        }
+
+        .auth-form-card {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .otp-input-box {
+            font-family: monospace;
+            font-size: 1.5rem;
+            letter-spacing: 0.35rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        @media (max-width: 991px) {
+            .auth-split-layout {
+                flex-direction: column;
+            }
+            .auth-image-pane {
+                flex: none;
+                height: 28vh;
+            }
+            .auth-overlay-quote {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+    <div class="auth-split-layout">
+
+        <!-- Left Image Pane -->
+        <div class="auth-image-pane">
+            <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1400&q=80"
+                 alt="Vintage Camera on Desk"
+                 loading="eager">
+            <div class="auth-overlay-quote">
+                <blockquote>&ldquo;Mật khẩu mới bảo vệ toàn bộ dữ liệu hợp đồng và album ảnh riêng tư của bạn.&rdquo;</blockquote>
+                <cite>PhotoConnect Identity Security</cite>
+            </div>
+        </div>
+
+        <!-- Right Form Pane -->
+        <div class="auth-form-pane">
+            <div class="auth-form-card">
+
+                <span class="section-index">Đặt lại mật khẩu</span>
+                <h1 class="editorial-title" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin: 0 0 0.5rem 0;">
+                    Tạo mật khẩu mới
+                </h1>
+                <p class="pc-lead" style="font-size: 0.95rem; margin-bottom: 2rem;">
+                    Nhập mã xác thực OTP đã nhận trong email cùng mật khẩu mới của bạn.
+                </p>
+
+                <!-- Feedback Alerts -->
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert alert-danger pc-alert pc-alert-danger mb-4" role="alert">
+                        <c:out value="${errorMessage}"/>
+                    </div>
+                </c:if>
+                <c:if test="${not empty infoMessage}">
+                    <div class="alert alert-success pc-alert pc-alert-success mb-4" role="alert">
+                        <c:out value="${infoMessage}"/>
+                    </div>
+                </c:if>
+
+                <form action="${pageContext.request.contextPath}/reset-password" method="post" class="mb-4">
+                    <%@ include file="fragments/csrf-input.jsp" %>
+
+                    <div class="form-group mb-3">
+                        <label for="email" class="form-label text-muted small fw-bold">EMAIL TÀI KHOẢN</label>
+                        <input type="email"
+                               name="email"
+                               id="email"
+                               class="form-control form-input"
+                               required
+                               value="<c:out value='${email}'/>"
+                               placeholder="your.name@example.com" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="otpCode" class="form-label text-muted small fw-bold">MÃ OTP (6 CHỮ SỐ)</label>
+                        <input type="text"
+                               name="otpCode"
+                               id="otpCode"
+                               class="form-control form-input otp-input-box"
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               placeholder="••••••"
+                               required
+                               autofocus />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="newPassword" class="form-label text-muted small fw-bold">MẬT KHẨU MỚI (TỐI THIỂU 8 KÝ TỰ)</label>
+                        <input type="password"
+                               name="newPassword"
+                               id="newPassword"
+                               class="form-control form-input"
+                               minlength="8"
+                               required
+                               placeholder="••••••••" />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="confirmPassword" class="form-label text-muted small fw-bold">XÁC NHẬN MẬT KHẨU MỚI</label>
+                        <input type="password"
+                               name="confirmPassword"
+                               id="confirmPassword"
+                               class="form-control form-input"
+                               minlength="8"
+                               required
+                               placeholder="••••••••" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary submit-btn w-100 py-3" id="btn-submit-reset">
+                        Cập nhật mật khẩu &rarr;
+                    </button>
+                </form>
+
+                <!-- Resend Reset OTP -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <span class="small text-muted">Chưa nhận được mã?</span>
+                    <form action="${pageContext.request.contextPath}/reset-password/resend" method="post" class="d-inline m-0">
+                        <%@ include file="fragments/csrf-input.jsp" %>
+                        <input type="hidden" name="email" value="<c:out value='${email}'/>" />
+                        <button type="submit" class="btn btn-link p-0 small text-primary text-decoration-none fw-semibold">
+                            Gửi lại mã OTP
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="${pageContext.request.contextPath}/login" class="small text-muted text-decoration-none">
+                        &larr; Quay lại trang Đăng nhập
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
