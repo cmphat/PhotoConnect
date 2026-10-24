@@ -521,10 +521,23 @@
                             <input type="text"
                                    id="city"
                                    name="city"
+                                   list="vietnam-cities"
                                    maxlength="100"
                                    class="form-control search-input-control"
-                                   placeholder="Hanoi, Da Nang..."
+                                   placeholder="Hà Nội, TP. Hồ Chí Minh, Đà Nẵng..."
                                    value="<c:out value='${searchRequest.city}'/>">
+                            <datalist id="vietnam-cities">
+                                <option value="Hà Nội">
+                                <option value="TP. Hồ Chí Minh">
+                                <option value="Đà Nẵng">
+                                <option value="Cần Thơ">
+                                <option value="Hải Phòng">
+                                <option value="Nha Trang">
+                                <option value="Đà Lạt">
+                                <option value="Huế">
+                                <option value="Vũng Tàu">
+                                <option value="Hội An">
+                            </datalist>
                         </div>
                     </div>
 
@@ -650,6 +663,15 @@
                     <a href="${pageContext.request.contextPath}/photographers?category=EVENT" class="quick-filter-chip <c:if test='${searchRequest.category == \"EVENT\"}'>active</c:if>">Events</a>
                     <a href="${pageContext.request.contextPath}/photographers?category=COMMERCIAL" class="quick-filter-chip <c:if test='${searchRequest.category == \"COMMERCIAL\"}'>active</c:if>">Commercial &amp; Product</a>
                 </div>
+
+                <!-- Quick Budget Chips -->
+                <div class="quick-tags-scroller mt-2">
+                    <span class="quick-tag-label">Ngân sách:</span>
+                    <a href="${pageContext.request.contextPath}/photographers?maxPrice=2000000" class="quick-filter-chip <c:if test='${searchRequest.maxPrice == 2000000 and empty searchRequest.minPrice}'>active</c:if>">&lt; 2 triệu</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=2000000&maxPrice=5000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 2000000 and searchRequest.maxPrice == 5000000}'>active</c:if>">2 - 5 triệu</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=5000000&maxPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 5000000 and searchRequest.maxPrice == 10000000}'>active</c:if>">5 - 10 triệu</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 10000000 and empty searchRequest.maxPrice}'>active</c:if>">&gt; 10 triệu</a>
+                </div>
             </form>
         </div>
 
@@ -751,13 +773,13 @@
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="#ffffff" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                             <span>
                                                 <c:choose>
-                                                    <c:when test="${not empty p.averageRating and p.averageRating > 0}">
+                                                    <c:when test="${not empty p.averageRating and p.averageRating > 0 and not p.newTalent}">
                                                         <fmt:formatNumber value="${p.averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
                                                         <c:if test="${not empty p.reviewCount and p.reviewCount > 0}">
-                                                            (${p.reviewCount})
+                                                             (${p.reviewCount})
                                                         </c:if>
                                                     </c:when>
-                                                    <c:otherwise>New</c:otherwise>
+                                                    <c:otherwise>Mới tham gia</c:otherwise>
                                                 </c:choose>
                                             </span>
                                         </div>

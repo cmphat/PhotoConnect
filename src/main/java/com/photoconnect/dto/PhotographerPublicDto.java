@@ -278,4 +278,8 @@ public class PhotographerPublicDto {
         }
         return (int) Math.round(recommendationScore * 100);
     }
+
+    public boolean isNewTalent() {
+        return reviewCount == null || reviewCount == 0;
+    }
 }

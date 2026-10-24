@@ -34,8 +34,10 @@ public class PhotographerPackageController {
         if (redirect != null) return redirect;
         Long userId = SessionSecurityUtils.userId(session);
         List<ServicePackageDto> packages = servicePackageService.getAllPackagesForStudio(userId);
+        long activeCount = packages.stream().filter(ServicePackageDto::isActive).count();
 
         model.addAttribute("packages", packages);
+        model.addAttribute("activeCount", activeCount);
         model.addAttribute("categories", PortfolioCategory.values());
         return "photographer-packages";
     }

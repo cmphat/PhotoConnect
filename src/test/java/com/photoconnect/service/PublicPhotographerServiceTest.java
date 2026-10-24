@@ -578,6 +578,19 @@ class PublicPhotographerServiceTest {
         assertThat(paged.getContent().get(1).getId()).isEqualTo(102L);
     }
 
+    @Test
+    void searchPhotographers_withZeroReviews_shouldApplyColdStartProtectionBoost() {
+        PhotographerProfile newTalent = createProfile(105L, "New Talent", new BigDecimal("2000000"), null, 0, "PORTRAIT");
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(newTalent));
+
+        List<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(new PhotographerSearchRequest());
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).isNewTalent()).isTrue();
+        assertThat(result.get(0).getRecommendationScore()).isGreaterThanOrEqualTo(0.15);
+    }
+
     private PhotographerProfile createProfile(Long id, String name, BigDecimal price, Double rating, Integer reviews, String specialty) {
         User u = new User();
         u.setId(id + 1000);

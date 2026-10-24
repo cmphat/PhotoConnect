@@ -171,4 +171,29 @@ public class PhotographerController {
             return "redirect:/photographers";
         }
     }
+
+    /**
+     * Public endpoint to compare up to 3 service packages side-by-side.
+     */
+    @GetMapping("/{id}/packages/compare")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> comparePackages(
+            @PathVariable("id") Long photographerId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "packageIds", required = false) List<Long> packageIds) {
+        if (packageIds == null || packageIds.isEmpty()) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", "Vui lòng chọn ít nhất 1 gói dịch vụ để so sánh."));
+        }
+        if (packageIds.size() > 3) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", "Chỉ có thể so sánh tối đa 3 gói dịch vụ cùng lúc."));
+        }
+        if (servicePackageService == null) {
+            return org.springframework.http.ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+        List<com.photoconnect.dto.ServicePackageDto> activePackages = servicePackageService.getActivePackagesForPhotographer(photographerId);
+        List<com.photoconnect.dto.ServicePackageDto> selected = activePackages.stream()
+                .filter(pkg -> packageIds.contains(pkg.getId()))
+                .toList();
+        return org.springframework.http.ResponseEntity.ok(selected);
+    }
 }
+

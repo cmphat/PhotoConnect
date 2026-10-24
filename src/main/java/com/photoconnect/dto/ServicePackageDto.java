@@ -24,6 +24,7 @@ public class ServicePackageDto {
     private Integer editedPhotoCount;
     private Integer deliveryDays;
     private boolean active;
+    private boolean recommended;
     private LocalDateTime createdAt;
 
     public ServicePackageDto() {
@@ -179,6 +180,14 @@ public class ServicePackageDto {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isRecommended() {
+        return recommended;
+    }
+
+    public void setRecommended(boolean recommended) {
+        this.recommended = recommended;
     }
 
     public LocalDateTime getCreatedAt() {

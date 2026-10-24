@@ -212,6 +212,12 @@ public class PublicPhotographerServiceImpl implements PublicPhotographerService 
         // Composite scoring formula: (0.35 * rating) + (0.25 * reviews) + (0.25 * completed) + (0.15 * availability)
         double score = (0.35 * normRating) + (0.25 * normReviews) + (0.25 * normCompleted) + (0.15 * availabilityScore);
 
+        // Cold-start protection: Give newly approved photographers with 0 reviews an exploration boost (0.15)
+        // ensuring high-potential new talent is not pushed to the bottom of recommendations
+        if (reviews == 0) {
+            score += 0.15;
+        }
+
         if (completeness != null && completeness >= 80) {
             score += 0.05;
         }

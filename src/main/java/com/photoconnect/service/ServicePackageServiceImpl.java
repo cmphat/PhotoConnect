@@ -42,6 +42,11 @@ public class ServicePackageServiceImpl implements ServicePackageService {
 
         PhotographerProfile profile = requireActivePhotographerProfile(photographerUserId);
 
+        long activeCount = servicePackageRepository.countByPhotographerProfileIdAndActiveTrue(profile.getId());
+        if (activeCount >= 10) {
+            throw new IllegalArgumentException("Photographer cannot have more than 10 active service packages.");
+        }
+
         ServicePackage servicePackage = new ServicePackage(
                 profile,
                 PortfolioCategory.fromFormValue(request.getCategory()),
@@ -94,6 +99,13 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         ServicePackage servicePackage = servicePackageRepository.findByIdAndPhotographerProfileId(packageId, profile.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Service package not found or does not belong to your profile."));
 
+        if (active && !servicePackage.isActive()) {
+            long activeCount = servicePackageRepository.countByPhotographerProfileIdAndActiveTrue(profile.getId());
+            if (activeCount >= 10) {
+                throw new IllegalArgumentException("Photographer cannot have more than 10 active service packages.");
+            }
+        }
+
         servicePackage.setActive(active);
         ServicePackage updated = servicePackageRepository.save(servicePackage);
         log.info("Toggled service package [{}] active state to [{}]", updated.getId(), active);
@@ -132,10 +144,19 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         if (photographerProfileId == null) {
             return List.of();
         }
-        return servicePackageRepository.findByPhotographerProfileIdAndActiveTrueOrderByPriceAsc(photographerProfileId)
+        List<ServicePackageDto> dtos = servicePackageRepository
+                .findByPhotographerProfileIdAndActiveTrueOrderByPriceAsc(photographerProfileId)
                 .stream()
                 .map(ServicePackageDto::fromEntity)
                 .collect(Collectors.toList());
+
+        if (dtos.size() >= 3) {
+            dtos.get(1).setRecommended(true);
+        } else if (!dtos.isEmpty()) {
+            dtos.get(0).setRecommended(true);
+        }
+
+        return dtos;
     }
 
     @Override

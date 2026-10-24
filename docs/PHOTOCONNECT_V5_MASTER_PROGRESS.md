@@ -17,8 +17,8 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | **Phase 1** | Identity, Email Verification & OTP | Sprint 2 | **TESTED** | 804 / 833 | 41 files changed |
 | **Phase 2** | Professional User Profiles & Social Links | Sprint 2 | **TESTED** | 804 / 833 | 8 files changed |
 | **Phase 3** | Photographer Onboarding & Verification | Sprint 2 | **TESTED** | 804 / 833 | 9 files changed |
-| **Phase 4** | Complete Service Marketplace & Comparison | Sprint 3 | **NOT_STARTED** | — | — |
-| **Phase 5** | Advanced Discovery & Recommendations | Sprint 3 | **NOT_STARTED** | — | — |
+| **Phase 4** | Complete Service Marketplace & Comparison | Sprint 3 | **TESTED** | 811 / 840 | 6 files changed |
+| **Phase 5** | Advanced Discovery & Recommendations | Sprint 3 | **TESTED** | 811 / 840 | 6 files changed |
 | **Phase 6** | Calendar & Booking Engine | Sprint 4 | **NOT_STARTED** | — | — |
 | **Phase 7** | Booking Detail & Shoot Brief | Sprint 5 | **NOT_STARTED** | — | — |
 | **Phase 8** | Deposit & Payment Consistency | Sprint 4 | **NOT_STARTED** | — | — |
@@ -128,4 +128,55 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 - **Test Results:** 833 tests run, 804 passed, 29 skipped, 0 failures, 0 errors.
 - **Unresolved Issues:** None.
 - **Next Actionable Step:** Proceed to Phase 4 (Complete Service Marketplace & Comparison) & Phase 5 (Advanced Discovery & Recommendations).
+
+---
+
+### Phase 4: Complete Service Marketplace & Comparison
+- **Status:** **TESTED**
+- **Existing Implementation:** `ServicePackage` entity, `PhotographerPackageController`, `ServicePackageRepository`, basic package cards in `photographer-detail.jsp`.
+- **Implemented & Verified:**
+  - Enforced business rule: Maximum 10 active service packages per photographer in `ServicePackageServiceImpl.createPackage` and `togglePackageActive`.
+  - Added `recommended` package detection flag in `ServicePackageDto` and `ServicePackageServiceImpl.getActivePackagesForPhotographer` (highlighting middle / recommended tier).
+  - Side-by-side package comparison feature:
+    - Added public API endpoint `GET /photographers/{id}/packages/compare?packageIds=1,2,3` in `PhotographerController` (validates max 3 packages, returns JSON).
+    - Added comparison checkboxes on package cards in `photographer-detail.jsp`.
+    - Added floating comparison dock indicating selected count (`compareDock`).
+    - Added responsive side-by-side comparison modal (`packageComparisonModal`) comparing price, duration, photo deliverables, turnaround days, and inclusions with a direct booking CTA button.
+  - Recommended package visual highlight with glowing Midnight Blue accent border and "Phổ biến nhất" badge.
+  - Active packages count indicator vs max 10 in photographer studio dashboard (`photographer-packages.jsp`).
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/dto/ServicePackageDto.java`
+  - `src/main/java/com/photoconnect/service/ServicePackageServiceImpl.java`
+  - `src/main/java/com/photoconnect/controller/PhotographerController.java`
+  - `src/main/java/com/photoconnect/controller/PhotographerPackageController.java`
+  - `src/main/webapp/WEB-INF/views/photographer-detail.jsp`
+  - `src/main/webapp/WEB-INF/views/photographer-packages.jsp`
+  - `src/test/java/com/photoconnect/service/ServicePackageServiceTest.java`
+  - `src/test/java/com/photoconnect/controller/PhotographerControllerTest.java`
+- **Migration Changes:** None required (fields already mapped).
+- **Test Results:** 840 tests run, 811 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Sprint 4 (Phases 6, 8, 9, 10).
+
+---
+
+### Phase 5: Advanced Discovery & Recommendations
+- **Status:** **TESTED**
+- **Existing Implementation:** Multi-criteria keyword, city, price range, experience, and category filtering in `PhotographerController` and `PublicPhotographerServiceImpl`.
+- **Implemented & Verified:**
+  - Cold-start protection: Implemented exploration boost (+0.15) for newly approved photographers with 0 reviews in `calculateRecommendationScore`, preventing new creators from being buried at the bottom of search results.
+  - Added `isNewTalent()` helper in `PhotographerPublicDto`.
+  - Added "Mới tham gia" badge on photographer cards in `photographers.jsp` for cold-start creators.
+  - Added quick budget range chips in `photographers.jsp`: `< 2 triệu`, `2 - 5 triệu`, `5 - 10 triệu`, `> 10 triệu`.
+  - Added Vietnamese cities datalist for instant autocomplete suggestions in search bar (Hà Nội, TP. Hồ Chí Minh, Đà Nẵng, Cần Thơ, Hải Phòng, Nha Trang, Đà Lạt, Huế, Vũng Tàu, Hội An).
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/dto/PhotographerPublicDto.java`
+  - `src/main/java/com/photoconnect/service/PublicPhotographerServiceImpl.java`
+  - `src/main/webapp/WEB-INF/views/photographers.jsp`
+  - `src/test/java/com/photoconnect/service/PublicPhotographerServiceTest.java`
+- **Migration Changes:** None.
+- **Test Results:** 840 tests run, 811 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Proceed to Sprint 4 — Booking & Collaboration (Phase 6: Calendar & Booking Engine, Phase 8: Deposit & Payment Consistency, Phase 9: Messaging & STOMP Chat Collaboration, Phase 10: Notification Center & Delivery).
+
 

@@ -205,6 +205,50 @@ class ServicePackageServiceTest {
     }
 
     @Test
+    void createPackage_ExceedsMaxActivePackages_ThrowsException() {
+        when(photographerProfileRepository.findByUserIdWithUser(2L)).thenReturn(Optional.of(profile));
+        when(servicePackageRepository.countByPhotographerProfileIdAndActiveTrue(10L)).thenReturn(10L);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                servicePackageService.createPackage(2L, validRequest));
+
+        assertTrue(ex.getMessage().contains("10 active service packages"));
+    }
+
+    @Test
+    void togglePackageActive_ExceedsMaxActivePackages_ThrowsException() {
+        pkg.setActive(false);
+        when(photographerProfileRepository.findByUserIdWithUser(2L)).thenReturn(Optional.of(profile));
+        when(servicePackageRepository.findByIdAndPhotographerProfileId(100L, 10L)).thenReturn(Optional.of(pkg));
+        when(servicePackageRepository.countByPhotographerProfileIdAndActiveTrue(10L)).thenReturn(10L);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                servicePackageService.togglePackageActive(2L, 100L, true));
+
+        assertTrue(ex.getMessage().contains("10 active service packages"));
+    }
+
+    @Test
+    void getActivePackagesForPhotographer_MarksRecommendedPackage() {
+        ServicePackage pkg1 = new ServicePackage(profile, PortfolioCategory.PORTRAIT, "Basic", "Desc", BigDecimal.valueOf(1000000), 60, 20, 3);
+        pkg1.setId(1L);
+        ServicePackage pkg2 = new ServicePackage(profile, PortfolioCategory.PORTRAIT, "Standard", "Desc", BigDecimal.valueOf(3000000), 120, 50, 5);
+        pkg2.setId(2L);
+        ServicePackage pkg3 = new ServicePackage(profile, PortfolioCategory.PORTRAIT, "Premium", "Desc", BigDecimal.valueOf(7000000), 240, 100, 7);
+        pkg3.setId(3L);
+
+        when(servicePackageRepository.findByPhotographerProfileIdAndActiveTrueOrderByPriceAsc(10L))
+                .thenReturn(List.of(pkg1, pkg2, pkg3));
+
+        List<ServicePackageDto> list = servicePackageService.getActivePackagesForPhotographer(10L);
+
+        assertEquals(3, list.size());
+        assertFalse(list.get(0).isRecommended());
+        assertTrue(list.get(1).isRecommended()); // Middle package recommended
+        assertFalse(list.get(2).isRecommended());
+    }
+
+    @Test
     void getActivePackagesForPhotographer_ReturnsList() {
         when(servicePackageRepository.findByPhotographerProfileIdAndActiveTrueOrderByPriceAsc(10L))
                 .thenReturn(Collections.singletonList(pkg));
@@ -213,5 +257,6 @@ class ServicePackageServiceTest {
 
         assertEquals(1, list.size());
         assertEquals("Standard Wedding Package", list.get(0).getName());
+        assertTrue(list.get(0).isRecommended());
     }
 }

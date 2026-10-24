@@ -51,6 +51,9 @@ class PhotographerControllerTest {
     @MockBean
     private com.photoconnect.service.SavedPhotographerService savedPhotographerService;
 
+    @MockBean
+    private com.photoconnect.service.ServicePackageService servicePackageService;
+
     private PhotographerPublicDto sampleDto() {
         com.photoconnect.entity.User user = new com.photoconnect.entity.User();
         user.setId(10L);
@@ -304,5 +307,41 @@ class PhotographerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("photographers"))
                 .andExpect(model().attribute("savedPhotographerIds", java.util.Set.of(10L)));
+    }
+
+    @Test
+    void comparePackages_emptyIds_shouldReturn400() throws Exception {
+        mockMvc.perform(get("/photographers/10/packages/compare"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void comparePackages_moreThan3Ids_shouldReturn400() throws Exception {
+        mockMvc.perform(get("/photographers/10/packages/compare?packageIds=1,2,3,4"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Chỉ có thể so sánh tối đa 3 gói dịch vụ cùng lúc."));
+    }
+
+    @Test
+    void comparePackages_validIds_shouldReturn200AndMatchingPackages() throws Exception {
+        com.photoconnect.dto.ServicePackageDto pkg1 = new com.photoconnect.dto.ServicePackageDto();
+        pkg1.setId(1L);
+        pkg1.setName("Basic Session");
+
+        com.photoconnect.dto.ServicePackageDto pkg2 = new com.photoconnect.dto.ServicePackageDto();
+        pkg2.setId(2L);
+        pkg2.setName("Deluxe Session");
+
+        when(servicePackageService.getActivePackagesForPhotographer(10L))
+                .thenReturn(List.of(pkg1, pkg2));
+
+        mockMvc.perform(get("/photographers/10/packages/compare?packageIds=1,2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Basic Session"))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].name").value("Deluxe Session"));
     }
 }
