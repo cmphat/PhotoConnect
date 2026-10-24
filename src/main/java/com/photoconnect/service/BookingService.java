@@ -67,4 +67,14 @@ public interface BookingService {
      * Photographer completes a booking.
      */
     void completeBooking(Long bookingId, Long photographerUserId);
+
+    /**
+     * Updates photographer private CRM notes on a booking.
+     */
+    void updatePhotographerNotes(Long bookingId, Long photographerUserId, String notes);
+
+    /**
+     * Returns count of completed shoots between photographer profile and customer.
+     */
+    long getCompletedShootCountWithCustomer(Long photographerProfileId, Long customerId);
 }

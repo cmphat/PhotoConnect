@@ -233,4 +233,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE b.status = com.photoconnect.entity.BookingStatus.COMPLETED
             """)
     java.math.BigDecimal calculateTotalPlatformCompletedRevenue();
+
+    @Query("""
+            SELECT COUNT(b) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.customer.id = :customerId
+              AND b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            """)
+    long countCompletedShootsForCustomerAndPhotographer(@Param("profileId") Long profileId,
+                                                        @Param("customerId") Long customerId);
 }

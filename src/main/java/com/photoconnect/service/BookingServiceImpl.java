@@ -460,4 +460,23 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS, "Only ACCEPTED bookings can be marked as completed.");
         }
     }
+
+    @Override
+    @Transactional
+    public void updatePhotographerNotes(Long bookingId, Long photographerUserId, String notes) {
+        Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
+        if (notes != null && notes.trim().length() > 1500) {
+            throw new InvalidBookingException("Ghi chú nội bộ của photographer không được vượt quá 1500 ký tự.");
+        }
+        booking.setPhotographerNotes(notes != null && !notes.isBlank() ? notes.trim() : null);
+        bookingRepository.save(booking);
+    }
+
+    @Override
+    public long getCompletedShootCountWithCustomer(Long photographerProfileId, Long customerId) {
+        if (photographerProfileId == null || customerId == null) {
+            return 0L;
+        }
+        return bookingRepository.countCompletedShootsForCustomerAndPhotographer(photographerProfileId, customerId);
+    }
 }

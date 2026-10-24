@@ -23,17 +23,29 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final BookingRepository bookingRepository;
     private final ReviewRepository reviewRepository;
     private final DepositRepository depositRepository;
+    private final com.photoconnect.repository.UserReportRepository userReportRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AdminDashboardServiceImpl(UserRepository userRepository,
+                                     PhotographerProfileRepository photographerProfileRepository,
+                                     BookingRepository bookingRepository,
+                                     ReviewRepository reviewRepository,
+                                     DepositRepository depositRepository,
+                                     @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.repository.UserReportRepository userReportRepository) {
+        this.userRepository = userRepository;
+        this.photographerProfileRepository = photographerProfileRepository;
+        this.bookingRepository = bookingRepository;
+        this.reviewRepository = reviewRepository;
+        this.depositRepository = depositRepository;
+        this.userReportRepository = userReportRepository;
+    }
 
     public AdminDashboardServiceImpl(UserRepository userRepository,
                                      PhotographerProfileRepository photographerProfileRepository,
                                      BookingRepository bookingRepository,
                                      ReviewRepository reviewRepository,
                                      DepositRepository depositRepository) {
-        this.userRepository = userRepository;
-        this.photographerProfileRepository = photographerProfileRepository;
-        this.bookingRepository = bookingRepository;
-        this.reviewRepository = reviewRepository;
-        this.depositRepository = depositRepository;
+        this(userRepository, photographerProfileRepository, bookingRepository, reviewRepository, depositRepository, null);
     }
 
     @Override
@@ -86,6 +98,10 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         dto.setForfeitedDepositsAmount(forfeitedAmt != null ? forfeitedAmt : BigDecimal.ZERO);
         dto.setRefundedDepositsCount(depositRepository.countByStatus(DepositStatus.REFUNDED));
         dto.setForfeitedDepositsCount(depositRepository.countByStatus(DepositStatus.FORFEITED));
+
+        if (userReportRepository != null) {
+            dto.setPendingReportsCount(userReportRepository.countByStatus(com.photoconnect.entity.ReportStatus.PENDING));
+        }
 
         return dto;
     }

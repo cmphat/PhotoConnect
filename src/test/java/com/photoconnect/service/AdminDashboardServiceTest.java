@@ -39,6 +39,9 @@ class AdminDashboardServiceTest {
     @Mock
     private DepositRepository depositRepository;
 
+    @Mock
+    private com.photoconnect.repository.UserReportRepository userReportRepository;
+
     private AdminDashboardService adminDashboardService;
 
     @BeforeEach
@@ -117,5 +120,25 @@ class AdminDashboardServiceTest {
         verify(reviewRepository).count();
         verify(depositRepository).countByStatus(DepositStatus.PAID);
         verify(depositRepository).sumAmountByStatus(DepositStatus.PAID);
+    }
+
+    @Test
+    void getDashboardStats_withUserReports_populatesPendingReportsCount() {
+        AdminDashboardService serviceWithReports = new AdminDashboardServiceImpl(
+                userRepository,
+                photographerProfileRepository,
+                bookingRepository,
+                reviewRepository,
+                depositRepository,
+                userReportRepository
+        );
+
+        when(userReportRepository.countByStatus(com.photoconnect.entity.ReportStatus.PENDING)).thenReturn(7L);
+
+        AdminDashboardStatsDto stats = serviceWithReports.getDashboardStats();
+
+        assertNotNull(stats);
+        assertEquals(7L, stats.getPendingReportsCount());
+        verify(userReportRepository).countByStatus(com.photoconnect.entity.ReportStatus.PENDING);
     }
 }

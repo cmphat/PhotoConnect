@@ -69,7 +69,15 @@ public class PhotographerBookingController {
 
         try {
             Booking booking = bookingService.getBookingForPhotographer(bookingId, userId);
-            model.addAttribute("booking", BookingViewDto.from(booking));
+            BookingViewDto viewDto = BookingViewDto.from(booking);
+            if (booking.getCustomer() != null && booking.getPhotographerProfile() != null) {
+                long shootCount = bookingService.getCompletedShootCountWithCustomer(
+                        booking.getPhotographerProfile().getId(),
+                        booking.getCustomer().getId()
+                );
+                viewDto.setPastCompletedShootsWithClient(shootCount);
+            }
+            model.addAttribute("booking", viewDto);
             if (bookingStateMachineService != null) {
                 model.addAttribute("history", bookingStateMachineService.getHistoryForBooking(bookingId, userId));
             }
@@ -320,6 +328,25 @@ public class PhotographerBookingController {
         } catch (InvalidBookingException | PhotographerUnavailableException | UnauthorizedException | IllegalStateException ex) {
             throw ex;
         } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/photographer/bookings/" + bookingId;
+    }
+
+    @PostMapping("/{id}/notes")
+    public String updatePhotographerNotes(@PathVariable("id") Long bookingId,
+                                          @RequestParam(value = "notes", required = false) String notes,
+                                          HttpSession session,
+                                          RedirectAttributes redirectAttributes) {
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        if (redirect != null) return redirect;
+        Long userId = SessionSecurityUtils.userId(session);
+
+        try {
+            bookingService.updatePhotographerNotes(bookingId, userId, notes);
+            redirectAttributes.addFlashAttribute("successMessage", "Ghi chú nội bộ studio đã được cập nhật thành công.");
+        } catch (InvalidBookingException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 

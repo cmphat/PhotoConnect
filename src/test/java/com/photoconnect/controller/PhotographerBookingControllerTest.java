@@ -234,5 +234,16 @@ class PhotographerBookingControllerTest {
                             .param("targetStatus", "SHOOTING"))
                     .andExpect(status().isConflict());
         }
+
+        @Test
+        @DisplayName("POST /photographer/bookings/{id}/notes should update private notes and redirect")
+        void updatePhotographerNotes_shouldUpdateAndRedirect() throws Exception {
+            mockMvc.perform(post("/photographer/bookings/100/notes")
+                            .session(ownerSession)
+                            .param("notes", "Client requested natural daylight"))
+                    .andExpect(status().is3xxRedirection());
+
+            verify(bookingService).updatePhotographerNotes(100L, 1L, "Client requested natural daylight");
+        }
     }
 }

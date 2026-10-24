@@ -63,6 +63,7 @@ public class BookingViewDto {
         dto.setShotList(booking.getShotList());
         dto.setPropsNeeded(booking.getPropsNeeded());
         dto.setParticipantCount(booking.getParticipantCount());
+        dto.setPhotographerNotes(booking.getPhotographerNotes());
         return dto;
     }
 
@@ -297,5 +298,24 @@ public class BookingViewDto {
 
     public void setParticipantCount(Integer participantCount) {
         this.participantCount = participantCount;
+    }
+
+    private String photographerNotes;
+    private Long pastCompletedShootsWithClient;
+
+    public String getPhotographerNotes() {
+        return photographerNotes;
+    }
+
+    public void setPhotographerNotes(String photographerNotes) {
+        this.photographerNotes = photographerNotes;
+    }
+
+    public Long getPastCompletedShootsWithClient() {
+        return pastCompletedShootsWithClient;
+    }
+
+    public void setPastCompletedShootsWithClient(Long pastCompletedShootsWithClient) {
+        this.pastCompletedShootsWithClient = pastCompletedShootsWithClient;
     }
 }

@@ -96,9 +96,9 @@
 
         <c:if test="${dashboard.summary.upcomingCount > 0 || dashboard.summary.pendingCount > 0 || dashboard.summary.completedCount > 0 || dashboard.summary.savedCount > 0}">
             <section class="dashboard-summary" aria-label="Booking summary">
-                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.upcomingCount}"/></span><span class="dashboard-stat__label">Upcoming</span></a>
-                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.pendingCount}"/></span><span class="dashboard-stat__label">Pending</span></a>
-                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.completedCount}"/></span><span class="dashboard-stat__label">Completed</span></a>
+                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings?status=UPCOMING"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.upcomingCount}"/></span><span class="dashboard-stat__label">Upcoming</span></a>
+                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings?status=PENDING"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.pendingCount}"/></span><span class="dashboard-stat__label">Pending</span></a>
+                <a class="dashboard-stat" href="${pageContext.request.contextPath}/bookings?status=COMPLETED"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.completedCount}"/></span><span class="dashboard-stat__label">Completed</span></a>
                 <a class="dashboard-stat" href="${pageContext.request.contextPath}/customer/saved-photographers"><span class="dashboard-stat__value"><c:out value="${dashboard.summary.savedCount}"/></span><span class="dashboard-stat__label">Saved</span></a>
             </section>
         </c:if>

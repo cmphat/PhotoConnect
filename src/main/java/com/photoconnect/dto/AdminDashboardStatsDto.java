@@ -216,4 +216,14 @@ public class AdminDashboardStatsDto {
     public void setForfeitedDepositsCount(long forfeitedDepositsCount) {
         this.forfeitedDepositsCount = forfeitedDepositsCount;
     }
+
+    private long pendingReportsCount;
+
+    public long getPendingReportsCount() {
+        return pendingReportsCount;
+    }
+
+    public void setPendingReportsCount(long pendingReportsCount) {
+        this.pendingReportsCount = pendingReportsCount;
+    }
 }

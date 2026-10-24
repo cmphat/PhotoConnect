@@ -50,6 +50,9 @@ public class Booking {
     @Column(name = "notes", length = 1000)
     private String notes;
 
+    @Column(name = "photographer_notes", length = 1500)
+    private String photographerNotes;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_package_id")
     private ServicePackage servicePackage;
@@ -200,6 +203,14 @@ public class Booking {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getPhotographerNotes() {
+        return photographerNotes;
+    }
+
+    public void setPhotographerNotes(String photographerNotes) {
+        this.photographerNotes = photographerNotes;
     }
 
     public BigDecimal getAgreedPrice() {

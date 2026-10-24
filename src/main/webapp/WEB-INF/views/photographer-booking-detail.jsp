@@ -203,6 +203,18 @@
                         </div>
                         <h2 class="editorial-heading" style="font-size: 1.75rem; margin: 0 0 0.35rem 0;">
                             from <c:out value="${booking.customerName}"/>
+                            <c:choose>
+                                <c:when test="${not empty booking.pastCompletedShootsWithClient and booking.pastCompletedShootsWithClient > 0}">
+                                    <span class="badge bg-success" style="font-size: 0.78rem; vertical-align: middle; margin-left: 0.5rem;">
+                                        ★ Khách quen (${booking.pastCompletedShootsWithClient} buổi đã hoàn thành)
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge bg-light text-dark" style="font-size: 0.78rem; vertical-align: middle; margin-left: 0.5rem; border: 1px solid var(--border);">
+                                        Khách hàng mới
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
                         </h2>
                         <c:if test="${not empty booking.createdAt}">
                             <fmt:parseDate value="${fn:substring(booking.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedCreatedAt" type="date" />
@@ -332,6 +344,32 @@
                             </div>
                         </div>
                     </c:if>
+
+                    <!-- Private Studio CRM Notes (Phase 13) -->
+                    <div style="grid-column: span 2; margin-top: 1.25rem;">
+                        <div style="background: rgba(15, 23, 42, 0.02); border: 1px solid var(--border); border-radius: var(--radius-sm, 8px); padding: 1.25rem 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text); display: flex; align-items: center; gap: 0.4rem;">
+                                    <i class="bi bi-journal-bookmark-fill" style="color: var(--accent);"></i> Ghi chú nội bộ Studio / Private CRM Notes
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--muted); font-style: italic;">
+                                    Chỉ bạn nhìn thấy &middot; Ẩn với khách hàng
+                                </span>
+                            </div>
+                            <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/notes" method="post">
+                                <%@ include file="fragments/csrf-input.jsp" %>
+                                <div class="mb-2">
+                                    <textarea name="notes" rows="3" class="form-control" style="font-size: 0.9rem;"
+                                              placeholder="Ghi chú sở thích khách hàng, phong cách ánh sáng, thiết bị cần mang, thanh toán tiền mặt..."><c:out value="${booking.photographerNotes}"/></textarea>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <button type="submit" class="btn btn-secondary btn-sm" id="btn-save-crm-notes">
+                                        <i class="bi bi-save me-1"></i> Lưu ghi chú / Save Notes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ── Photographer Action Bar ────────────────────────────── -->

@@ -666,4 +666,40 @@ class BookingServiceTest {
         verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.COMPLETED), eq(2L), any());
         verify(bookingRepository).save(booking);
     }
+
+    @Test
+    void updatePhotographerNotes_savesPrivateNotesForOwner() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.updatePhotographerNotes(50L, 2L, "Khách thích phong cách tự nhiên, hẹn mang thêm 1 bộ đồ vintage");
+
+        assertThat(booking.getPhotographerNotes()).isEqualTo("Khách thích phong cách tự nhiên, hẹn mang thêm 1 bộ đồ vintage");
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void updatePhotographerNotes_notesTooLong_throwsException() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        String hugeNotes = "a".repeat(1501);
+        assertThatThrownBy(() -> bookingService.updatePhotographerNotes(50L, 2L, hugeNotes))
+                .isInstanceOf(InvalidBookingException.class)
+                .hasMessageContaining("không được vượt quá 1500 ký tự");
+    }
+
+    @Test
+    void getCompletedShootCountWithCustomer_delegatesToRepository() {
+        when(bookingRepository.countCompletedShootsForCustomerAndPhotographer(10L, 1L)).thenReturn(3L);
+
+        long count = bookingService.getCompletedShootCountWithCustomer(10L, 1L);
+
+        assertThat(count).isEqualTo(3L);
+        verify(bookingRepository).countCompletedShootsForCustomerAndPhotographer(10L, 1L);
+    }
 }

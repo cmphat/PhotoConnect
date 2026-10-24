@@ -31,9 +31,9 @@
                     <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
-            <c:if test="${stats.pendingPhotographerApprovals > 0 or stats.disputedBookings > 0}">
+            <c:if test="${stats.pendingPhotographerApprovals > 0 or stats.disputedBookings > 0 or stats.pendingReportsCount > 0}">
                 <div class="alert alert-warning pc-alert pc-alert-warning" role="alert">
-                    <strong>Operational Notice:</strong> Pending photographer verifications or booking disputes require administrative review.
+                    <strong>Operational Notice:</strong> Pending photographer verifications, booking disputes, or incident violation reports require administrative review.
                 </div>
             </c:if>
 
@@ -73,11 +73,11 @@
                 </div>
             </div>
 
-            <!-- KPI Group 2: Photographer Verification Queue -->
+            <!-- KPI Group 2: Photographer Verification & Trust Safety -->
             <div style="margin-bottom: 2.5rem;">
-                <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem;">Verification & Quality</h3>
+                <h3 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem;">Verification &amp; Trust Safety</h3>
                 <div class="kpi-grid row g-4">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <div class="kpi-card <c:if test="${stats.pendingPhotographerApprovals > 0}">pending-alert</c:if>">
                             <div class="kpi-header">
                                 <span class="kpi-title">Pending Approvals</span>
@@ -92,7 +92,22 @@
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
+                        <div class="kpi-card <c:if test="${stats.pendingReportsCount > 0}">pending-alert</c:if>">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Violation Reports</span>
+                                <c:if test="${stats.pendingReportsCount > 0}">
+                                    <span style="background-color: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 2px;">Review Needed</span>
+                                </c:if>
+                            </div>
+                            <div class="kpi-value" style="color: <c:choose><c:when test="${stats.pendingReportsCount > 0}">#ef4444</c:when><c:otherwise>var(--text)</c:otherwise></c:choose>;">
+                                <c:out value="${stats.pendingReportsCount}"/>
+                            </div>
+                            <p class="kpi-subtext"><a href="${pageContext.request.contextPath}/admin/reviews?tab=reports" style="color: inherit; text-decoration: underline;">Moderate Trust &amp; Safety &rarr;</a></p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-3">
                         <div class="kpi-card">
                             <div class="kpi-header">
                                 <span class="kpi-title">Approved Photographers</span>
@@ -102,7 +117,7 @@
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <div class="kpi-card">
                             <div class="kpi-header">
                                 <span class="kpi-title">Client Reviews</span>

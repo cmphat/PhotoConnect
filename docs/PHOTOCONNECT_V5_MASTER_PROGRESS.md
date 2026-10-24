@@ -25,10 +25,10 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | **Phase 9** | Messaging & STOMP Chat Collaboration | Sprint 4 | **TESTED** | 822 / 851 | Verified |
 | **Phase 10** | Notification Center & Delivery | Sprint 4 | **TESTED** | 822 / 851 | Verified |
 | **Phase 11** | Secure Photo Delivery & Revision Workflow | Sprint 5 | **TESTED** | 822 / 851 | Verified |
-| **Phase 12** | Customer Workspace & Dashboard | Sprint 6 | **NOT_STARTED** | — | — |
-| **Phase 13** | Photographer Studio & CRM | Sprint 6 | **NOT_STARTED** | — | — |
+| **Phase 12** | Customer Workspace & Dashboard | Sprint 6 | **TESTED** | 827 / 856 | 3 files changed |
+| **Phase 13** | Photographer Studio & CRM | Sprint 6 | **TESTED** | 827 / 856 | 7 files changed |
 | **Phase 14** | Reviews, Trust & Reporting | Sprint 5 | **TESTED** | 822 / 851 | 11 files changed |
-| **Phase 15** | Admin Management System & Auditing | Sprint 6 | **NOT_STARTED** | — | — |
+| **Phase 15** | Admin Management System & Auditing | Sprint 6 | **TESTED** | 827 / 856 | 4 files changed |
 | **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **NOT_STARTED** | — | — |
 | **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **NOT_STARTED** | — | — |
 | **Phase 18** | Security Hardening & Penetration Defense | Sprint 7 | **NOT_STARTED** | — | — |
@@ -310,7 +310,75 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 - **Migration Changes:** `V025__create_user_reports.sql` (created and added to Flyway).
 - **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
 - **Unresolved Issues:** None.
-- **Next Actionable Step:** Proceed to Sprint 6 — Management, CRM & Analytics (Phase 12: Customer Workspace & Dashboard, Phase 13: Photographer Studio & CRM, Phase 15: Admin Management System & Auditing).
+- **Next Actionable Step:** Proceed to Sprint 6.
+
+---
+
+### Phase 12: Customer Workspace & Dashboard
+- **Status:** **TESTED**
+- **Existing Implementation:** `CustomerDashboardController`, `CustomerDashboardService`, `CustomerDashboardServiceImpl`, `CustomerDashboardView`, `customer-dashboard.jsp`.
+- **Implemented & Verified:**
+  - Added full status filtering in `BookingController.listCustomerBookings` (`UPCOMING`, `PENDING`, `ACCEPTED`, `COMPLETED`, `CANCELLED`).
+  - Added interactive filter pills and actionable empty states in `bookings.jsp` allowing instant switching across booking states.
+  - Linked KPI summary cards in `customer-dashboard.jsp` (`Upcoming`, `Pending`, `Completed`) directly to pre-filtered booking views with query parameters.
+  - Verified `CustomerDashboardUiContractTest` passed.
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/controller/BookingController.java`
+  - `src/main/webapp/WEB-INF/views/bookings.jsp`
+  - `src/main/webapp/WEB-INF/views/customer-dashboard.jsp`
+- **Migration Changes:** None.
+- **Test Results:** 856 tests run, 827 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 13: Photographer Studio & CRM
+- **Status:** **TESTED**
+- **Existing Implementation:** `PhotographerDashboardController`, `PhotographerDashboardService`, `photographer-dashboard.jsp`, `photographer-analytics.jsp`.
+- **Implemented & Verified:**
+  - Created Flyway migration `V026__add_photographer_notes_to_bookings.sql` adding `photographer_notes` (NVARCHAR(1500) NULL) to `dbo.bookings`.
+  - Updated `Booking` entity and `BookingViewDto` to support creator-private notes.
+  - Added query `countCompletedShootsForCustomerAndPhotographer` in `BookingRepository` to calculate customer shoot history count.
+  - Implemented `updatePhotographerNotes` and `getCompletedShootCountWithCustomer` in `BookingService` and `BookingServiceImpl`.
+  - Added endpoint `POST /photographer/bookings/{id}/notes` in `PhotographerBookingController`.
+  - Updated `photographer-booking-detail.jsp` with:
+    - Customer loyalty relationship badge ("Khách quen (X buổi đã hoàn thành)" vs "Khách hàng mới").
+    - Private Studio CRM Notes card with CSRF-protected form to record private customer preferences, lighting style, gear notes, or onsite payment tracking (strictly hidden from customers).
+  - Added unit tests in `BookingServiceTest` and `PhotographerBookingControllerTest`.
+- **Files Changed:**
+  - `src/main/resources/db/migration/V026__add_photographer_notes_to_bookings.sql`
+  - `src/main/java/com/photoconnect/entity/Booking.java`
+  - `src/main/java/com/photoconnect/repository/BookingRepository.java`
+  - `src/main/java/com/photoconnect/dto/BookingViewDto.java`
+  - `src/main/java/com/photoconnect/service/BookingService.java`
+  - `src/main/java/com/photoconnect/service/BookingServiceImpl.java`
+  - `src/main/java/com/photoconnect/controller/PhotographerBookingController.java`
+  - `src/main/webapp/WEB-INF/views/photographer-booking-detail.jsp`
+  - `src/test/java/com/photoconnect/service/BookingServiceTest.java`
+  - `src/test/java/com/photoconnect/controller/PhotographerBookingControllerTest.java`
+- **Migration Changes:** `V026__add_photographer_notes_to_bookings.sql` (created and added to Flyway).
+- **Test Results:** 856 tests run, 827 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 15: Admin Management System & Auditing
+- **Status:** **TESTED**
+- **Existing Implementation:** `AdminDashboardController`, `AdminUserController`, `AdminPhotographerController`, `AdminBookingController`, `AdminReviewController`.
+- **Implemented & Verified:**
+  - Integrated Trust & Safety incident reports queue metrics (`pendingReportsCount`) into `AdminDashboardStatsDto` and `AdminDashboardServiceImpl`.
+  - Updated `admin-dashboard.jsp` with a dedicated Trust & Safety Violation Reports KPI card with direct moderation navigation link (`/admin/reviews?tab=reports`).
+  - Updated Operational Notice banner in `admin-dashboard.jsp` to alert administrators whenever incident reports require attention.
+  - Added unit test in `AdminDashboardServiceTest` for `pendingReportsCount`.
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/dto/AdminDashboardStatsDto.java`
+  - `src/main/java/com/photoconnect/service/AdminDashboardServiceImpl.java`
+  - `src/main/webapp/WEB-INF/views/admin-dashboard.jsp`
+  - `src/test/java/com/photoconnect/service/AdminDashboardServiceTest.java`
+- **Migration Changes:** None (builds on V025 user reports schema).
+- **Test Results:** 856 tests run, 827 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Proceed to Sprint 7 — Quality, Performance & Hardening (Phase 16: Complete UI/UX Polish in Midnight Blue, Phase 17: Performance, Query Optimization & Logging, Phase 18: Security Hardening & Penetration Defense).
 
 
 

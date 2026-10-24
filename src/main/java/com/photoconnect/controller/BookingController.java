@@ -179,13 +179,32 @@ public class BookingController {
      * List customer bookings.
      */
     @GetMapping("/bookings")
-    public String listCustomerBookings(HttpSession session, Model model) {
+    public String listCustomerBookings(@RequestParam(value = "status", required = false) String statusStr,
+                                       HttpSession session, Model model) {
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
         Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         java.util.List<Booking> bookings = bookingService.getCustomerBookings(userId);
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr)) {
+            String norm = statusStr.trim().toUpperCase();
+            if ("UPCOMING".equals(norm)) {
+                java.time.LocalDate today = java.time.LocalDate.now();
+                bookings = bookings.stream()
+                        .filter(b -> (b.getStatus() == com.photoconnect.entity.BookingStatus.ACCEPTED
+                                || b.getStatus() == com.photoconnect.entity.BookingStatus.PENDING)
+                                && !b.getBookingDate().isBefore(today))
+                        .toList();
+            } else {
+                try {
+                    com.photoconnect.entity.BookingStatus filterStatus = com.photoconnect.entity.BookingStatus.valueOf(norm);
+                    bookings = bookings.stream().filter(b -> b.getStatus() == filterStatus).toList();
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
         model.addAttribute("bookings", bookings.stream().map(com.photoconnect.dto.BookingViewDto::from).toList());
+        model.addAttribute("selectedStatus", statusStr != null ? statusStr.trim().toUpperCase() : "ALL");
         return "bookings";
     }
 
