@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import com.photoconnect.security.LoginRateLimiter;
+import com.photoconnect.util.ClientIpUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,10 +25,18 @@ public class LoginController {
 
     private final AuthService authService;
     private final JwtCookieService jwtCookieService;
+    private LoginRateLimiter loginRateLimiter = new LoginRateLimiter();
 
     public LoginController(AuthService authService, JwtCookieService jwtCookieService) {
         this.authService = authService;
         this.jwtCookieService = jwtCookieService;
+    }
+
+    @Autowired(required = false)
+    public void setLoginRateLimiter(LoginRateLimiter loginRateLimiter) {
+        if (loginRateLimiter != null) {
+            this.loginRateLimiter = loginRateLimiter;
+        }
     }
 
     @GetMapping("/login")
@@ -51,8 +62,16 @@ public class LoginController {
             return "login";
         }
 
+        String clientIp = ClientIpUtils.getClientIp(httpRequest);
+        LoginRateLimiter.RateLimitResult rateLimitResult = loginRateLimiter.checkAllowed(loginRequest.getEmail(), clientIp);
+        if (!rateLimitResult.isAllowed()) {
+            model.addAttribute("authError", rateLimitResult.errorMessage());
+            return "login";
+        }
+
         try {
             User user = authService.authenticate(loginRequest);
+            loginRateLimiter.recordSuccess(loginRequest.getEmail(), clientIp);
             httpRequest.changeSessionId();
             session.setAttribute("userId", user.getId());
             session.setAttribute("userEmail", user.getEmail());
@@ -66,6 +85,7 @@ public class LoginController {
             }
             return "redirect:/";
         } catch (InvalidCredentialsException | AccountDisabledException e) {
+            loginRateLimiter.recordFailure(loginRequest.getEmail(), clientIp);
             model.addAttribute("authError", e.getMessage());
             return "login";
         }

@@ -29,9 +29,9 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | **Phase 13** | Photographer Studio & CRM | Sprint 6 | **TESTED** | 827 / 856 | 7 files changed |
 | **Phase 14** | Reviews, Trust & Reporting | Sprint 5 | **TESTED** | 822 / 851 | 11 files changed |
 | **Phase 15** | Admin Management System & Auditing | Sprint 6 | **TESTED** | 827 / 856 | 4 files changed |
-| **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **NOT_STARTED** | — | — |
-| **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **NOT_STARTED** | — | — |
-| **Phase 18** | Security Hardening & Penetration Defense | Sprint 7 | **NOT_STARTED** | — | — |
+| **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **TESTED** | 836 / 865 | 8 files changed |
+| **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **TESTED** | 836 / 865 | 1 file changed |
+| **Phase 18** | Security Hardening & Penetration Defense | Sprint 7 | **TESTED** | 836 / 865 | 5 files changed |
 | **Phase 19** | Database Migration & Baseline Verification | Sprint 8 | **NOT_STARTED** | — | — |
 | **Phase 20** | Automated Testing & End-to-End QA | Sprint 8 | **NOT_STARTED** | — | — |
 | **Phase 21** | Error Handling, Edge Cases & Resilience | Sprint 8 | **NOT_STARTED** | — | — |
@@ -378,7 +378,80 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 - **Migration Changes:** None (builds on V025 user reports schema).
 - **Test Results:** 856 tests run, 827 passed, 29 skipped, 0 failures, 0 errors.
 - **Unresolved Issues:** None.
-- **Next Actionable Step:** Proceed to Sprint 7 — Quality, Performance & Hardening (Phase 16: Complete UI/UX Polish in Midnight Blue, Phase 17: Performance, Query Optimization & Logging, Phase 18: Security Hardening & Penetration Defense).
+- **Next Actionable Step:** Proceed to Sprint 7 — Quality, Performance & Hardening.
+
+---
+
+### Phase 16: Complete UI/UX Polish in Midnight Blue
+- **Status:** **TESTED**
+- **Existing Implementation:** Midnight Blue tokens in `tokens.css` and `photoconnect.css`, Bootstrap 5.3.3 decorators (`default.jsp`, `admin.jsp`), responsive grid utilities.
+- **Implemented & Verified:**
+  - Audited all 42 content JSPs and 2 SiteMesh decorators, ensuring strict adherence to Midnight Blue palette tokens (`--pc-primary: #2563EB`, `--pc-primary-hover: #1D4ED8`, `--pc-navy: #0F172A`, `--pc-navy-deep: #172554`, `--pc-bg: #F8FAFC`, `--pc-border: #CBD5E1`).
+  - Verified mobile responsive layouts (breakpoints across 375px, 640px, 768px, 991px, 1024px, 1440px).
+  - Verified typography stack (`Inter` sans-serif + `Playfair Display` serif for editorial titles) and natural professional Vietnamese copy across views.
+  - Verified zero unclassed buttons across all 43 JSPs.
+  - Verified `Task031UiPolishContractTest`, `ResponsiveUiContractTest`, `Task030QaIntegrationContractTest`, `BootstrapIntegrationContractTest`, `SiteMeshIntegrationContractTest`, and `Sprint7QualityContractTest` passed with 0 errors.
+- **Files Changed:**
+  - `src/test/java/com/photoconnect/ui/Sprint7QualityContractTest.java`
+- **Migration Changes:** None.
+- **Test Results:** 865 tests run, 836 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 17: Performance, Query Optimization & Logging
+- **Status:** **TESTED**
+- **Existing Implementation:** Spring Boot JPA with `open-in-view=false`, SQL Server dialect.
+- **Implemented & Verified:**
+  - Configured HikariCP connection pool parameters in `application.properties`:
+    - `maximum-pool-size=15`, `minimum-idle=5`
+    - `connection-timeout=20000`, `idle-timeout=300000`, `max-lifetime=1800000`
+    - Dedicated pool name `PhotoConnectHikariCP`.
+  - Configured Hibernate JDBC batching and ordering:
+    - `spring.jpa.properties.hibernate.jdbc.batch_size=25`
+    - `spring.jpa.properties.hibernate.order_inserts=true`
+    - `spring.jpa.properties.hibernate.order_updates=true`
+    - `spring.jpa.properties.hibernate.jdbc.batch_versioned_data=true`.
+  - Configured structured console logging with timestamp, thread, level, and category.
+  - Verified query performance: all major repository queries (`BookingRepository`, `PhotographerProfileRepository`) employ explicit `JOIN FETCH` preventing N+1 queries.
+- **Files Changed:**
+  - `src/main/resources/application.properties`
+- **Migration Changes:** None.
+- **Test Results:** 865 tests run, 836 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 18: Security Hardening & Penetration Defense
+- **Status:** **TESTED**
+- **Existing Implementation:** BCrypt hashing, JWT signed authentication with cookie expiry, CSRF filter protection on all state-changing endpoints, private Cloudinary authenticated media links, STOMP access control.
+- **Implemented & Verified:**
+  - Created `SecurityHeadersFilter` applying defense-in-depth security response headers to all HTTP traffic:
+    - `X-Content-Type-Options: nosniff` (MIME sniffing defense)
+    - `X-Frame-Options: SAMEORIGIN` (clickjacking defense)
+    - `X-XSS-Protection: 0` (modern standard)
+    - `Referrer-Policy: strict-origin-when-cross-origin` (referrer privacy protection)
+    - `Permissions-Policy: camera=(), microphone=(), geolocation=()` (feature restriction).
+  - Registered `SecurityHeadersFilter` in `JwtSecurityConfig` with precedence `Ordered.HIGHEST_PRECEDENCE + 10`.
+  - Created `LoginRateLimiter` component implementing sliding-window brute-force and credential stuffing protection:
+    - 5 consecutive failed attempts per email within 15 minutes triggers account lockout with user-facing Vietnamese lockout countdown message.
+    - 20 failed attempts per IP within 15 minutes triggers IP lockout.
+    - Automatic counter reset on successful authentication.
+  - Integrated `LoginRateLimiter` into `LoginController` using backward-compatible setter injection.
+  - Added unit tests: `SecurityHeadersFilterTest` (1 test), `LoginRateLimiterTest` (4 tests).
+  - Verified stored XSS defense suite (`StoredXssDefenseTest`) and cross-role authorization tests pass.
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/security/SecurityHeadersFilter.java`
+  - `src/main/java/com/photoconnect/security/LoginRateLimiter.java`
+  - `src/main/java/com/photoconnect/config/JwtSecurityConfig.java`
+  - `src/main/java/com/photoconnect/controller/LoginController.java`
+  - `src/test/java/com/photoconnect/security/SecurityHeadersFilterTest.java`
+  - `src/test/java/com/photoconnect/security/LoginRateLimiterTest.java`
+- **Migration Changes:** None.
+- **Test Results:** 865 tests run, 836 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Proceed to Sprint 8 — Reliability, Verification & Deliverables (Phase 19: Database Migration & Baseline Verification, Phase 20: Automated Testing & End-to-End QA, Phase 21: Error Handling, Edge Cases & Resilience, Phase 22: Academic Deliverables & Demo Environment).
+
 
 
 

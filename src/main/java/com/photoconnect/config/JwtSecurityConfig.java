@@ -43,6 +43,17 @@ public class JwtSecurityConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<com.photoconnect.security.SecurityHeadersFilter> securityHeadersFilterRegistration() {
+        FilterRegistrationBean<com.photoconnect.security.SecurityHeadersFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new com.photoconnect.security.SecurityHeadersFilter());
+        registration.setName("securityHeadersFilter");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+        registration.setDispatcherTypes(EnumSet.of(DispatcherType.REQUEST));
+        registration.addUrlPatterns("/*");
+        return registration;
+    }
+
+    @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthenticationFilterRegistration(
             JwtTokenService tokenService, JwtCookieService cookieService, UserRepository userRepository) {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>();
