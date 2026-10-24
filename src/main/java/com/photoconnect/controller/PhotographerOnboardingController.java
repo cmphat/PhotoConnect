@@ -85,7 +85,8 @@ public class PhotographerOnboardingController {
     }
 
     @GetMapping("/photographer/onboarding-status")
-    public String showOnboardingStatus(HttpSession session, Model model) {
+    public String showOnboardingStatus(@org.springframework.web.bind.annotation.RequestParam(value = "resubmitted", required = false) Boolean resubmitted,
+                                       HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             return "redirect:/login";
@@ -96,11 +97,71 @@ public class PhotographerOnboardingController {
             return "redirect:/admin/dashboard";
         }
 
+        if (Boolean.TRUE.equals(resubmitted)) {
+            model.addAttribute("resubmitSuccess", "Hồ sơ của bạn đã được gửi lại để xét duyệt thành công!");
+        }
+
         photographerProfileService.findByUserId(userId).ifPresent(profile -> {
             model.addAttribute("profile", profile);
             model.addAttribute("verificationStatus", profile.getVerificationStatus().name());
+            model.addAttribute("rejectionReason", profile.getRejectionReason());
         });
 
         return "photographer-onboarding-status";
+    }
+
+    @GetMapping("/photographer/onboarding/reapply")
+    public String showReapplyForm(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        var profileOpt = photographerProfileService.findByUserId(userId);
+        if (profileOpt.isEmpty()) {
+            return "redirect:/become-photographer";
+        }
+
+        var profile = profileOpt.get();
+        if (profile.getVerificationStatus() != com.photoconnect.entity.PhotographerVerificationStatus.REJECTED) {
+            return "redirect:/photographer/onboarding-status";
+        }
+
+        PhotographerProfileRequest request = new PhotographerProfileRequest();
+        request.setDisplayName(profile.getDisplayName());
+        request.setBio(profile.getBio());
+        request.setCity(profile.getCity());
+        request.setExperienceYears(profile.getExperienceYears());
+        request.setPriceFrom(profile.getPriceFrom());
+
+        model.addAttribute("profileRequest", request);
+        model.addAttribute("isReapply", true);
+        model.addAttribute("rejectionReason", profile.getRejectionReason());
+        return "photographer-onboarding";
+    }
+
+    @PostMapping("/photographer/onboarding/reapply")
+    public String processReapply(@Valid @ModelAttribute("profileRequest") PhotographerProfileRequest profileRequest,
+                                 BindingResult bindingResult,
+                                 HttpSession session,
+                                 Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("isReapply", true);
+            return "photographer-onboarding";
+        }
+
+        try {
+            photographerProfileService.reapply(userId, profileRequest);
+            return "redirect:/photographer/onboarding-status?resubmitted=true";
+        } catch (Exception e) {
+            model.addAttribute("onboardingError", e.getMessage());
+            model.addAttribute("isReapply", true);
+            return "photographer-onboarding";
+        }
     }
 }

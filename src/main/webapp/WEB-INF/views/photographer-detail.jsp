@@ -290,6 +290,35 @@
                                 </c:forEach>
                             </div>
                         </c:if>
+
+                        <!-- Verified Social Links -->
+                        <div class="d-flex align-items-center flex-wrap gap-2 mt-3">
+                            <c:if test="${not empty photographer.websiteUrl and fn:startsWith(photographer.websiteUrl, 'http')}">
+                                <a href="<c:out value='${photographer.websiteUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>🌐</span> Website
+                                </a>
+                            </c:if>
+                            <c:if test="${not empty photographer.instagramUrl and fn:startsWith(photographer.instagramUrl, 'http')}">
+                                <a href="<c:out value='${photographer.instagramUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>📷</span> Instagram
+                                </a>
+                            </c:if>
+                            <c:if test="${not empty photographer.facebookUrl and fn:startsWith(photographer.facebookUrl, 'http')}">
+                                <a href="<c:out value='${photographer.facebookUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>f</span> Facebook
+                                </a>
+                            </c:if>
+                            <c:if test="${not empty photographer.tiktokUrl and fn:startsWith(photographer.tiktokUrl, 'http')}">
+                                <a href="<c:out value='${photographer.tiktokUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>🎵</span> TikTok
+                                </a>
+                            </c:if>
+                            <c:if test="${not empty photographer.youtubeUrl and fn:startsWith(photographer.youtubeUrl, 'http')}">
+                                <a href="<c:out value='${photographer.youtubeUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>▶</span> YouTube
+                                </a>
+                            </c:if>
+                        </div>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">

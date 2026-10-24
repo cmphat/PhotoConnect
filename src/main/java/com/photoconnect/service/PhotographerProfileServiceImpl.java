@@ -73,6 +73,37 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
     }
 
     @Override
+    @Transactional
+    public PhotographerProfile reapply(Long userId, PhotographerProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new AccountDisabledException("Your account must be active to reapply.");
+        }
+
+        PhotographerProfile profile = photographerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No existing photographer application found."));
+
+        if (profile.getVerificationStatus() != PhotographerVerificationStatus.REJECTED) {
+            throw new IllegalStateException("Only rejected applications can be resubmitted.");
+        }
+
+        profile.setDisplayName(request.getDisplayName().trim());
+        profile.setBio(request.getBio().trim());
+        profile.setCity(request.getCity().trim());
+        profile.setExperienceYears(request.getExperienceYears());
+        profile.setPriceFrom(request.getPriceFrom());
+        profile.setVerificationStatus(PhotographerVerificationStatus.PENDING);
+        profile.setRejectionReason(null);
+        profile.setReviewedAt(null);
+        profile.setReviewedByAdminId(null);
+        profile.setUpdatedAt(java.time.LocalDateTime.now());
+
+        return photographerProfileRepository.save(profile);
+    }
+
+    @Override
     public Optional<PhotographerProfile> findByUserId(Long userId) {
         return photographerProfileRepository.findByUserId(userId);
     }
@@ -140,6 +171,10 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
                 ? request.getInstagramUrl().trim() : null);
         profile.setFacebookUrl(request.getFacebookUrl() != null && !request.getFacebookUrl().trim().isEmpty()
                 ? request.getFacebookUrl().trim() : null);
+        profile.setTiktokUrl(request.getTiktokUrl() != null && !request.getTiktokUrl().trim().isEmpty()
+                ? request.getTiktokUrl().trim() : null);
+        profile.setYoutubeUrl(request.getYoutubeUrl() != null && !request.getYoutubeUrl().trim().isEmpty()
+                ? request.getYoutubeUrl().trim() : null);
 
         // Optional creator details
         profile.setEquipmentSummary(request.getEquipmentSummary() != null && !request.getEquipmentSummary().trim().isEmpty()

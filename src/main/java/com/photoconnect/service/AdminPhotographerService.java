@@ -25,13 +25,11 @@ public interface AdminPhotographerService {
      */
     PhotographerProfile approve(Long profileId);
 
-    /**
-     * Rejects a PENDING application.
-     * Only PENDING → REJECTED is allowed.
-     * Throws InvalidStatusTransitionException for any other current status.
-     * NOTE: User.role remains PHOTOGRAPHER; verification status and account role are separate concepts.
-     */
+    PhotographerProfile approve(Long profileId, Long adminId, String adminNotes);
+
     PhotographerProfile reject(Long profileId);
+
+    PhotographerProfile reject(Long profileId, Long adminId, String rejectionReason, String adminNotes);
 
     /**
      * Returns all photographer profiles with associated User fetched.

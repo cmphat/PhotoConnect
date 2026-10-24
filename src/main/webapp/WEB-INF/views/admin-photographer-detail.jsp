@@ -77,25 +77,68 @@
                         </div>
 
                         <c:if test="${profile.verificationStatus == 'PENDING'}">
-                            <div class="pc-actions" style="border-top: 1px solid var(--border); padding-top: 3rem;">
-                                <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/approve" method="post" style="margin: 0;">
-                                    <%@ include file="fragments/csrf-input.jsp" %>
-                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this application?')">
-                                        Approve Application
-                                    </button>
-                                </form>
-                                <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/reject" method="post" style="margin: 0;">
-                                    <%@ include file="fragments/csrf-input.jsp" %>
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this application?')">
-                                        Reject
-                                    </button>
-                                </form>
+                            <div class="row g-4" style="border-top: 1px solid var(--border); padding-top: 2rem;">
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded-3 bg-light">
+                                        <h3 class="h6 fw-bold mb-2 text-success">Phê duyệt hồ sơ</h3>
+                                        <p class="small text-muted mb-3">Hồ sơ sẽ được hiển thị công khai trên marketplace và có thể nhận lịch đặt.</p>
+                                        <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/approve" method="post" style="margin: 0;">
+                                            <%@ include file="fragments/csrf-input.jsp" %>
+                                            <div class="mb-2">
+                                                <input type="text" name="adminNotes" class="form-control form-control-sm" placeholder="Ghi chú nội bộ admin (tùy chọn)">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Xác nhận phê duyệt hồ sơ nhiếp ảnh gia này?')">
+                                                Phê duyệt hồ sơ
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded-3 bg-light">
+                                        <h3 class="h6 fw-bold mb-2 text-danger">Từ chối hồ sơ</h3>
+                                        <p class="small text-muted mb-3">Nhiếp ảnh gia sẽ nhận được lý do từ chối và có thể cập nhật để nộp lại.</p>
+                                        <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/reject" method="post" style="margin: 0;">
+                                            <%@ include file="fragments/csrf-input.jsp" %>
+                                            <div class="mb-2">
+                                                <textarea name="rejectionReason" class="form-control form-control-sm" rows="2" placeholder="Lý do từ chối (gửi tới người nộp)" required></textarea>
+                                            </div>
+                                            <div class="mb-2">
+                                                <input type="text" name="adminNotes" class="form-control form-control-sm" placeholder="Ghi chú nội bộ admin (tùy chọn)">
+                                            </div>
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận từ chối hồ sơ này?')">
+                                                Từ chối hồ sơ
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </c:if>
 
                         <c:if test="${profile.verificationStatus != 'PENDING'}">
-                            <div style="color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                                This application has already been processed (status: <strong><c:out value="${profile.verificationStatus}"/></strong>).
+                            <div class="border-top pt-4 mt-3" style="font-size: 0.9rem;">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="text-muted">Trạng thái xử lý:</span>
+                                    <span class="status-badge ${profile.verificationStatus}"><c:out value="${profile.verificationStatus}"/></span>
+                                </div>
+                                <c:if test="${not empty profile.reviewedAt}">
+                                    <div class="text-muted small mb-1">
+                                        Thời gian duyệt: <fmt:parseDate value="${fn:substring(profile.reviewedAt, 0, 19)}" pattern="yyyy-MM-dd'T'HH:mm:ss" var="parsedReviewDate" type="both" />
+                                        <fmt:formatDate value="${parsedReviewDate}" pattern="dd/MM/yyyy HH:mm" />
+                                        <c:if test="${not empty profile.reviewedByAdminId}">
+                                            &middot; Duyệt bởi Admin ID #${profile.reviewedByAdminId}
+                                        </c:if>
+                                    </div>
+                                </c:if>
+                                <c:if test="${not empty profile.rejectionReason}">
+                                    <div class="alert alert-warning pc-alert pc-alert-warning mt-2 mb-2">
+                                        <strong>Lý do từ chối:</strong> <c:out value="${profile.rejectionReason}"/>
+                                    </div>
+                                </c:if>
+                                <c:if test="${not empty profile.adminNotes}">
+                                    <div class="text-muted small">
+                                        <em>Ghi chú nội bộ:</em> <c:out value="${profile.adminNotes}"/>
+                                    </div>
+                                </c:if>
                             </div>
                         </c:if>
                     </div>

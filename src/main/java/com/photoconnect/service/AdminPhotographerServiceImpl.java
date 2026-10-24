@@ -54,7 +54,12 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
     @Override
     @Transactional
     public PhotographerProfile approve(Long profileId) {
-        // Use findById here — we don't need user fields for mutation
+        return approve(profileId, null, null);
+    }
+
+    @Override
+    @Transactional
+    public PhotographerProfile approve(Long profileId, Long adminId, String adminNotes) {
         PhotographerProfile profile = photographerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Photographer application not found with id: " + profileId));
@@ -65,13 +70,23 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
         }
 
         profile.setVerificationStatus(PhotographerVerificationStatus.APPROVED);
+        profile.setReviewedAt(java.time.LocalDateTime.now());
+        profile.setReviewedByAdminId(adminId);
+        if (adminNotes != null && !adminNotes.isBlank()) {
+            profile.setAdminNotes(adminNotes.trim());
+        }
         return photographerProfileRepository.save(profile);
     }
 
     @Override
     @Transactional
     public PhotographerProfile reject(Long profileId) {
-        // Use findById here — we don't need user fields for mutation
+        return reject(profileId, null, null, null);
+    }
+
+    @Override
+    @Transactional
+    public PhotographerProfile reject(Long profileId, Long adminId, String rejectionReason, String adminNotes) {
         PhotographerProfile profile = photographerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Photographer application not found with id: " + profileId));
@@ -81,9 +96,15 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
                     "Cannot reject application with status: " + profile.getVerificationStatus());
         }
 
-        // NOTE: User.role intentionally remains PHOTOGRAPHER.
-        // Account role and professional verification status are separate concepts.
         profile.setVerificationStatus(PhotographerVerificationStatus.REJECTED);
+        profile.setReviewedAt(java.time.LocalDateTime.now());
+        profile.setReviewedByAdminId(adminId);
+        if (rejectionReason != null && !rejectionReason.isBlank()) {
+            profile.setRejectionReason(rejectionReason.trim());
+        }
+        if (adminNotes != null && !adminNotes.isBlank()) {
+            profile.setAdminNotes(adminNotes.trim());
+        }
         return photographerProfileRepository.save(profile);
     }
 

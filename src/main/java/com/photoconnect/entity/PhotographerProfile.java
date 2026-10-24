@@ -48,6 +48,24 @@ public class PhotographerProfile {
     @Column(name = "facebook_url", length = 255)
     private String facebookUrl;
 
+    @Column(name = "tiktok_url", length = 255)
+    private String tiktokUrl;
+
+    @Column(name = "youtube_url", length = 255)
+    private String youtubeUrl;
+
+    @Column(name = "rejection_reason", length = 1000)
+    private String rejectionReason;
+
+    @Column(name = "admin_notes", length = 1000)
+    private String adminNotes;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
+    @Column(name = "reviewed_by_admin_id")
+    private Long reviewedByAdminId;
+
     @Column(name = "equipment_summary", length = 500)
     private String equipmentSummary;
 
@@ -284,5 +302,53 @@ public class PhotographerProfile {
 
     public void setStartingPrice(BigDecimal startingPrice) {
         this.priceFrom = startingPrice;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public void setTiktokUrl(String tiktokUrl) {
+        this.tiktokUrl = tiktokUrl;
+    }
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public void setYoutubeUrl(String youtubeUrl) {
+        this.youtubeUrl = youtubeUrl;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public String getAdminNotes() {
+        return adminNotes;
+    }
+
+    public void setAdminNotes(String adminNotes) {
+        this.adminNotes = adminNotes;
+    }
+
+    public LocalDateTime getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(LocalDateTime reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+    public Long getReviewedByAdminId() {
+        return reviewedByAdminId;
+    }
+
+    public void setReviewedByAdminId(Long reviewedByAdminId) {
+        this.reviewedByAdminId = reviewedByAdminId;
     }
 }

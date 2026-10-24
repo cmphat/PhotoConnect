@@ -79,6 +79,8 @@ public class PhotographerProfileController {
             editRequest.setWebsiteUrl(profile.getWebsiteUrl());
             editRequest.setInstagramUrl(profile.getInstagramUrl());
             editRequest.setFacebookUrl(profile.getFacebookUrl());
+            editRequest.setTiktokUrl(profile.getTiktokUrl());
+            editRequest.setYoutubeUrl(profile.getYoutubeUrl());
             editRequest.setEquipmentSummary(profile.getEquipmentSummary());
             editRequest.setLanguages(profile.getLanguages());
             editRequest.setTravelAvailable(profile.isTravelAvailable());

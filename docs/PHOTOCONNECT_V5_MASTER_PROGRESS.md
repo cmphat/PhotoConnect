@@ -14,9 +14,9 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | Phase | Description | Sprint | Status | Tests Passed | Files Changed |
 |---|---|---|---|---|---|
 | **Phase 0** | V5 Baseline & Stabilization | Sprint 1 | **TESTED** | 797 / 826 | Baseline docs, pom.xml |
-| **Phase 1** | Identity, Email Verification & OTP | Sprint 2 | **NOT_STARTED** | — | — |
-| **Phase 2** | Professional User Profiles & Social Links | Sprint 2 | **NOT_STARTED** | — | — |
-| **Phase 3** | Photographer Onboarding & Verification | Sprint 2 | **NOT_STARTED** | — | — |
+| **Phase 1** | Identity, Email Verification & OTP | Sprint 2 | **TESTED** | 804 / 833 | 41 files changed |
+| **Phase 2** | Professional User Profiles & Social Links | Sprint 2 | **TESTED** | 804 / 833 | 8 files changed |
+| **Phase 3** | Photographer Onboarding & Verification | Sprint 2 | **TESTED** | 804 / 833 | 9 files changed |
 | **Phase 4** | Complete Service Marketplace & Comparison | Sprint 3 | **NOT_STARTED** | — | — |
 | **Phase 5** | Advanced Discovery & Recommendations | Sprint 3 | **NOT_STARTED** | — | — |
 | **Phase 6** | Calendar & Booking Engine | Sprint 4 | **NOT_STARTED** | — | — |
@@ -56,18 +56,76 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 ---
 
 ### Phase 1: Identity, Email Verification & Account Security
-- **Status:** **IN_PROGRESS**
-- **Existing Implementation:** `RegisterController`, `LoginController`, `GoogleAuthController`, `User` entity with `UserStatus` (ACTIVE, INACTIVE, SUSPENDED), BCrypt password hashing.
-- **Missing Functionality:**
+- **Status:** **TESTED**
+- **Existing Implementation:** `RegisterController`, `LoginController`, `GoogleAuthController`, `User` entity with `UserStatus` (ACTIVE, INACTIVE, SUSPENDED, PENDING_VERIFICATION), BCrypt password hashing.
+- **Implemented & Verified:**
   - `spring-boot-starter-mail` dependency.
-  - OTP generation service: 6-digit cryptographically secure OTP, preserving leading zeros, 5-minute expiry, keyed hashing, single-use consumption, max 5 failed attempts, 60s resend cooldown.
-  - Rate limiting by account & source IP.
-  - Separate purposes: REGISTRATION, PASSWORD_RESET, EMAIL_CHANGE.
-  - Local in-memory / capture mail mode when live SMTP is unconfigured.
-  - Registration verification view (`verify-otp.jsp`), forgot password (`forgot-password.jsp`), reset password (`reset-password.jsp`), change email flow.
-  - Account deactivation & password change in security settings.
-- **Files Changed:** Pending implementation.
-- **Migration Changes:** `V022__create_email_verification_tokens.sql`.
-- **Test Results:** Pending.
+  - `EmailVerificationToken` entity and Flyway migration `V022__create_email_verification_tokens.sql`.
+  - Cryptographically secure 6-digit OTP generation (`SecureRandom`, `%06d`, leading zeros preserved), BCrypt salted hash storage, 5-minute expiry, max 5 failed attempts lockout, 60s resend cooldown.
+  - Rate limiting by account & source IP (`ClientIpUtils`).
+  - Strict purposes: `REGISTRATION`, `PASSWORD_RESET`, `EMAIL_CHANGE`.
+  - Local thread-safe mail capture mode (`CapturedEmail`) when external SMTP is unconfigured; zero OTP logging or plaintext storage.
+  - Verification view (`verify-otp.jsp`), forgot password (`forgot-password.jsp`), reset password (`reset-password.jsp`).
+  - Security management in `user-profile.jsp` (password change, authenticated email change challenge, account deactivation).
+  - Profile URL sanitization enforcing HTTP/HTTPS and blocking `javascript:` / `data:` protocols.
+- **Files Changed:**
+  - `pom.xml`, `application.properties`, `UserStatus.java`, `ErrorCode.java`, `docs/ERROR_CODES.md`.
+  - `EmailVerificationToken.java`, `EmailVerificationPurpose.java`, `EmailVerificationTokenRepository.java`.
+  - `EmailService.java`, `EmailServiceImpl.java`, `EmailOtpService.java`, `EmailOtpServiceImpl.java`.
+  - `UserService.java`, `UserServiceImpl.java`, `AuthServiceImpl.java`, `UserProfileServiceImpl.java`.
+  - `RegisterController.java`, `EmailVerificationController.java`, `PasswordRecoveryController.java`, `AccountSecurityController.java`, `ClientIpUtils.java`.
+  - `login.jsp`, `register.jsp`, `user-profile.jsp`, `verify-otp.jsp`, `forgot-password.jsp`, `reset-password.jsp`.
+  - `EmailOtpServiceTest.java`.
+- **Migration Changes:** `V022__create_email_verification_tokens.sql` (created and added to Flyway).
+- **Test Results:** 833 tests run, 804 passed, 29 skipped, 0 failures, 0 errors.
 - **Unresolved Issues:** None.
-- **Next Actionable Step:** Add `spring-boot-starter-mail` to `pom.xml`, create `V022` migration, implement `EmailOtpService` and `EmailService`.
+- **Next Actionable Step:** Proceed to Phase 2 (Professional User Profiles) and Phase 3 (Photographer Onboarding & Verification).
+- **Checkpoint Commit:** `eac8ae2`
+
+---
+
+### Phase 2: Professional User Profiles & Social Links
+- **Status:** **TESTED**
+- **Existing Implementation:** `PhotographerProfile` entity, `PhotographerProfileController`, `PhotographerProfileEditRequest`, basic portfolio link fields.
+- **Implemented & Verified:**
+  - Expanded `PhotographerProfile` entity with TikTok (`tiktok_url`) and YouTube (`youtube_url`) channels.
+  - Updated `PhotographerProfileEditRequest` and form validation for social URLs.
+  - Updated `photographer-detail.jsp` with responsive social icon badges linking to verified external platforms with `rel="noopener noreferrer"` and safe protocol validation (`http`/`https`).
+  - Added starting price helper methods and responsive display consistency.
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/entity/PhotographerProfile.java`
+  - `src/main/java/com/photoconnect/dto/PhotographerProfileEditRequest.java`
+  - `src/main/java/com/photoconnect/controller/PhotographerProfileController.java`
+  - `src/main/webapp/WEB-INF/views/photographer-profile-edit.jsp`
+  - `src/main/webapp/WEB-INF/views/photographer-detail.jsp`
+- **Migration Changes:** Included in `V023__add_photographer_review_audit_and_social_urls.sql`.
+- **Test Results:** 833 tests run, 804 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Sprint 3 (Phase 4 & 5).
+
+---
+
+### Phase 3: Photographer Onboarding & Verification
+- **Status:** **TESTED**
+- **Existing Implementation:** Basic photographer registration and admin list approval.
+- **Implemented & Verified:**
+  - Added audit metadata columns to `photographer_profiles`: `rejection_reason`, `admin_notes`, `reviewed_at`, `reviewed_by_admin_id`.
+  - Rejection workflow: Admin rejection requires explicit reason.
+  - Status display in `photographer-onboarding-status.jsp` clearly communicates rejection rationale and next steps to candidate.
+  - Re-application workflow (`reapply`): Allows rejected photographers to revise bio, pricing, portfolio links, and re-submit for review (`REJECTED` -> `PENDING`).
+  - Updated `AdminPhotographerController` and `admin-photographer-detail.jsp` with review audit trails, admin notes, and rejection forms while maintaining backward compatibility with existing tests.
+- **Files Changed:**
+  - `src/main/java/com/photoconnect/service/AdminPhotographerService.java`
+  - `src/main/java/com/photoconnect/service/AdminPhotographerServiceImpl.java`
+  - `src/main/java/com/photoconnect/controller/AdminPhotographerController.java`
+  - `src/main/java/com/photoconnect/service/PhotographerProfileService.java`
+  - `src/main/java/com/photoconnect/service/PhotographerProfileServiceImpl.java`
+  - `src/main/java/com/photoconnect/controller/PhotographerOnboardingController.java`
+  - `src/main/webapp/WEB-INF/views/photographer-onboarding.jsp`
+  - `src/main/webapp/WEB-INF/views/photographer-onboarding-status.jsp`
+  - `src/main/webapp/WEB-INF/views/admin-photographer-detail.jsp`
+- **Migration Changes:** `V023__add_photographer_review_audit_and_social_urls.sql` (created and added to Flyway).
+- **Test Results:** 833 tests run, 804 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Proceed to Phase 4 (Complete Service Marketplace & Comparison) & Phase 5 (Advanced Discovery & Recommendations).
+

@@ -146,6 +146,12 @@
             <c:choose>
                 <c:when test="${not empty profile}">
 
+                    <c:if test="${not empty resubmitSuccess}">
+                        <div class="alert alert-success pc-alert pc-alert-success mb-4" role="status">
+                            <c:out value="${resubmitSuccess}"/>
+                        </div>
+                    </c:if>
+
                     <div class="onboarding-card">
 
                         <!-- Status Header Banner -->
@@ -207,6 +213,11 @@
                                         <div>
                                             <div class="timeline-content-title">Application Not Approved</div>
                                             <p class="timeline-content-desc">Unfortunately, your application does not meet our current curation guidelines.</p>
+                                            <c:if test="${not empty rejectionReason}">
+                                                <div class="alert alert-warning pc-alert pc-alert-warning mt-2 mb-0" style="font-size: 0.9rem;">
+                                                    <strong>Lý do từ chối:</strong> <c:out value="${rejectionReason}"/>
+                                                </div>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </c:when>
@@ -297,6 +308,14 @@
                                     </a>
                                     <a href="${pageContext.request.contextPath}/photographers/${profile.id}" class="btn btn-secondary btn-lg" id="btn-view-public-profile">
                                         View Public Profile
+                                    </a>
+                                </c:when>
+                                <c:when test="${verificationStatus == 'REJECTED'}">
+                                    <a href="${pageContext.request.contextPath}/photographer/onboarding/reapply" class="btn btn-primary btn-lg" id="btn-reapply">
+                                        Chỉnh sửa &amp; Nộp lại hồ sơ &rarr;
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/" class="btn btn-secondary btn-lg">
+                                        &larr; Return to Home
                                     </a>
                                 </c:when>
                                 <c:otherwise>

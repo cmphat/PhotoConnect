@@ -58,6 +58,12 @@ public class PhotographerProfileEditRequest {
     @Size(max = 255, message = "Facebook URL must not exceed 255 characters.")
     private String facebookUrl;
 
+    @Size(max = 255, message = "TikTok URL must not exceed 255 characters.")
+    private String tiktokUrl;
+
+    @Size(max = 255, message = "YouTube URL must not exceed 255 characters.")
+    private String youtubeUrl;
+
     @Size(max = 500, message = "Equipment summary must not exceed 500 characters.")
     private String equipmentSummary;
 
@@ -102,6 +108,12 @@ public class PhotographerProfileEditRequest {
         }
         if (!isValidHttpUrl(facebookUrl)) {
             return "Facebook URL must start with http:// or https:// and cannot contain scripts or invalid characters.";
+        }
+        if (!isValidHttpUrl(tiktokUrl)) {
+            return "TikTok URL must start with http:// or https:// and cannot contain scripts or invalid characters.";
+        }
+        if (!isValidHttpUrl(youtubeUrl)) {
+            return "YouTube URL must start with http:// or https:// and cannot contain scripts or invalid characters.";
         }
         if (specialties != null) {
             for (String s : specialties) {
@@ -225,5 +237,21 @@ public class PhotographerProfileEditRequest {
 
     public void setTravelAvailable(Boolean travelAvailable) {
         this.travelAvailable = travelAvailable;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public void setTiktokUrl(String tiktokUrl) {
+        this.tiktokUrl = tiktokUrl;
+    }
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public void setYoutubeUrl(String youtubeUrl) {
+        this.youtubeUrl = youtubeUrl;
     }
 }

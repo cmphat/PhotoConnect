@@ -453,6 +453,34 @@
                            maxlength="255">
                     <div class="form-text">Direct URL to your Facebook artist page.</div>
                 </div>
+
+                <div class="col-12 col-md-6">
+                    <label for="tiktokUrl" class="form-label" style="font-weight: 500; font-size: 0.9rem;">
+                        TikTok Profile
+                    </label>
+                    <input type="url"
+                           class="form-control"
+                           id="tiktokUrl"
+                           name="tiktokUrl"
+                           placeholder="https://tiktok.com/@yourhandle"
+                           value="<c:out value='${editRequest.tiktokUrl}'/>"
+                           maxlength="255">
+                    <div class="form-text">Direct URL to your TikTok creator profile.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label for="youtubeUrl" class="form-label" style="font-weight: 500; font-size: 0.9rem;">
+                        YouTube Channel
+                    </label>
+                    <input type="url"
+                           class="form-control"
+                           id="youtubeUrl"
+                           name="youtubeUrl"
+                           placeholder="https://youtube.com/@yourchannel"
+                           value="<c:out value='${editRequest.youtubeUrl}'/>"
+                           maxlength="255">
+                    <div class="form-text">Direct URL to your YouTube portfolio/channel.</div>
+                </div>
             </div>
         </section>
 

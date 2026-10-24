@@ -105,11 +105,23 @@
 
                 <span class="section-index">Creator Application</span>
                 <h1 class="editorial-title" style="font-size: clamp(2.25rem, 4vw, 3.25rem); margin: 0 0 0.5rem 0;">
-                    Join the Verified Roster
+                    <c:choose>
+                        <c:when test="${isReapply}">Cập nhật &amp; Nộp lại hồ sơ</c:when>
+                        <c:otherwise>Join the Verified Roster</c:otherwise>
+                    </c:choose>
                 </h1>
                 <p class="pc-lead" style="font-size: 0.98rem; margin-bottom: 2rem;">
-                    Submit your credentials to be featured on the PhotoConnect marketplace and receive client booking inquiries.
+                    <c:choose>
+                        <c:when test="${isReapply}">Chỉnh sửa thông tin hồ sơ của bạn và gửi lại để ban quản trị PhotoConnect xét duyệt.</c:when>
+                        <c:otherwise>Submit your credentials to be featured on the PhotoConnect marketplace and receive client booking inquiries.</c:otherwise>
+                    </c:choose>
                 </p>
+
+                <c:if test="${isReapply and not empty rejectionReason}">
+                    <div class="alert alert-warning pc-alert pc-alert-warning mb-4" role="alert">
+                        <strong>Lý do từ chối trước đó:</strong> <c:out value="${rejectionReason}"/>
+                    </div>
+                </c:if>
 
                 <div class="pc-alert" role="note" style="margin-bottom: 2rem;">
                     Your profile will be reviewed by our curatorial team. You will receive a status of <strong>Pending Review</strong> immediately following submission.
@@ -121,7 +133,8 @@
                     </div>
                 </c:if>
 
-                <form:form action="${pageContext.request.contextPath}/become-photographer" method="post" modelAttribute="profileRequest">
+                <c:set var="formAction" value="${isReapply ? '/photographer/onboarding/reapply' : '/become-photographer'}" />
+                <form:form action="${pageContext.request.contextPath}${formAction}" method="post" modelAttribute="profileRequest">
                     <%@ include file="fragments/csrf-input.jsp" %>
                     <div class="form-group">
                         <label for="displayName" class="form-label">Professional Display Name *</label>
@@ -155,7 +168,10 @@
                     </div>
 
                     <button type="submit" class="submit-btn" style="margin-top: 1.5rem;" id="btn-submit-onboarding">
-                        Submit Application &rarr;
+                        <c:choose>
+                            <c:when test="${isReapply}">Nộp lại hồ sơ xét duyệt &rarr;</c:when>
+                            <c:otherwise>Submit Application &rarr;</c:otherwise>
+                        </c:choose>
                     </button>
                 </form:form>
             </div>

@@ -78,13 +78,19 @@ public class AdminPhotographerController {
     // ── POST /admin/photographers/{id}/approve ────────────────────────────
     @PostMapping("/{id}/approve")
     public String approveApplication(@PathVariable Long id,
+                                     @org.springframework.web.bind.annotation.RequestParam(value = "adminNotes", required = false) String adminNotes,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
         String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
+        Long adminId = (Long) session.getAttribute("userId");
         try {
-            adminPhotographerService.approve(id);
+            if (adminNotes != null && !adminNotes.isBlank()) {
+                adminPhotographerService.approve(id, adminId, adminNotes);
+            } else {
+                adminPhotographerService.approve(id);
+            }
             redirectAttributes.addFlashAttribute("successMessage", "Application approved successfully.");
         } catch (InvalidStatusTransitionException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -97,13 +103,20 @@ public class AdminPhotographerController {
     // ── POST /admin/photographers/{id}/reject ─────────────────────────────
     @PostMapping("/{id}/reject")
     public String rejectApplication(@PathVariable Long id,
+                                    @org.springframework.web.bind.annotation.RequestParam(value = "rejectionReason", required = false) String rejectionReason,
+                                    @org.springframework.web.bind.annotation.RequestParam(value = "adminNotes", required = false) String adminNotes,
                                     HttpSession session,
                                     RedirectAttributes redirectAttributes) {
         String redirect = AdminSecurityUtils.requireAdmin(session);
         if (redirect != null) return redirect;
 
+        Long adminId = (Long) session.getAttribute("userId");
         try {
-            adminPhotographerService.reject(id);
+            if ((rejectionReason != null && !rejectionReason.isBlank()) || (adminNotes != null && !adminNotes.isBlank())) {
+                adminPhotographerService.reject(id, adminId, rejectionReason, adminNotes);
+            } else {
+                adminPhotographerService.reject(id);
+            }
             redirectAttributes.addFlashAttribute("successMessage", "Application rejected.");
         } catch (InvalidStatusTransitionException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

@@ -21,6 +21,12 @@ public interface PhotographerProfileService {
     PhotographerProfile createProfile(Long userId, PhotographerProfileRequest request);
 
     /**
+     * Resubmits a previously REJECTED application for review.
+     * Transitions verificationStatus from REJECTED back to PENDING and clears prior rejection reason.
+     */
+    PhotographerProfile reapply(Long userId, PhotographerProfileRequest request);
+
+    /**
      * Returns the PhotographerProfile associated with the given userId, if any.
      */
     Optional<PhotographerProfile> findByUserId(Long userId);
