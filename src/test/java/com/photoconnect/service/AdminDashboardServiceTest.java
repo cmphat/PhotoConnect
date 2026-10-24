@@ -71,6 +71,15 @@ class AdminDashboardServiceTest {
 
         when(depositRepository.countByStatus(DepositStatus.PAID)).thenReturn(18L);
         when(depositRepository.sumAmountByStatus(DepositStatus.PAID)).thenReturn(new BigDecimal("9000000.00"));
+        when(depositRepository.countByStatus(DepositStatus.REFUNDED)).thenReturn(2L);
+        when(depositRepository.sumAmountByStatus(DepositStatus.REFUNDED)).thenReturn(new BigDecimal("1000000.00"));
+        when(depositRepository.countByStatus(DepositStatus.FORFEITED)).thenReturn(1L);
+        when(depositRepository.sumAmountByStatus(DepositStatus.FORFEITED)).thenReturn(new BigDecimal("500000.00"));
+
+        when(bookingRepository.countByStatus(BookingStatus.DISPUTED)).thenReturn(2L);
+        when(bookingRepository.countByStatus(BookingStatus.CANCELLED)).thenReturn(5L);
+        when(bookingRepository.calculateTotalPlatformBookingVolume()).thenReturn(new BigDecimal("120000000"));
+        when(bookingRepository.calculateTotalPlatformCompletedRevenue()).thenReturn(new BigDecimal("80000000"));
 
         AdminDashboardStatsDto stats = adminDashboardService.getDashboardStats();
 
@@ -86,6 +95,16 @@ class AdminDashboardServiceTest {
         assertEquals(25L, stats.getTotalReviews());
         assertEquals(18L, stats.getPaidDepositsCount());
         assertEquals(new BigDecimal("9000000.00"), stats.getSimulatedDepositAmount());
+
+        assertEquals(2L, stats.getDisputedBookings());
+        assertEquals(5L, stats.getCancelledBookings());
+        assertEquals(new BigDecimal("120000000"), stats.getTotalPlatformBookingVolume());
+        assertEquals(new BigDecimal("80000000"), stats.getCompletedRevenue());
+        assertEquals(new BigDecimal("8000000.00"), stats.getPlatformFeeRevenue());
+        assertEquals(new BigDecimal("1000000.00"), stats.getRefundedDepositsAmount());
+        assertEquals(new BigDecimal("500000.00"), stats.getForfeitedDepositsAmount());
+        assertEquals(2L, stats.getRefundedDepositsCount());
+        assertEquals(1L, stats.getForfeitedDepositsCount());
 
         verify(userRepository).count();
         verify(userRepository).countByRole(UserRole.CUSTOMER);

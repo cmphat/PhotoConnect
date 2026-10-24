@@ -15,6 +15,7 @@ import java.time.LocalTime;
 public class BookingRequest {
 
     private Long photographerId;
+    private Long packageId;
 
     @NotNull(message = "Booking date is required")
     @FutureOrPresent(message = "Booking date cannot be in the past")
@@ -56,6 +57,14 @@ public class BookingRequest {
 
     public void setPhotographerId(Long photographerId) {
         this.photographerId = photographerId;
+    }
+
+    public Long getPackageId() {
+        return packageId;
+    }
+
+    public void setPackageId(Long packageId) {
+        this.packageId = packageId;
     }
 
     public LocalDate getBookingDate() {

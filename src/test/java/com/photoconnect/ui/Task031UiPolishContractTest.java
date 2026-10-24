@@ -66,7 +66,7 @@ class Task031UiPolishContractTest {
                     .filter(path -> !path.toString().contains("fragments"))
                     .toList();
 
-            assertThat(pages).hasSize(32);
+            assertThat(pages).hasSize(40);
             for (Path page : pages) {
                 String jsp = Files.readString(page);
                 assertThat(unclassedButton.matcher(jsp).find())

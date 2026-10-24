@@ -34,6 +34,16 @@ public interface BookingService {
     void cancelBooking(Long bookingId, Long customerUserId);
 
     /**
+     * Customer cancels a booking with an explicit reason.
+     */
+    void cancelBooking(Long bookingId, Long customerUserId, String reason);
+
+    /**
+     * Photographer cancels a booking with an explicit reason.
+     */
+    void cancelBookingByPhotographer(Long bookingId, Long photographerUserId, String reason);
+
+    /**
      * Retrieves a booking and verifies photographer ownership.
      */
     Booking getBookingForPhotographer(Long bookingId, Long photographerUserId);

@@ -44,6 +44,12 @@ class PublicPhotographerServiceTest {
     @Mock
     private PortfolioImageRepository portfolioImageRepository;
 
+    @Mock
+    private com.photoconnect.repository.BookingRepository bookingRepository;
+
+    @Mock
+    private ScheduleService scheduleService;
+
     @InjectMocks
     private PublicPhotographerServiceImpl publicPhotographerService;
 
@@ -466,5 +472,135 @@ class PublicPhotographerServiceTest {
         assertThat(dto.getEquipmentSummary()).isEqualTo("Sony A7IV, 35mm GM");
         assertThat(dto.getLanguages()).isEqualTo("English, Vietnamese");
         assertThat(dto.isTravelAvailable()).isTrue();
+    }
+
+    @Test
+    void searchPhotographers_withRecommendationScoring_shouldRankHigherScoreFirst() {
+        PhotographerProfile profileA = createProfile(101L, "Studio A", new BigDecimal("2000000"), 4.8, 25, "PORTRAIT");
+        PhotographerProfile profileB = createProfile(102L, "Studio B", new BigDecimal("5000000"), 3.5, 2, "WEDDING");
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(profileB, profileA));
+        when(bookingRepository.countCompletedBookingsForPhotographer(101L)).thenReturn(20L);
+        when(bookingRepository.countCompletedBookingsForPhotographer(102L)).thenReturn(1L);
+
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setSortBy("RECOMMENDED");
+
+        List<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(request);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getId()).isEqualTo(101L);
+        assertThat(result.get(0).getRecommendationScore()).isGreaterThan(result.get(1).getRecommendationScore());
+    }
+
+    @Test
+    void searchPhotographers_withPriceSort_shouldSortAscendingAndDescending() {
+        PhotographerProfile profileLow = createProfile(101L, "Budget Studio", new BigDecimal("1000000"), 4.0, 5, "PORTRAIT");
+        PhotographerProfile profileHigh = createProfile(102L, "Luxury Studio", new BigDecimal("8000000"), 4.9, 30, "PORTRAIT");
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(profileHigh, profileLow));
+
+        PhotographerSearchRequest requestAsc = new PhotographerSearchRequest();
+        requestAsc.setSortBy("PRICE_ASC");
+        List<PhotographerPublicDto> resultAsc = publicPhotographerService.searchPhotographers(requestAsc);
+        assertThat(resultAsc.get(0).getId()).isEqualTo(101L);
+        assertThat(resultAsc.get(1).getId()).isEqualTo(102L);
+
+        PhotographerSearchRequest requestDesc = new PhotographerSearchRequest();
+        requestDesc.setSortBy("PRICE_DESC");
+        List<PhotographerPublicDto> resultDesc = publicPhotographerService.searchPhotographers(requestDesc);
+        assertThat(resultDesc.get(0).getId()).isEqualTo(102L);
+        assertThat(resultDesc.get(1).getId()).isEqualTo(101L);
+    }
+
+    @Test
+    void searchPhotographers_withRatingAndCategoryFilter_shouldFilterCorrectly() {
+        PhotographerProfile wedding = createProfile(101L, "Wedding Pro", new BigDecimal("4000000"), 4.8, 15, "WEDDING");
+        PhotographerProfile portraitLow = createProfile(102L, "Portrait Novice", new BigDecimal("2000000"), 3.8, 2, "PORTRAIT");
+        PhotographerProfile portraitHigh = createProfile(103L, "Portrait Master", new BigDecimal("3500000"), 4.9, 40, "PORTRAIT");
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(wedding, portraitLow, portraitHigh));
+
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setCategory("PORTRAIT");
+        request.setMinRating(4.5);
+
+        List<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(request);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(103L);
+        assertThat(result.get(0).getDisplayName()).isEqualTo("Portrait Master");
+    }
+
+    @Test
+    void searchPhotographers_withAvailableDate_shouldFilterOutUnavailable() {
+        PhotographerProfile availablePro = createProfile(101L, "Available Studio", new BigDecimal("3000000"), 4.5, 10, "PORTRAIT");
+        PhotographerProfile busyPro = createProfile(102L, "Busy Studio", new BigDecimal("3000000"), 4.5, 10, "PORTRAIT");
+
+        java.time.LocalDate searchDate = java.time.LocalDate.now().plusDays(5);
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(availablePro, busyPro));
+        when(scheduleService.isDateAvailable(101L, searchDate)).thenReturn(true);
+        when(scheduleService.isDateAvailable(102L, searchDate)).thenReturn(false);
+
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setAvailableDate(searchDate);
+
+        List<PhotographerPublicDto> result = publicPhotographerService.searchPhotographers(request);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(101L);
+        assertThat(result.get(0).getAvailableOnRequestedDate()).isTrue();
+    }
+
+    @Test
+    void searchPhotographers_pagedWithAdvancedSort_shouldSliceCorrectPage() {
+        PhotographerProfile p1 = createProfile(101L, "Studio 1", new BigDecimal("1000000"), 4.0, 1, "PORTRAIT");
+        PhotographerProfile p2 = createProfile(102L, "Studio 2", new BigDecimal("2000000"), 4.5, 5, "PORTRAIT");
+        PhotographerProfile p3 = createProfile(103L, "Studio 3", new BigDecimal("3000000"), 4.8, 10, "PORTRAIT");
+
+        when(photographerProfileRepository.searchApprovedPhotographers(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(p1, p2, p3));
+
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setSortBy("PRICE_DESC");
+        request.setPage(0);
+
+        Page<PhotographerPublicDto> paged = publicPhotographerService.searchPhotographers(request, PageRequest.of(0, 2));
+
+        assertThat(paged.getTotalElements()).isEqualTo(3);
+        assertThat(paged.getContent()).hasSize(2);
+        assertThat(paged.getContent().get(0).getId()).isEqualTo(103L);
+        assertThat(paged.getContent().get(1).getId()).isEqualTo(102L);
+    }
+
+    private PhotographerProfile createProfile(Long id, String name, BigDecimal price, Double rating, Integer reviews, String specialty) {
+        User u = new User();
+        u.setId(id + 1000);
+        u.setFullName(name);
+        u.setEmail("pro" + id + "@example.com");
+
+        PhotographerProfile p = new PhotographerProfile();
+        p.setUser(u);
+        p.setDisplayName(name);
+        p.setPriceFrom(price);
+        p.setAverageRating(rating);
+        p.setReviewCount(reviews);
+        p.setSpecialties(specialty);
+        p.setCity("Hanoi");
+        p.setVerificationStatus(PhotographerVerificationStatus.APPROVED);
+
+        try {
+            var idField = PhotographerProfile.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(p, id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return p;
     }
 }

@@ -22,11 +22,34 @@
                 </div>
             </div>
 
+            <!-- Multi-Filter Search Bar -->
+            <form action="${pageContext.request.contextPath}/admin/bookings" method="get" class="mb-4 p-3" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                <input type="hidden" name="status" value="${selectedStatus}"/>
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label for="adminSearchInput" class="form-label" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Search Participants</label>
+                        <input type="text" id="adminSearchInput" name="search" class="form-control" placeholder="Customer, creator, email, location..." value="<c:out value='${search}'/>"/>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="adminStartDate" class="form-label" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">From Date</label>
+                        <input type="date" id="adminStartDate" name="startDate" class="form-control" value="<c:out value='${startDate}'/>"/>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="adminEndDate" class="form-label" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">To Date</label>
+                        <input type="date" id="adminEndDate" name="endDate" class="form-control" value="<c:out value='${endDate}'/>"/>
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        <a href="${pageContext.request.contextPath}/admin/bookings" class="btn btn-outline-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+
             <!-- Status Filter Tabs -->
             <div class="status-tabs">
-                <a href="${pageContext.request.contextPath}/admin/bookings?status=ALL" class="status-tab ${selectedStatus == 'ALL' ? 'active' : ''}">All Bookings</a>
+                <a href="${pageContext.request.contextPath}/admin/bookings?status=ALL<c:if test='${not empty search}'>&search=<c:out value='${search}'/></c:if>" class="status-tab ${selectedStatus == 'ALL' ? 'active' : ''}">All Bookings</a>
                 <c:forEach var="st" items="${statuses}">
-                    <a href="${pageContext.request.contextPath}/admin/bookings?status=${st.name()}" class="status-tab ${selectedStatus == st.name() ? 'active' : ''}">${st.name()}</a>
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=${st.name()}<c:if test='${not empty search}'>&search=<c:out value='${search}'/></c:if>" class="status-tab ${selectedStatus == st.name() ? 'active' : ''}">${st.name()}</a>
                 </c:forEach>
             </div>
 
@@ -34,7 +57,7 @@
                 <c:when test="${empty bookings}">
                     <div class="pc-empty-state">
                         <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No bookings found</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 0;">There are no shoot bookings matching the "${selectedStatus}" status filter.</p>
+                        <p style="color: var(--text-muted); margin-bottom: 0;">There are no shoot bookings matching your filter criteria.</p>
                     </div>
                 </c:when>
                 <c:otherwise>
@@ -50,6 +73,7 @@
                                     <th>Agreed Price</th>
                                     <th>Status</th>
                                     <th>Created</th>
+                                    <th style="text-align: right;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,6 +101,9 @@
                                         </td>
                                         <td>
                                             <c:choose>
+                                                <c:when test="${b.status == 'DISPUTED'}">
+                                                    <span class="badge" style="background-color: #ef4444; color: #fff;">DISPUTED</span>
+                                                </c:when>
                                                 <c:when test="${b.status == 'PENDING'}">
                                                     <span class="badge badge-pending">PENDING</span>
                                                 </c:when>
@@ -102,6 +129,11 @@
                                                 <fmt:parseDate value="${fn:substring(b.createdAt, 0, 10)}" pattern="yyyy-MM-dd" var="parsedCreatedDate" type="date" />
                                                 <fmt:formatDate value="${parsedCreatedDate}" pattern="MMM d, yyyy" />
                                             </c:if>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="${pageContext.request.contextPath}/admin/bookings/${b.id}" class="btn btn-sm btn-outline-primary" style="font-size: 0.82rem; padding: 0.2rem 0.55rem;">
+                                                Inspect &rarr;
+                                            </a>
                                         </td>
                                     </tr>
                                 </c:forEach>

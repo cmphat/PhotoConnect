@@ -45,22 +45,25 @@ public class PhotographerController {
     private final PortfolioService portfolioService;
     private final com.photoconnect.service.ReviewService reviewService;
     private final SavedPhotographerService savedPhotographerService;
+    private final com.photoconnect.service.ServicePackageService servicePackageService;
 
     public PhotographerController(PublicPhotographerService publicPhotographerService,
                                   PortfolioService portfolioService,
                                   com.photoconnect.service.ReviewService reviewService) {
-        this(publicPhotographerService, portfolioService, reviewService, null);
+        this(publicPhotographerService, portfolioService, reviewService, null, null);
     }
 
     @Autowired
     public PhotographerController(PublicPhotographerService publicPhotographerService,
                                   PortfolioService portfolioService,
                                   com.photoconnect.service.ReviewService reviewService,
-                                  @Autowired(required = false) SavedPhotographerService savedPhotographerService) {
+                                  @Autowired(required = false) SavedPhotographerService savedPhotographerService,
+                                  @Autowired(required = false) com.photoconnect.service.ServicePackageService servicePackageService) {
         this.publicPhotographerService = publicPhotographerService;
         this.portfolioService = portfolioService;
         this.reviewService = reviewService;
         this.savedPhotographerService = savedPhotographerService;
+        this.servicePackageService = servicePackageService;
     }
 
     // ── GET /photographers ────────────────────────────────────────────────
@@ -142,6 +145,15 @@ public class PhotographerController {
             List<com.photoconnect.dto.ReviewDto> reviews =
                     reviewService.getReviewsForPhotographer(id);
             model.addAttribute("reviews", reviews);
+
+            // Load active service packages
+            if (servicePackageService != null) {
+                List<com.photoconnect.dto.ServicePackageDto> packages =
+                        servicePackageService.getActivePackagesForPhotographer(id);
+                model.addAttribute("packages", packages);
+            } else {
+                model.addAttribute("packages", java.util.Collections.emptyList());
+            }
 
             boolean isSaved = false;
             if (session != null && savedPhotographerService != null) {

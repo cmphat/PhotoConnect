@@ -50,6 +50,22 @@ public class Booking {
     @Column(name = "notes", length = 1000)
     private String notes;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_package_id")
+    private ServicePackage servicePackage;
+
+    @Column(name = "package_name", length = 150)
+    private String packageName;
+
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes = 120;
+
+    @Column(name = "edited_photo_count")
+    private Integer editedPhotoCount;
+
+    @Column(name = "delivery_days")
+    private Integer deliveryDays;
+
     @Column(name = "agreed_price", nullable = false, precision = 18, scale = 2)
     private BigDecimal agreedPrice;
 
@@ -62,6 +78,16 @@ public class Booking {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by_user_id")
+    private User cancelledBy;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
 
     public Booking() {
     }
@@ -171,6 +197,46 @@ public class Booking {
         this.status = status;
     }
 
+    public ServicePackage getServicePackage() {
+        return servicePackage;
+    }
+
+    public void setServicePackage(ServicePackage servicePackage) {
+        this.servicePackage = servicePackage;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes != null ? durationMinutes : 120;
+    }
+
+    public Integer getEditedPhotoCount() {
+        return editedPhotoCount;
+    }
+
+    public void setEditedPhotoCount(Integer editedPhotoCount) {
+        this.editedPhotoCount = editedPhotoCount;
+    }
+
+    public Integer getDeliveryDays() {
+        return deliveryDays;
+    }
+
+    public void setDeliveryDays(Integer deliveryDays) {
+        this.deliveryDays = deliveryDays;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -185,5 +251,29 @@ public class Booking {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public User getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public void setCancelledBy(User cancelledBy) {
+        this.cancelledBy = cancelledBy;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 }

@@ -26,6 +26,10 @@ public class BookingResponseDto {
     private final BigDecimal agreedPrice;
     private final BookingStatus status;
     private final LocalDateTime createdAt;
+    private final String packageName;
+    private final Integer durationMinutes;
+    private final Integer editedPhotoCount;
+    private final Integer deliveryDays;
 
     public BookingResponseDto(Long id,
                               Long customerId,
@@ -40,6 +44,27 @@ public class BookingResponseDto {
                               BigDecimal agreedPrice,
                               BookingStatus status,
                               LocalDateTime createdAt) {
+        this(id, customerId, customerName, photographerProfileId, photographerDisplayName, photographerCity,
+                bookingDate, bookingTime, location, notes, agreedPrice, status, createdAt, null, 120, null, null);
+    }
+
+    public BookingResponseDto(Long id,
+                              Long customerId,
+                              String customerName,
+                              Long photographerProfileId,
+                              String photographerDisplayName,
+                              String photographerCity,
+                              LocalDate bookingDate,
+                              LocalTime bookingTime,
+                              String location,
+                              String notes,
+                              BigDecimal agreedPrice,
+                              BookingStatus status,
+                              LocalDateTime createdAt,
+                              String packageName,
+                              Integer durationMinutes,
+                              Integer editedPhotoCount,
+                              Integer deliveryDays) {
         this.id = id;
         this.customerId = customerId;
         this.customerName = customerName;
@@ -53,6 +78,10 @@ public class BookingResponseDto {
         this.agreedPrice = agreedPrice;
         this.status = status;
         this.createdAt = createdAt;
+        this.packageName = packageName;
+        this.durationMinutes = durationMinutes != null ? durationMinutes : 120;
+        this.editedPhotoCount = editedPhotoCount;
+        this.deliveryDays = deliveryDays;
     }
 
     public static BookingResponseDto from(Booking booking) {
@@ -72,7 +101,11 @@ public class BookingResponseDto {
                 booking.getNotes(),
                 booking.getAgreedPrice(),
                 booking.getStatus(),
-                booking.getCreatedAt()
+                booking.getCreatedAt(),
+                booking.getPackageName(),
+                booking.getDurationMinutes(),
+                booking.getEditedPhotoCount(),
+                booking.getDeliveryDays()
         );
     }
 
@@ -126,5 +159,21 @@ public class BookingResponseDto {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public Integer getEditedPhotoCount() {
+        return editedPhotoCount;
+    }
+
+    public Integer getDeliveryDays() {
+        return deliveryDays;
     }
 }

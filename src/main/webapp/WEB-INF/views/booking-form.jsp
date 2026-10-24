@@ -88,6 +88,21 @@
                     <form action="${pageContext.request.contextPath}/photographers/${photographer.id}/book" method="post" id="booking-form">
                         <%@ include file="fragments/csrf-input.jsp" %>
 
+                        <!-- Service Package Selection -->
+                        <c:if test="${not empty packages}">
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="packageId" class="form-label">Select Service Package</label>
+                                <select id="packageId" name="packageId" class="form-input" style="padding: 0.65rem 0.85rem;">
+                                    <option value="">-- Custom Shoot (Photographer Base Rate) --</option>
+                                    <c:forEach var="pkg" items="${packages}">
+                                        <option value="${pkg.id}" ${bookingRequest.packageId == pkg.id ? 'selected' : ''}>
+                                            <c:out value="${pkg.name}"/> · <c:out value="${pkg.formattedPrice}"/> (<c:out value="${pkg.formattedDuration}"/>, <c:out value="${pkg.editedPhotoCount}"/> photos)
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                        </c:if>
+
                         <!-- Date & Time Row -->
                         <div class="pc-booking-datetime-grid">
                             <div class="form-group">

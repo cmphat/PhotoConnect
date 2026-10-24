@@ -21,6 +21,11 @@ public class PhotographerSearchRequest {
     private BigDecimal maxPrice;
     private Integer minExperience;
     private Integer page;
+    private String category;
+    private Double minRating;
+    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+    private java.time.LocalDate availableDate;
+    private String sortBy;
 
     public PhotographerSearchRequest() {
     }
@@ -31,6 +36,19 @@ public class PhotographerSearchRequest {
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
         this.minExperience = minExperience;
+    }
+
+    public PhotographerSearchRequest(String keyword, String city, BigDecimal minPrice, BigDecimal maxPrice, Integer minExperience,
+                                     String category, Double minRating, java.time.LocalDate availableDate, String sortBy) {
+        this.keyword = keyword;
+        this.city = city;
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
+        this.minExperience = minExperience;
+        this.category = category;
+        this.minRating = minRating;
+        this.availableDate = availableDate;
+        this.sortBy = sortBy;
     }
 
     // ── Getters and Setters ──────────────────────────────────────────────────
@@ -87,6 +105,38 @@ public class PhotographerSearchRequest {
         return page != null ? page : 0;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Double getMinRating() {
+        return minRating;
+    }
+
+    public void setMinRating(Double minRating) {
+        this.minRating = minRating;
+    }
+
+    public java.time.LocalDate getAvailableDate() {
+        return availableDate;
+    }
+
+    public void setAvailableDate(java.time.LocalDate availableDate) {
+        this.availableDate = availableDate;
+    }
+
+    public String getSortBy() {
+        return sortBy;
+    }
+
+    public void setSortBy(String sortBy) {
+        this.sortBy = sortBy;
+    }
+
     // ── Normalization Helpers ────────────────────────────────────────────────
 
     public String getNormalizedKeyword() {
@@ -101,6 +151,28 @@ public class PhotographerSearchRequest {
             return null;
         }
         return city.trim();
+    }
+
+    public String getNormalizedCategory() {
+        if (category == null || category.trim().isEmpty() || "ALL".equalsIgnoreCase(category.trim())) {
+            return null;
+        }
+        return category.trim();
+    }
+
+    public String getNormalizedSortBy() {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return null;
+        }
+        return sortBy.trim().toUpperCase();
+    }
+
+    public String getEffectiveSortBy() {
+        String normalized = getNormalizedSortBy();
+        if (normalized == null || normalized.equals("DEFAULT")) {
+            return "RECOMMENDED";
+        }
+        return normalized;
     }
 
     // ── Validation Helpers ───────────────────────────────────────────────────
@@ -118,6 +190,12 @@ public class PhotographerSearchRequest {
         }
         if (getNormalizedCity() != null && getNormalizedCity().length() > MAX_TEXT_LENGTH) {
             return "City cannot exceed 100 characters.";
+        }
+        if (getNormalizedCategory() != null && getNormalizedCategory().length() > 50) {
+            return "Category cannot exceed 50 characters.";
+        }
+        if (minRating != null && (minRating < 0.0 || minRating > 5.0)) {
+            return "Minimum rating must be between 0 and 5.";
         }
         if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
             return "Minimum price cannot be negative.";
@@ -140,7 +218,21 @@ public class PhotographerSearchRequest {
         if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
             return "Minimum price cannot exceed maximum price.";
         }
+        if (getNormalizedSortBy() != null && !isValidSortOption(getNormalizedSortBy())) {
+            return "Invalid sort option: " + sortBy;
+        }
         return null;
+    }
+
+    private boolean isValidSortOption(String sort) {
+        return "RECOMMENDED".equals(sort)
+                || "RATING_DESC".equals(sort)
+                || "PRICE_ASC".equals(sort)
+                || "PRICE_DESC".equals(sort)
+                || "REVIEWS_DESC".equals(sort)
+                || "COMPLETED_DESC".equals(sort)
+                || "NEWEST".equals(sort)
+                || "DEFAULT".equals(sort);
     }
 
     private boolean hasValidPriceShape(BigDecimal price) {
@@ -158,6 +250,16 @@ public class PhotographerSearchRequest {
                 || getNormalizedCity() != null
                 || minPrice != null
                 || maxPrice != null
-                || minExperience != null;
+                || minExperience != null
+                || getNormalizedCategory() != null
+                || minRating != null
+                || availableDate != null;
+    }
+
+    public boolean hasAdvancedFiltersOrSort() {
+        return getNormalizedCategory() != null
+                || minRating != null
+                || availableDate != null
+                || (getNormalizedSortBy() != null && !getNormalizedSortBy().equals("DEFAULT"));
     }
 }

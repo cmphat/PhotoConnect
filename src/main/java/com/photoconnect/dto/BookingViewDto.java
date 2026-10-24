@@ -46,8 +46,66 @@ public class BookingViewDto {
         dto.setNotes(booking.getNotes());
         dto.setAgreedPrice(booking.getAgreedPrice());
         dto.setStatus(booking.getStatus());
+        dto.setPackageName(booking.getPackageName() != null ? booking.getPackageName() : "Custom Session");
+        dto.setDurationMinutes(booking.getDurationMinutes() != null ? booking.getDurationMinutes() : 120);
+        dto.setEditedPhotoCount(booking.getEditedPhotoCount());
+        dto.setDeliveryDays(booking.getDeliveryDays());
         dto.setCreatedAt(booking.getCreatedAt());
+        dto.setCancellationReason(booking.getCancellationReason());
+        if (booking.getCancelledBy() != null) {
+            dto.setCancelledByName(booking.getCancelledBy().getFullName());
+        }
+        dto.setCancelledAt(booking.getCancelledAt());
         return dto;
+    }
+
+    private String cancellationReason;
+    private String cancelledByName;
+    private LocalDateTime cancelledAt;
+
+    private String packageName;
+    private Integer durationMinutes;
+    private Integer editedPhotoCount;
+    private Integer deliveryDays;
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public Integer getEditedPhotoCount() {
+        return editedPhotoCount;
+    }
+
+    public void setEditedPhotoCount(Integer editedPhotoCount) {
+        this.editedPhotoCount = editedPhotoCount;
+    }
+
+    public Integer getDeliveryDays() {
+        return deliveryDays;
+    }
+
+    public void setDeliveryDays(Integer deliveryDays) {
+        this.deliveryDays = deliveryDays;
+    }
+
+    public String getStatusDisplayName() {
+        return status != null ? status.getDisplayName() : "";
+    }
+
+    public String getBadgeClass() {
+        return status != null ? status.getBadgeClass() : "pc-badge-secondary";
     }
 
     public Long getId() {
@@ -144,5 +202,29 @@ public class BookingViewDto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public String getCancelledByName() {
+        return cancelledByName;
+    }
+
+    public void setCancelledByName(String cancelledByName) {
+        this.cancelledByName = cancelledByName;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 }

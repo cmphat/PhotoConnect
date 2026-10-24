@@ -435,6 +435,52 @@
                                     </c:forEach>
                                 </div>
                             </c:otherwise>
+                    <!-- Service Packages Section -->
+                    <div style="margin-top: 3.5rem;" id="service-packages-section">
+                        <span class="section-index">Curated Offerings</span>
+                        <h2 class="section-headline">Service Packages</h2>
+
+                        <c:choose>
+                            <c:when test="${not empty packages}">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 1.5rem;">
+                                    <c:forEach var="pkg" items="${packages}">
+                                        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+                                            <div>
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                                    <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--accent); background: rgba(37,99,235,0.08); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                                        <c:out value="${pkg.categoryDisplayName}"/>
+                                                    </span>
+                                                </div>
+                                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text); margin: 0 0 0.5rem 0;">
+                                                    <c:out value="${pkg.name}"/>
+                                                </h3>
+                                                <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent); margin-bottom: 0.85rem;">
+                                                    <c:out value="${pkg.formattedPrice}"/>
+                                                </div>
+                                                <div style="background: var(--background); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.82rem; color: var(--text); margin-bottom: 0.85rem;">
+                                                    <div>⏱ <strong><c:out value="${pkg.formattedDuration}"/></strong> duration</div>
+                                                    <div style="margin-top: 0.25rem;">📷 <strong><c:out value="${pkg.editedPhotoCount}"/></strong> edited photos</div>
+                                                    <div style="margin-top: 0.25rem;">🚚 <strong><c:out value="${pkg.deliveryDays}"/> days</strong> turnaround</div>
+                                                </div>
+                                                <c:if test="${not empty pkg.description}">
+                                                    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.25rem;">
+                                                        <c:out value="${pkg.description}"/>
+                                                    </p>
+                                                </c:if>
+                                            </div>
+                                            <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book?packageId=${pkg.id}"
+                                               class="btn btn-outline-primary w-100" style="font-weight: 600; font-size: 0.88rem;">
+                                                Select Package →
+                                            </a>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div style="background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 2rem; text-align: center; color: var(--muted); margin-top: 1rem;">
+                                    This photographer has not created structured packages yet. Custom sessions can be reserved directly via the booking form.
+                                </div>
+                            </c:otherwise>
                         </c:choose>
                     </div>
 

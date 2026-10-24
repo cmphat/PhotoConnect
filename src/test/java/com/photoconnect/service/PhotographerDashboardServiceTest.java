@@ -1,5 +1,6 @@
 package com.photoconnect.service;
 
+import com.photoconnect.dto.PhotographerAnalyticsDto;
 import com.photoconnect.dto.PhotographerDashboardView;
 import com.photoconnect.entity.Booking;
 import com.photoconnect.entity.BookingStatus;
@@ -208,6 +209,63 @@ class PhotographerDashboardServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Only active photographers");
         verify(bookingRepository, never()).findPendingStudioRequests(any(), any());
+    }
+
+    @Test
+    void getAnalyticsCalculatesMetricsAndDistinctFinancialStates() {
+        when(bookingRepository.countByPhotographerProfileId(10L)).thenReturn(12L);
+        when(bookingRepository.countByPhotographerProfileIdAndStatus(10L, BookingStatus.PENDING)).thenReturn(2L);
+        when(bookingRepository.countUpcomingAcceptedForStudio(eq(10L), any(LocalDate.class))).thenReturn(3L);
+        when(bookingRepository.countByPhotographerProfileIdAndStatus(10L, BookingStatus.COMPLETED)).thenReturn(6L);
+        when(bookingRepository.countByPhotographerProfileIdAndStatus(10L, BookingStatus.CANCELLED)).thenReturn(1L);
+
+        when(bookingRepository.calculateGrossBookingValue(10L)).thenReturn(new BigDecimal("35000000"));
+        when(depositRepository.calculateConfirmedDepositsForPhotographer(10L)).thenReturn(new BigDecimal("10500000"));
+        when(bookingRepository.calculateCompletedRevenue(10L)).thenReturn(new BigDecimal("21000000"));
+
+        when(bookingRepository.countBookingsByStatusForPhotographer(10L)).thenReturn(List.<Object[]>of(
+                new Object[]{BookingStatus.COMPLETED, 6L},
+                new Object[]{BookingStatus.PENDING, 2L}
+        ));
+
+        when(bookingRepository.findPopularPackagesForPhotographer(10L)).thenReturn(List.<Object[]>of(
+                new Object[]{"Wedding Full Day", 4L, new BigDecimal("20000000")},
+                new Object[]{"Portrait Standard", 2L, new BigDecimal("4000000")}
+        ));
+
+        when(bookingRepository.findBookingTrendsSince(eq(10L), any(LocalDate.class))).thenReturn(List.<Object[]>of(
+                new Object[]{LocalDate.now(), BookingStatus.COMPLETED, new BigDecimal("5000000")}
+        ));
+
+        PhotographerAnalyticsDto analytics = service.getAnalytics(100L);
+
+        assertThat(analytics.getTotalBookings()).isEqualTo(12L);
+        assertThat(analytics.getPendingRequests()).isEqualTo(2L);
+        assertThat(analytics.getUpcomingSessions()).isEqualTo(3L);
+        assertThat(analytics.getCompletedBookings()).isEqualTo(6L);
+        assertThat(analytics.getCancelledBookings()).isEqualTo(1L);
+
+        assertThat(analytics.getGrossBookingValue()).isEqualByComparingTo("35000000");
+        assertThat(analytics.getConfirmedDeposits()).isEqualByComparingTo("10500000");
+        assertThat(analytics.getCompletedRevenue()).isEqualByComparingTo("21000000");
+
+        assertThat(analytics.getAverageRating()).isEqualTo(4.75);
+        assertThat(analytics.getReviewCount()).isEqualTo(8);
+
+        assertThat(analytics.getStatusDistribution()).containsEntry("COMPLETED", 6L).containsEntry("PENDING", 2L);
+        assertThat(analytics.getPopularPackages()).hasSize(2)
+                .extracting(PhotographerAnalyticsDto.PackageStatDto::getPackageName)
+                .containsExactly("Wedding Full Day", "Portrait Standard");
+
+        assertThat(analytics.getMonthlyTrends()).hasSize(6);
+    }
+
+    @Test
+    void getAnalyticsRejectsNonPhotographer() {
+        profile.getUser().setRole(UserRole.CUSTOMER);
+
+        assertThatThrownBy(() -> service.getAnalytics(100L))
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     private void stubEmptyScopedQueries() {

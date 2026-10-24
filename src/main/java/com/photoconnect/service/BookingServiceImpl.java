@@ -11,15 +11,15 @@ import com.photoconnect.entity.UserStatus;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.PhotographerUnavailableException;
 import com.photoconnect.exception.SelfBookingNotAllowedException;
-import com.photoconnect.repository.BookingRepository;
-import com.photoconnect.repository.PhotographerProfileRepository;
-import com.photoconnect.repository.UserRepository;
+import com.photoconnect.entity.*;
+import com.photoconnect.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -29,15 +29,46 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final PhotographerProfileRepository photographerProfileRepository;
     private final ScheduleService scheduleService;
+    private final com.photoconnect.repository.ServicePackageRepository servicePackageRepository;
+    private final NotificationService notificationService;
+    private final BookingStateMachineService bookingStateMachineService;
+    private final DepositRepository depositRepository;
+    private final RescheduleRequestRepository rescheduleRequestRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserRepository userRepository,
                               PhotographerProfileRepository photographerProfileRepository,
                               ScheduleService scheduleService) {
+        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, null, null, null, null, null);
+    }
+
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              UserRepository userRepository,
+                              PhotographerProfileRepository photographerProfileRepository,
+                              ScheduleService scheduleService,
+                              com.photoconnect.repository.ServicePackageRepository servicePackageRepository) {
+        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, servicePackageRepository, null, null, null, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              UserRepository userRepository,
+                              PhotographerProfileRepository photographerProfileRepository,
+                              ScheduleService scheduleService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.repository.ServicePackageRepository servicePackageRepository,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) DepositRepository depositRepository,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) RescheduleRequestRepository rescheduleRequestRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.photographerProfileRepository = photographerProfileRepository;
         this.scheduleService = scheduleService;
+        this.servicePackageRepository = servicePackageRepository;
+        this.notificationService = notificationService;
+        this.bookingStateMachineService = bookingStateMachineService;
+        this.depositRepository = depositRepository;
+        this.rescheduleRequestRepository = rescheduleRequestRepository;
     }
 
     @Override
@@ -102,18 +133,51 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidBookingException("Only customer accounts can create bookings.");
         }
 
-        // 4. Check Availability
+        // 4. Price & Package Snapshot
+        BigDecimal agreedPrice = profile.getPriceFrom() != null ? profile.getPriceFrom() : BigDecimal.ZERO;
+        com.photoconnect.entity.ServicePackage selectedPackage = null;
+        String packageName = "Custom Session";
+        int durationMinutes = 120;
+        Integer editedPhotoCount = null;
+        Integer deliveryDays = null;
+
+        if (request.getPackageId() != null && servicePackageRepository != null) {
+            com.photoconnect.entity.ServicePackage pkg = servicePackageRepository
+                    .findByIdAndPhotographerProfileId(request.getPackageId(), profile.getId())
+                    .orElseThrow(() -> new InvalidBookingException("Selected service package not found or does not belong to this photographer."));
+            if (!pkg.isActive()) {
+                throw new InvalidBookingException("Selected service package is currently inactive.");
+            }
+            selectedPackage = pkg;
+            packageName = pkg.getName();
+            agreedPrice = pkg.getPrice();
+            durationMinutes = pkg.getDurationMinutes();
+            editedPhotoCount = pkg.getEditedPhotoCount();
+            deliveryDays = pkg.getDeliveryDays();
+        }
+
+        // 5. Check Availability & Slot Conflict
+        java.time.LocalTime requestedTime = request.getBookingTime() != null ? request.getBookingTime() : java.time.LocalTime.of(9, 0);
         if (!scheduleService.isDateAvailable(profile.getId(), request.getBookingDate())) {
             throw new PhotographerUnavailableException("The photographer is not available on this date.");
         }
+        scheduleService.validateSlotAvailability(
+                profile.getId(),
+                request.getBookingDate(),
+                requestedTime,
+                durationMinutes,
+                null
+        );
 
-        // 5. Price Snapshot
-        BigDecimal agreedPrice = profile.getPriceFrom() != null ? profile.getPriceFrom() : BigDecimal.ZERO;
-
-        // 5. Persist Booking
+        // 6. Persist Booking
         Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setPhotographerProfile(profile);
+        booking.setServicePackage(selectedPackage);
+        booking.setPackageName(packageName);
+        booking.setDurationMinutes(durationMinutes);
+        booking.setEditedPhotoCount(editedPhotoCount);
+        booking.setDeliveryDays(deliveryDays);
         booking.setBookingDate(request.getBookingDate());
         booking.setBookingTime(request.getBookingTime());
         booking.setLocation(request.getLocation().trim());
@@ -121,7 +185,18 @@ public class BookingServiceImpl implements BookingService {
         booking.setAgreedPrice(agreedPrice);
         booking.setStatus(BookingStatus.PENDING);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        if (notificationService != null && profile.getUser() != null) {
+            notificationService.sendNotification(
+                    profile.getUser().getId(),
+                    com.photoconnect.entity.NotificationType.BOOKING_REQUEST,
+                    "New Booking Request",
+                    "Client " + customer.getFullName() + " requested a photoshoot session for " + booking.getBookingDate(),
+                    saved.getId(),
+                    "/photographer/bookings/" + saved.getId()
+            );
+        }
+        return saved;
     }
 
     @Override
@@ -145,13 +220,122 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void cancelBooking(Long bookingId, Long customerUserId) {
+        cancelBooking(bookingId, customerUserId, null);
+    }
+
+    @Override
+    @Transactional
+    public void cancelBooking(Long bookingId, Long customerUserId, String reason) {
         Booking booking = getBookingForCustomer(bookingId, customerUserId);
 
-        if (booking.getStatus() == BookingStatus.PENDING || booking.getStatus() == BookingStatus.ACCEPTED) {
-            booking.setStatus(BookingStatus.CANCELLED);
-            bookingRepository.save(booking);
-        } else {
+        if (booking.getStatus() != BookingStatus.PENDING &&
+            booking.getStatus() != BookingStatus.ACCEPTED &&
+            booking.getStatus() != BookingStatus.DEPOSIT_PENDING &&
+            booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new InvalidBookingException("Cannot cancel booking in current state: " + booking.getStatus());
+        }
+
+        String effectiveReason = (reason != null && !reason.isBlank()) ? reason : "Cancelled by client";
+        booking.setCancellationReason(effectiveReason);
+        booking.setCancelledBy(booking.getCustomer());
+        booking.setCancelledAt(LocalDateTime.now());
+
+        handleDepositCancellation(booking, true);
+        cancelPendingReschedules(bookingId);
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        if (bookingStateMachineService != null) {
+            bookingStateMachineService.transition(bookingId, BookingStatus.CANCELLED, customerUserId, effectiveReason);
+        }
+
+        if (notificationService != null && booking.getPhotographerProfile() != null && booking.getPhotographerProfile().getUser() != null) {
+            notificationService.sendNotification(
+                    booking.getPhotographerProfile().getUser().getId(),
+                    com.photoconnect.entity.NotificationType.BOOKING_CANCELLED,
+                    "Booking Cancelled",
+                    "Booking #" + bookingId + " was cancelled by the client." + (reason != null && !reason.isBlank() ? " Reason: " + reason : ""),
+                    bookingId,
+                    "/photographer/bookings/" + bookingId
+            );
+        }
+    }
+
+    @Override
+    @Transactional
+    public void cancelBookingByPhotographer(Long bookingId, Long photographerUserId, String reason) {
+        Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
+
+        if (booking.getStatus() != BookingStatus.PENDING &&
+            booking.getStatus() != BookingStatus.ACCEPTED &&
+            booking.getStatus() != BookingStatus.DEPOSIT_PENDING &&
+            booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new InvalidBookingException("Cannot cancel booking in current state: " + booking.getStatus());
+        }
+
+        String effectiveReason = (reason != null && !reason.isBlank()) ? reason : "Cancelled by photographer";
+        booking.setCancellationReason(effectiveReason);
+        booking.setCancelledBy(booking.getPhotographerProfile().getUser());
+        booking.setCancelledAt(LocalDateTime.now());
+
+        handleDepositCancellation(booking, false);
+        cancelPendingReschedules(bookingId);
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        if (bookingStateMachineService != null) {
+            bookingStateMachineService.transition(bookingId, BookingStatus.CANCELLED, photographerUserId, effectiveReason);
+        }
+
+        if (notificationService != null && booking.getCustomer() != null) {
+            notificationService.sendNotification(
+                    booking.getCustomer().getId(),
+                    com.photoconnect.entity.NotificationType.BOOKING_CANCELLED,
+                    "Booking Cancelled",
+                    "Booking #" + bookingId + " was cancelled by the photographer." + (reason != null && !reason.isBlank() ? " Reason: " + reason : "") + " Any deposit paid is eligible for 100% refund credit.",
+                    bookingId,
+                    "/bookings/" + bookingId
+            );
+        }
+    }
+
+    private void handleDepositCancellation(Booking booking, boolean cancelledByCustomer) {
+        if (depositRepository == null) return;
+        depositRepository.findByBookingIdWithDetails(booking.getId()).ifPresent(deposit -> {
+            if (deposit.getStatus() == DepositStatus.PAID) {
+                if (!cancelledByCustomer) {
+                    deposit.setStatus(DepositStatus.REFUNDED);
+                    deposit.setFailureReason("Photographer cancelled confirmed booking. Customer entitled to 100% refund credit.");
+                } else {
+                    LocalDateTime sessionStart = LocalDateTime.of(booking.getBookingDate(), booking.getBookingTime());
+                    long hoursUntilSession = java.time.Duration.between(LocalDateTime.now(), sessionStart).toHours();
+                    if (hoursUntilSession >= 48) {
+                        deposit.setStatus(DepositStatus.REFUNDED);
+                        deposit.setFailureReason("Customer cancelled >= 48 hours before session. Eligible for full refund credit (policy: 48h advance notice).");
+                    } else {
+                        deposit.setStatus(DepositStatus.FORFEITED);
+                        deposit.setFailureReason("Customer cancelled within 48 hours of session. Deposit forfeited per cancellation policy.");
+                    }
+                }
+                depositRepository.save(deposit);
+            } else if (deposit.getStatus() == DepositStatus.PENDING || deposit.getStatus() == DepositStatus.PROCESSING) {
+                deposit.setStatus(DepositStatus.CANCELLED);
+                deposit.setFailureReason("Booking cancelled.");
+                depositRepository.save(deposit);
+            }
+        });
+    }
+
+    private void cancelPendingReschedules(Long bookingId) {
+        if (rescheduleRequestRepository == null) return;
+        List<RescheduleRequest> pending = rescheduleRequestRepository.findByBookingIdAndStatus(bookingId, RescheduleStatus.PENDING);
+        for (RescheduleRequest req : pending) {
+            req.setStatus(RescheduleStatus.CANCELLED);
+            req.setResolvedAt(LocalDateTime.now());
+            req.setResponseNote("Auto-cancelled due to booking cancellation");
+            rescheduleRequestRepository.save(req);
         }
     }
 
@@ -177,6 +361,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public void acceptBooking(Long bookingId, Long photographerUserId) {
         Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
 
@@ -186,11 +371,41 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidBookingException("Only active and approved photographers can accept bookings.");
         }
 
-        if (booking.getStatus() == BookingStatus.PENDING) {
-            booking.setStatus(BookingStatus.ACCEPTED);
-            bookingRepository.save(booking);
-        } else {
+        if (booking.getStatus() != BookingStatus.PENDING) {
             throw new InvalidBookingException("Only PENDING bookings can be accepted.");
+        }
+
+        // Concurrency control: acquire database lock on photographer profile to prevent race conditions
+        PhotographerProfile lockedProfile = photographerProfileRepository.findByIdWithLock(booking.getPhotographerProfile().getId())
+                .orElse(booking.getPhotographerProfile());
+
+        int duration = (booking.getDurationMinutes() != null && booking.getDurationMinutes() > 0)
+                ? booking.getDurationMinutes()
+                : 120;
+        java.time.LocalTime time = booking.getBookingTime() != null ? booking.getBookingTime() : java.time.LocalTime.of(9, 0);
+
+        // Check that slot has not been reserved concurrently
+        scheduleService.validateSlotAvailability(
+                lockedProfile.getId(),
+                booking.getBookingDate(),
+                time,
+                duration,
+                booking.getId()
+        );
+
+        booking.setStatus(BookingStatus.ACCEPTED);
+        bookingRepository.save(booking);
+
+        if (notificationService != null && booking.getCustomer() != null) {
+            String photogName = lockedProfile.getUser() != null ? lockedProfile.getUser().getFullName() : "Your photographer";
+            notificationService.sendNotification(
+                    booking.getCustomer().getId(),
+                    com.photoconnect.entity.NotificationType.BOOKING_ACCEPTED,
+                    "Booking Accepted",
+                    "Photographer " + photogName + " accepted your booking for " + booking.getBookingDate() + "!",
+                    booking.getId(),
+                    "/bookings/" + booking.getId()
+            );
         }
     }
 
@@ -201,6 +416,17 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus() == BookingStatus.PENDING) {
             booking.setStatus(BookingStatus.REJECTED);
             bookingRepository.save(booking);
+
+            if (notificationService != null && booking.getCustomer() != null) {
+                notificationService.sendNotification(
+                        booking.getCustomer().getId(),
+                        com.photoconnect.entity.NotificationType.BOOKING_REJECTED,
+                        "Booking Request Declined",
+                        "Your booking request for " + booking.getBookingDate() + " was declined.",
+                        booking.getId(),
+                        "/bookings/" + booking.getId()
+                );
+            }
         } else {
             throw new InvalidBookingException("Only PENDING bookings can be rejected.");
         }

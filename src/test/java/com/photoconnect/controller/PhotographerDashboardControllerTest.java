@@ -1,5 +1,6 @@
 package com.photoconnect.controller;
 
+import com.photoconnect.dto.PhotographerAnalyticsDto;
 import com.photoconnect.dto.PhotographerDashboardView;
 import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.UserRole;
@@ -88,6 +89,29 @@ class PhotographerDashboardControllerTest {
                         .session(session(100L, UserRole.PHOTOGRAPHER)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/photographer/onboarding-status"));
+    }
+
+    @Test
+    void analyticsEndpointRendersForPhotographer() throws Exception {
+        PhotographerAnalyticsDto analyticsDto = new PhotographerAnalyticsDto();
+        authenticate(100L, UserRole.PHOTOGRAPHER);
+        when(photographerDashboardService.getAnalytics(100L)).thenReturn(analyticsDto);
+
+        mockMvc.perform(get("/photographer/analytics")
+                        .session(session(100L, UserRole.PHOTOGRAPHER)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("photographer-analytics"))
+                .andExpect(model().attribute("analytics", analyticsDto));
+
+        verify(photographerDashboardService).getAnalytics(100L);
+    }
+
+    @Test
+    void analyticsEndpointRejectsCustomer() throws Exception {
+        authenticate(2L, UserRole.CUSTOMER);
+        mockMvc.perform(get("/photographer/analytics").session(session(2L, UserRole.CUSTOMER)))
+                .andExpect(status().isForbidden());
+        verify(photographerDashboardService, never()).getAnalytics(any());
     }
 
     private MockHttpSession session(Long userId, UserRole role) {

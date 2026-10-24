@@ -26,13 +26,33 @@ public class DepositController {
     private final DepositService depositService;
     private final BookingService bookingService;
     private final DemoQrCodeService qrCodeService;
+    private final com.photoconnect.service.BookingStateMachineService bookingStateMachineService;
+    private final com.photoconnect.service.NotificationService notificationService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public DepositController(DepositService depositService,
+                             BookingService bookingService,
+                             DemoQrCodeService qrCodeService,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.BookingStateMachineService bookingStateMachineService,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.NotificationService notificationService) {
+        this.depositService = depositService;
+        this.bookingService = bookingService;
+        this.qrCodeService = qrCodeService;
+        this.bookingStateMachineService = bookingStateMachineService;
+        this.notificationService = notificationService;
+    }
+
+    public DepositController(DepositService depositService,
+                             BookingService bookingService,
+                             DemoQrCodeService qrCodeService,
+                             com.photoconnect.service.BookingStateMachineService bookingStateMachineService) {
+        this(depositService, bookingService, qrCodeService, bookingStateMachineService, null);
+    }
 
     public DepositController(DepositService depositService,
                              BookingService bookingService,
                              DemoQrCodeService qrCodeService) {
-        this.depositService = depositService;
-        this.bookingService = bookingService;
-        this.qrCodeService = qrCodeService;
+        this(depositService, bookingService, qrCodeService, null, null);
     }
 
     /** Keeps the TASK-015 URL usable while making checkout the canonical route. */
@@ -69,7 +89,32 @@ public class DepositController {
                                  HttpSession session) {
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
-        depositService.processDemoPayment(bookingId, SessionSecurityUtils.userId(session), paymentRequest);
+        Long userId = SessionSecurityUtils.userId(session);
+        DepositViewDto outcome = depositService.processDemoPayment(bookingId, userId, paymentRequest);
+        if (outcome != null && outcome.getStatus() == com.photoconnect.entity.DepositStatus.PAID) {
+            if (bookingStateMachineService != null) {
+                try {
+                    bookingStateMachineService.transition(bookingId, com.photoconnect.entity.BookingStatus.CONFIRMED, userId, "Customer verified deposit payment");
+                } catch (Exception e) {
+                    // Log and continue to result screen
+                }
+            }
+            if (notificationService != null) {
+                try {
+                    Booking b = bookingService.getBookingForCustomer(bookingId, userId);
+                    if (b != null && b.getPhotographerProfile() != null && b.getPhotographerProfile().getUser() != null) {
+                        notificationService.sendNotification(
+                                b.getPhotographerProfile().getUser().getId(),
+                                com.photoconnect.entity.NotificationType.DEPOSIT_CONFIRMED,
+                                "Deposit Paid",
+                                "Deposit payment confirmed for booking #" + bookingId,
+                                bookingId,
+                                "/photographer/bookings/" + bookingId
+                        );
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
         return "redirect:/bookings/" + bookingId + "/deposit/result";
     }
 

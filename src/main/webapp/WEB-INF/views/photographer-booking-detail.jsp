@@ -107,7 +107,15 @@
                     <div class="stepper-terminated">
                         <span style="font-size: 1.25rem;">✕</span>
                         <div>
-                            <strong>Session Cancelled</strong> &mdash; This session was cancelled by the client.
+                            <strong>Session Cancelled</strong> &mdash; This session is cancelled.
+                            <c:if test="${not empty booking.cancelledByName}">
+                                <div style="font-size: 0.88rem; margin-top: 0.35rem;">
+                                    Cancelled by: <strong><c:out value="${booking.cancelledByName}"/></strong>
+                                    <c:if test="${not empty booking.cancellationReason}">
+                                        &middot; Reason: <em>&ldquo;<c:out value="${booking.cancellationReason}"/>&rdquo;</em>
+                                    </c:if>
+                                </div>
+                            </c:if>
                         </div>
                     </div>
                 </c:when>
@@ -229,6 +237,17 @@
                             <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
                         </div>
                     </div>
+                    <c:if test="${not empty booking.packageName}">
+                        <div style="grid-column: span 2;">
+                            <div class="spec-item-label">Selected Service Package</div>
+                            <div class="spec-item-value">
+                                <strong><c:out value="${booking.packageName}"/></strong>
+                                <span style="font-size: 0.88rem; color: var(--muted); margin-left: 0.5rem;">
+                                    (${booking.durationMinutes} mins · ${not empty booking.editedPhotoCount ? booking.editedPhotoCount : 'Standard'} photos · ${not empty booking.deliveryDays ? booking.deliveryDays : 'Standard'} days delivery)
+                                </span>
+                            </div>
+                        </div>
+                    </c:if>
                     <div style="grid-column: span 2;">
                         <div class="spec-item-label">Requested Location</div>
                         <div class="spec-item-value">
@@ -272,6 +291,131 @@
                             <%@ include file="fragments/csrf-input.jsp" %>
                             <button type="submit" class="btn btn-primary" id="btn-complete-booking">
                                 Mark as Completed
+                            </button>
+                        </form>
+                    </div>
+                </c:if>
+
+                <!-- ── Rescheduling Management ──────────────────────────────── -->
+                <c:if test="${booking.status == 'ACCEPTED' || booking.status == 'DEPOSIT_PENDING' || booking.status == 'CONFIRMED'}">
+                    <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+                            <div>
+                                <h3 class="editorial-heading" style="font-size: 1.15rem; margin: 0 0 0.25rem 0;">
+                                    Session Rescheduling
+                                </h3>
+                                <div style="color: var(--muted); font-size: 0.85rem;">
+                                    Propose a new date or time, or respond to client reschedule proposals.
+                                </div>
+                            </div>
+                            <c:if test="${empty pendingReschedule}">
+                                <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-photog-reschedule" onclick="var el = document.getElementById('photog-reschedule-collapse'); el.style.display = (el.style.display === 'none' ? 'block' : 'none');">
+                                    Propose Reschedule
+                                </button>
+                            </c:if>
+                        </div>
+
+                        <!-- Active Pending Reschedule Alert -->
+                        <c:if test="${not empty pendingReschedule}">
+                            <div style="background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                                    <div>
+                                        <span class="status-badge ${pendingReschedule.status}" style="margin-bottom: 0.5rem; display: inline-block;">
+                                            <c:out value="${pendingReschedule.statusDisplayName}"/>
+                                        </span>
+                                        <div style="font-weight: 600; font-size: 1rem;">
+                                            Proposed: ${pendingReschedule.proposedDate} at ${pendingReschedule.proposedTime}
+                                        </div>
+                                        <div style="color: var(--muted); font-size: 0.85rem; margin-top: 0.35rem;">
+                                            Requested by: <strong><c:out value="${pendingReschedule.requestedByName}"/></strong>
+                                            <c:if test="${not empty pendingReschedule.reason}">
+                                                &middot; Note: <em>&ldquo;<c:out value="${pendingReschedule.reason}"/>&rdquo;</em>
+                                            </c:if>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <c:choose>
+                                            <c:when test="${pendingReschedule.requestedByUserId == sessionScope.user.id}">
+                                                <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reschedule/${pendingReschedule.id}/cancel" method="post" style="margin: 0;">
+                                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                                    <button type="submit" class="btn btn-secondary btn-sm" id="btn-cancel-photog-reschedule" onclick="return confirm('Withdraw this reschedule proposal?');">
+                                                        Withdraw Proposal
+                                                    </button>
+                                                </form>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reschedule/${pendingReschedule.id}/accept" method="post" style="margin: 0;">
+                                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                                    <button type="submit" class="btn btn-primary btn-sm" id="btn-accept-photog-reschedule">
+                                                        Accept Reschedule
+                                                    </button>
+                                                </form>
+                                                <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reschedule/${pendingReschedule.id}/reject" method="post" style="margin: 0;">
+                                                    <%@ include file="fragments/csrf-input.jsp" %>
+                                                    <button type="submit" class="btn btn-danger btn-sm" id="btn-reject-photog-reschedule" onclick="return confirm('Decline this reschedule request?');">
+                                                        Decline
+                                                    </button>
+                                                </form>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+
+                        <!-- Reschedule Proposal Form -->
+                        <div id="photog-reschedule-collapse" style="display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.25rem;">
+                            <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/reschedule" method="post">
+                                <%@ include file="fragments/csrf-input.jsp" %>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem;">New Proposed Date</label>
+                                        <input type="date" name="proposedDate" class="pc-input" required style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border);" />
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem;">New Proposed Time</label>
+                                        <input type="time" name="proposedTime" class="pc-input" required style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border);" />
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem;">Reason (Optional)</label>
+                                        <input type="text" name="reason" placeholder="e.g. Schedule adjustment, emergency..." class="pc-input" maxlength="500" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border);" />
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('photog-reschedule-collapse').style.display = 'none';">Cancel</button>
+                                    <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-photog-reschedule">Submit Proposal</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </c:if>
+
+                <c:if test="${booking.status != 'PENDING' && booking.status != 'REJECTED' && booking.status != 'CANCELLED'}">
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <div class="fw-semibold text-dark">Finished Photos Delivery Studio</div>
+                            <div class="text-muted small">Upload, curate, and deliver finished high-resolution photos for this client.</div>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/delivery" class="btn btn-outline-primary" id="btn-delivery-studio">
+                            <i class="bi bi-images me-1"></i> Open Delivery Studio
+                        </a>
+                    </div>
+                </c:if>
+
+                <!-- ── Photographer Cancellation Option (PENDING, ACCEPTED, DEPOSIT_PENDING, CONFIRMED) ── -->
+                <c:if test="${booking.status == 'PENDING' || booking.status == 'ACCEPTED' || booking.status == 'DEPOSIT_PENDING' || booking.status == 'CONFIRMED'}">
+                    <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--text); margin-bottom: 0.25rem;">Cancel Session</div>
+                            <div style="font-size: 0.82rem; color: var(--muted); max-width: 500px; line-height: 1.5;">
+                                If you cannot fulfill this session, you may cancel it. Any deposit paid by the client will be credited for a 100% refund.
+                            </div>
+                        </div>
+                        <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/cancel" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? If deposit was paid, the client will receive 100% refund credit.');" style="margin: 0; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <%@ include file="fragments/csrf-input.jsp" %>
+                            <input type="text" name="reason" placeholder="Reason (optional)" class="pc-input" style="padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.85rem; max-width: 200px;" />
+                            <button type="submit" class="btn btn-danger btn-sm" id="btn-photog-cancel-booking">
+                                Cancel Booking
                             </button>
                         </form>
                     </div>

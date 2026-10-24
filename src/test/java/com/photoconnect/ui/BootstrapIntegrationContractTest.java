@@ -66,7 +66,7 @@ class BootstrapIntegrationContractTest {
                     .filter(path -> !path.getFileName().toString().equals("error.jsp"))
                     .toList();
 
-            assertThat(contentPages).hasSize(31);
+            assertThat(contentPages).hasSize(39);
 
             for (Path page : contentPages) {
                 String jsp = Files.readString(page);

@@ -162,6 +162,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.equals("/auth/google/link")
                 || path.equals("/bookings") || path.startsWith("/bookings/")
                 || path.equals("/api/bookings") || path.startsWith("/api/bookings/")
+                || path.equals("/profile/me")
+                || path.equals("/profile/edit")
+                || path.equals("/profile/avatar")
+                || path.equals("/profile/avatar/remove")
+                || path.startsWith("/api/me/")
                 || path.equals("/ws") || path.startsWith("/ws/")
                 || path.equals("/ws-raw") || path.startsWith("/ws-raw/");
     }

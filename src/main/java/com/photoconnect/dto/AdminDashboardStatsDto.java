@@ -19,6 +19,16 @@ public class AdminDashboardStatsDto {
     private long paidDepositsCount;
     private BigDecimal simulatedDepositAmount;
 
+    private long disputedBookings;
+    private long cancelledBookings;
+    private BigDecimal totalPlatformBookingVolume = BigDecimal.ZERO;
+    private BigDecimal completedRevenue = BigDecimal.ZERO;
+    private BigDecimal platformFeeRevenue = BigDecimal.ZERO;
+    private BigDecimal refundedDepositsAmount = BigDecimal.ZERO;
+    private BigDecimal forfeitedDepositsAmount = BigDecimal.ZERO;
+    private long refundedDepositsCount;
+    private long forfeitedDepositsCount;
+
     public AdminDashboardStatsDto() {
         this.simulatedDepositAmount = BigDecimal.ZERO;
     }
@@ -133,5 +143,77 @@ public class AdminDashboardStatsDto {
 
     public void setSimulatedDepositAmount(BigDecimal simulatedDepositAmount) {
         this.simulatedDepositAmount = simulatedDepositAmount;
+    }
+
+    public long getDisputedBookings() {
+        return disputedBookings;
+    }
+
+    public void setDisputedBookings(long disputedBookings) {
+        this.disputedBookings = disputedBookings;
+    }
+
+    public long getCancelledBookings() {
+        return cancelledBookings;
+    }
+
+    public void setCancelledBookings(long cancelledBookings) {
+        this.cancelledBookings = cancelledBookings;
+    }
+
+    public BigDecimal getTotalPlatformBookingVolume() {
+        return totalPlatformBookingVolume;
+    }
+
+    public void setTotalPlatformBookingVolume(BigDecimal totalPlatformBookingVolume) {
+        this.totalPlatformBookingVolume = totalPlatformBookingVolume != null ? totalPlatformBookingVolume : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getCompletedRevenue() {
+        return completedRevenue;
+    }
+
+    public void setCompletedRevenue(BigDecimal completedRevenue) {
+        this.completedRevenue = completedRevenue != null ? completedRevenue : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getPlatformFeeRevenue() {
+        return platformFeeRevenue;
+    }
+
+    public void setPlatformFeeRevenue(BigDecimal platformFeeRevenue) {
+        this.platformFeeRevenue = platformFeeRevenue != null ? platformFeeRevenue : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getRefundedDepositsAmount() {
+        return refundedDepositsAmount;
+    }
+
+    public void setRefundedDepositsAmount(BigDecimal refundedDepositsAmount) {
+        this.refundedDepositsAmount = refundedDepositsAmount != null ? refundedDepositsAmount : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getForfeitedDepositsAmount() {
+        return forfeitedDepositsAmount;
+    }
+
+    public void setForfeitedDepositsAmount(BigDecimal forfeitedDepositsAmount) {
+        this.forfeitedDepositsAmount = forfeitedDepositsAmount != null ? forfeitedDepositsAmount : BigDecimal.ZERO;
+    }
+
+    public long getRefundedDepositsCount() {
+        return refundedDepositsCount;
+    }
+
+    public void setRefundedDepositsCount(long refundedDepositsCount) {
+        this.refundedDepositsCount = refundedDepositsCount;
+    }
+
+    public long getForfeitedDepositsCount() {
+        return forfeitedDepositsCount;
+    }
+
+    public void setForfeitedDepositsCount(long forfeitedDepositsCount) {
+        this.forfeitedDepositsCount = forfeitedDepositsCount;
     }
 }

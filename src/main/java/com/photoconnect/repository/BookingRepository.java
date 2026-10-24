@@ -125,4 +125,112 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findUpcomingAcceptedForStudio(@Param("profileId") Long profileId,
                                                 @Param("today") java.time.LocalDate today,
                                                 Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(b) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.status = com.photoconnect.entity.BookingStatus.ACCEPTED
+              AND b.bookingDate >= :today
+            """)
+    long countUpcomingAcceptedForStudio(@Param("profileId") Long profileId,
+                                        @Param("today") java.time.LocalDate today);
+
+    List<Booking> findByPhotographerProfileIdOrderByBookingDateAscBookingTimeAsc(Long profileId);
+
+    List<Booking> findByCustomerIdOrderByBookingDateDesc(Long customerId);
+
+    long countByPhotographerProfileId(Long profileId);
+
+    long countByCustomerId(Long customerId);
+
+    @Query("""
+            SELECT b FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.bookingDate = :date
+              AND b.status IN :reservingStatuses
+              AND (:excludeBookingId IS NULL OR b.id <> :excludeBookingId)
+            """)
+    List<Booking> findActiveBookingsOnDate(@Param("profileId") Long profileId,
+                                          @Param("date") java.time.LocalDate date,
+                                          @Param("reservingStatuses") List<com.photoconnect.entity.BookingStatus> reservingStatuses,
+                                          @Param("excludeBookingId") Long excludeBookingId);
+
+    @Query("""
+            SELECT COALESCE(SUM(b.agreedPrice), 0) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.status NOT IN (com.photoconnect.entity.BookingStatus.CANCELLED, com.photoconnect.entity.BookingStatus.REJECTED)
+            """)
+    java.math.BigDecimal calculateGrossBookingValue(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT COALESCE(SUM(b.agreedPrice), 0) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            """)
+    java.math.BigDecimal calculateCompletedRevenue(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT COUNT(b) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            """)
+    long countCompletedBookingsForPhotographer(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT b.status, COUNT(b) FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+            GROUP BY b.status
+            """)
+    List<Object[]> countBookingsByStatusForPhotographer(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT COALESCE(b.packageName, 'Custom Session'), COUNT(b), COALESCE(SUM(b.agreedPrice), 0)
+            FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.status NOT IN (com.photoconnect.entity.BookingStatus.CANCELLED, com.photoconnect.entity.BookingStatus.REJECTED)
+            GROUP BY COALESCE(b.packageName, 'Custom Session')
+            ORDER BY COUNT(b) DESC
+            """)
+    List<Object[]> findPopularPackagesForPhotographer(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT b.bookingDate, b.status, b.agreedPrice
+            FROM Booking b
+            WHERE b.photographerProfile.id = :profileId
+              AND b.bookingDate >= :startDate
+            ORDER BY b.bookingDate ASC
+            """)
+    List<Object[]> findBookingTrendsSince(@Param("profileId") Long profileId, @Param("startDate") java.time.LocalDate startDate);
+
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.customer c
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user u
+            WHERE (:status IS NULL OR b.status = :status)
+              AND (:startDate IS NULL OR b.bookingDate >= :startDate)
+              AND (:endDate IS NULL OR b.bookingDate <= :endDate)
+              AND (:search IS NULL OR LOWER(c.fullName) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(p.displayName) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(b.location) LIKE LOWER(CONCAT('%', :search, '%')))
+            ORDER BY b.createdAt DESC
+            """)
+    List<Booking> findAdminBookings(@Param("status") com.photoconnect.entity.BookingStatus status,
+                                   @Param("search") String search,
+                                   @Param("startDate") java.time.LocalDate startDate,
+                                   @Param("endDate") java.time.LocalDate endDate);
+
+    @Query("""
+            SELECT COALESCE(SUM(b.agreedPrice), 0) FROM Booking b
+            WHERE b.status NOT IN (com.photoconnect.entity.BookingStatus.CANCELLED, com.photoconnect.entity.BookingStatus.REJECTED)
+            """)
+    java.math.BigDecimal calculateTotalPlatformBookingVolume();
+
+    @Query("""
+            SELECT COALESCE(SUM(b.agreedPrice), 0) FROM Booking b
+            WHERE b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            """)
+    java.math.BigDecimal calculateTotalPlatformCompletedRevenue();
 }

@@ -1,28 +1,20 @@
 package com.photoconnect.service;
 
+import com.photoconnect.dto.PhotographerAnalyticsDto;
+import com.photoconnect.dto.NotificationDto;
 import com.photoconnect.dto.PhotographerDashboardView;
-import com.photoconnect.entity.Booking;
-import com.photoconnect.entity.BookingStatus;
-import com.photoconnect.entity.Deposit;
-import com.photoconnect.entity.DepositStatus;
-import com.photoconnect.entity.PhotographerProfile;
-import com.photoconnect.entity.PhotographerUnavailableDate;
-import com.photoconnect.entity.PhotographerVerificationStatus;
-import com.photoconnect.entity.PortfolioImage;
-import com.photoconnect.entity.UserRole;
-import com.photoconnect.entity.UserStatus;
+import com.photoconnect.entity.*;
 import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.exception.PhotographerStudioProfileNotFoundException;
-import com.photoconnect.repository.BookingRepository;
-import com.photoconnect.repository.DepositRepository;
-import com.photoconnect.repository.PhotographerProfileRepository;
-import com.photoconnect.repository.PhotographerUnavailableDateRepository;
-import com.photoconnect.repository.PortfolioImageRepository;
+import com.photoconnect.repository.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,6 +38,7 @@ public class PhotographerDashboardServiceImpl implements PhotographerDashboardSe
     private final PortfolioImageRepository portfolioImageRepository;
     private final PhotographerUnavailableDateRepository unavailableDateRepository;
     private final PhotographerProfileService photographerProfileService;
+    private final NotificationRepository notificationRepository;
 
     public PhotographerDashboardServiceImpl(
             PhotographerProfileRepository photographerProfileRepository,
@@ -54,12 +47,26 @@ public class PhotographerDashboardServiceImpl implements PhotographerDashboardSe
             PortfolioImageRepository portfolioImageRepository,
             PhotographerUnavailableDateRepository unavailableDateRepository,
             PhotographerProfileService photographerProfileService) {
+        this(photographerProfileRepository, bookingRepository, depositRepository,
+             portfolioImageRepository, unavailableDateRepository, photographerProfileService, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PhotographerDashboardServiceImpl(
+            PhotographerProfileRepository photographerProfileRepository,
+            BookingRepository bookingRepository,
+            DepositRepository depositRepository,
+            PortfolioImageRepository portfolioImageRepository,
+            PhotographerUnavailableDateRepository unavailableDateRepository,
+            PhotographerProfileService photographerProfileService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationRepository notificationRepository) {
         this.photographerProfileRepository = photographerProfileRepository;
         this.bookingRepository = bookingRepository;
         this.depositRepository = depositRepository;
         this.portfolioImageRepository = portfolioImageRepository;
         this.unavailableDateRepository = unavailableDateRepository;
         this.photographerProfileService = photographerProfileService;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -126,6 +133,126 @@ public class PhotographerDashboardServiceImpl implements PhotographerDashboardSe
                         profile.getAverageRating() != null ? profile.getAverageRating() : 0.0,
                         profile.getReviewCount() != null ? profile.getReviewCount() : 0)
         );
+    }
+
+    @Override
+    public PhotographerAnalyticsDto getAnalytics(Long photographerUserId) {
+        PhotographerProfile profile = requireActivePhotographer(photographerUserId);
+        Long profileId = profile.getId();
+        LocalDate today = LocalDate.now();
+
+        PhotographerAnalyticsDto dto = new PhotographerAnalyticsDto();
+
+        // 1. Booking counts
+        dto.setTotalBookings(bookingRepository.countByPhotographerProfileId(profileId));
+        dto.setPendingRequests(bookingRepository.countByPhotographerProfileIdAndStatus(profileId, BookingStatus.PENDING));
+        dto.setUpcomingSessions(bookingRepository.countUpcomingAcceptedForStudio(profileId, today));
+        dto.setCompletedBookings(bookingRepository.countByPhotographerProfileIdAndStatus(profileId, BookingStatus.COMPLETED));
+        dto.setCancelledBookings(bookingRepository.countByPhotographerProfileIdAndStatus(profileId, BookingStatus.CANCELLED));
+
+        // 2. Financial Metrics (distinct accounting states)
+        dto.setGrossBookingValue(bookingRepository.calculateGrossBookingValue(profileId));
+        dto.setConfirmedDeposits(depositRepository.calculateConfirmedDepositsForPhotographer(profileId));
+        dto.setCompletedRevenue(bookingRepository.calculateCompletedRevenue(profileId));
+
+        // 3. Ratings
+        dto.setAverageRating(profile.getAverageRating() != null ? profile.getAverageRating() : 0.0);
+        dto.setReviewCount(profile.getReviewCount() != null ? profile.getReviewCount() : 0);
+
+        // 4. Status distribution
+        Map<String, Long> statusMap = new LinkedHashMap<>();
+        for (BookingStatus status : BookingStatus.values()) {
+            statusMap.put(status.name(), 0L);
+        }
+        List<Object[]> statusCounts = bookingRepository.countBookingsByStatusForPhotographer(profileId);
+        if (statusCounts != null) {
+            for (Object[] row : statusCounts) {
+                if (row != null && row.length >= 2 && row[0] != null) {
+                    BookingStatus status = (BookingStatus) row[0];
+                    Long count = ((Number) row[1]).longValue();
+                    statusMap.put(status.name(), count);
+                }
+            }
+        }
+        dto.setStatusDistribution(statusMap);
+
+        // 5. Popular packages
+        List<PhotographerAnalyticsDto.PackageStatDto> packageStats = new ArrayList<>();
+        List<Object[]> popularRows = bookingRepository.findPopularPackagesForPhotographer(profileId);
+        if (popularRows != null) {
+            for (Object[] row : popularRows) {
+                if (row != null && row.length >= 3) {
+                    String pkgName = row[0] != null ? row[0].toString() : "Custom Session";
+                    long count = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+                    BigDecimal rev = row[2] != null ? (BigDecimal) row[2] : BigDecimal.ZERO;
+                    packageStats.add(new PhotographerAnalyticsDto.PackageStatDto(pkgName, count, rev));
+                }
+            }
+        }
+        dto.setPopularPackages(packageStats);
+
+        // 6. Monthly trends (past 6 months up to current month)
+        LocalDate startMonthDate = today.minusMonths(5).withDayOfMonth(1);
+        List<Object[]> trendRows = bookingRepository.findBookingTrendsSince(profileId, startMonthDate);
+
+        Map<YearMonth, Long> countMap = new LinkedHashMap<>();
+        Map<YearMonth, BigDecimal> grossMap = new LinkedHashMap<>();
+        Map<YearMonth, BigDecimal> completedMap = new LinkedHashMap<>();
+        YearMonth curYm = YearMonth.from(startMonthDate);
+        YearMonth endYm = YearMonth.from(today);
+        while (!curYm.isAfter(endYm)) {
+            countMap.put(curYm, 0L);
+            grossMap.put(curYm, BigDecimal.ZERO);
+            completedMap.put(curYm, BigDecimal.ZERO);
+            curYm = curYm.plusMonths(1);
+        }
+
+        if (trendRows != null) {
+            for (Object[] row : trendRows) {
+                if (row != null && row.length >= 3 && row[0] != null) {
+                    LocalDate bDate = (LocalDate) row[0];
+                    BookingStatus bStatus = (BookingStatus) row[1];
+                    BigDecimal price = row[2] != null ? (BigDecimal) row[2] : BigDecimal.ZERO;
+                    YearMonth ym = YearMonth.from(bDate);
+
+                    if (countMap.containsKey(ym)) {
+                        countMap.put(ym, countMap.get(ym) + 1);
+                        if (bStatus != BookingStatus.CANCELLED && bStatus != BookingStatus.REJECTED) {
+                            grossMap.put(ym, grossMap.get(ym).add(price));
+                        }
+                        if (bStatus == BookingStatus.COMPLETED) {
+                            completedMap.put(ym, completedMap.get(ym).add(price));
+                        }
+                    }
+                }
+            }
+        }
+
+        List<PhotographerAnalyticsDto.MonthlyTrendDto> monthlyTrends = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
+        for (YearMonth ym : countMap.keySet()) {
+            monthlyTrends.add(new PhotographerAnalyticsDto.MonthlyTrendDto(
+                    ym.format(formatter),
+                    countMap.get(ym),
+                    grossMap.get(ym),
+                    completedMap.get(ym)
+            ));
+        }
+        dto.setMonthlyTrends(monthlyTrends);
+
+        // 7. Recent notifications
+        if (notificationRepository != null) {
+            List<Notification> notifs = notificationRepository.findTop20ByRecipientIdOrderByCreatedAtDesc(photographerUserId);
+            List<NotificationDto> notifDtos = notifs.stream()
+                    .limit(5)
+                    .map(NotificationDto::fromEntity)
+                    .toList();
+            dto.setRecentNotifications(notifDtos);
+        } else {
+            dto.setRecentNotifications(Collections.emptyList());
+        }
+
+        return dto;
     }
 
     private PhotographerProfile requireActivePhotographer(Long userId) {

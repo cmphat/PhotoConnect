@@ -29,6 +29,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -48,6 +52,18 @@ class BookingServiceTest {
 
     @Mock
     private ScheduleService scheduleService;
+
+    @Mock
+    private com.photoconnect.repository.ServicePackageRepository servicePackageRepository;
+
+    @Mock
+    private com.photoconnect.repository.DepositRepository depositRepository;
+
+    @Mock
+    private com.photoconnect.repository.RescheduleRequestRepository rescheduleRequestRepository;
+
+    @Mock
+    private BookingStateMachineService bookingStateMachineService;
 
     @InjectMocks
     private BookingServiceImpl bookingService;
@@ -117,6 +133,36 @@ class BookingServiceTest {
         assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
 
         verify(bookingRepository).save(any(Booking.class));
+    }
+
+    @Test
+    void createBooking_withPackage_snapshotsAgreedTerms() {
+        validRequest.setPackageId(55L);
+        com.photoconnect.entity.ServicePackage pkg = new com.photoconnect.entity.ServicePackage();
+        pkg.setId(55L);
+        pkg.setPhotographerProfile(photographerProfile);
+        pkg.setName("Sunset Gold Package");
+        pkg.setPrice(new BigDecimal("4200000.00"));
+        pkg.setDurationMinutes(180);
+        pkg.setEditedPhotoCount(45);
+        pkg.setDeliveryDays(5);
+        pkg.setActive(true);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(true);
+        when(servicePackageRepository.findByIdAndPhotographerProfileId(55L, 10L)).thenReturn(Optional.of(pkg));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Booking result = bookingService.createBooking(1L, 10L, validRequest);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getServicePackage()).isEqualTo(pkg);
+        assertThat(result.getPackageName()).isEqualTo("Sunset Gold Package");
+        assertThat(result.getAgreedPrice()).isEqualByComparingTo(new BigDecimal("4200000.00"));
+        assertThat(result.getDurationMinutes()).isEqualTo(180);
+        assertThat(result.getEditedPhotoCount()).isEqualTo(45);
+        assertThat(result.getDeliveryDays()).isEqualTo(5);
     }
 
     @Test
@@ -369,6 +415,71 @@ class BookingServiceTest {
     }
 
     @Test
+    void cancelBooking_withReasonAndConfirmedMoreThan48h_marksDepositRefunded() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(5), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        com.photoconnect.entity.Deposit deposit = new com.photoconnect.entity.Deposit(booking, new BigDecimal("500000"));
+        deposit.setStatus(com.photoconnect.entity.DepositStatus.PAID);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdWithDetails(50L)).thenReturn(Optional.of(deposit));
+
+        bookingService.cancelBooking(50L, 1L, "Client trip cancelled");
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(booking.getCancellationReason()).isEqualTo("Client trip cancelled");
+        assertThat(booking.getCancelledBy()).isEqualTo(customer);
+        assertThat(booking.getCancelledAt()).isNotNull();
+        assertThat(deposit.getStatus()).isEqualTo(com.photoconnect.entity.DepositStatus.REFUNDED);
+        assertThat(deposit.getFailureReason()).contains("48 hours");
+        verify(depositRepository).save(deposit);
+    }
+
+    @Test
+    void cancelBooking_whenConfirmedLessThan48h_marksDepositForfeited() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(1), LocalTime.of(10, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        com.photoconnect.entity.Deposit deposit = new com.photoconnect.entity.Deposit(booking, new BigDecimal("500000"));
+        deposit.setStatus(com.photoconnect.entity.DepositStatus.PAID);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdWithDetails(50L)).thenReturn(Optional.of(deposit));
+
+        bookingService.cancelBooking(50L, 1L, "Short notice cancel");
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(deposit.getStatus()).isEqualTo(com.photoconnect.entity.DepositStatus.FORFEITED);
+        assertThat(deposit.getFailureReason()).contains("forfeited per cancellation policy");
+        verify(depositRepository).save(deposit);
+    }
+
+    @Test
+    void cancelBookingByPhotographer_whenConfirmed_marksDepositRefunded() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(1), LocalTime.of(10, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        com.photoconnect.entity.Deposit deposit = new com.photoconnect.entity.Deposit(booking, new BigDecimal("500000"));
+        deposit.setStatus(com.photoconnect.entity.DepositStatus.PAID);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdWithDetails(50L)).thenReturn(Optional.of(deposit));
+
+        bookingService.cancelBookingByPhotographer(50L, 2L, "Equipment malfunction");
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(booking.getCancellationReason()).isEqualTo("Equipment malfunction");
+        assertThat(booking.getCancelledBy()).isEqualTo(photographerUser);
+        assertThat(deposit.getStatus()).isEqualTo(com.photoconnect.entity.DepositStatus.REFUNDED);
+        assertThat(deposit.getFailureReason()).contains("Photographer cancelled");
+        verify(depositRepository).save(deposit);
+    }
+
+    @Test
     void acceptBooking_whenPending_shouldSucceed() {
         Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
         booking.setId(50L);
@@ -446,5 +557,53 @@ class BookingServiceTest {
         assertThatThrownBy(() -> bookingService.getBookingForPhotographer(50L, 99L))
                 .isInstanceOf(InvalidBookingException.class)
                 .hasMessageContaining("You are not authorized to view this booking");
+    }
+
+    @Test
+    void createBooking_slotCollision_shouldFail() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(true);
+        doThrow(new PhotographerUnavailableException("The requested time slot conflicts with an existing confirmed booking."))
+                .when(scheduleService).validateSlotAvailability(eq(10L), eq(validRequest.getBookingDate()), any(), anyInt(), isNull());
+
+        assertThatThrownBy(() -> bookingService.createBooking(1L, 10L, validRequest))
+                .isInstanceOf(PhotographerUnavailableException.class)
+                .hasMessageContaining("conflicts with an existing confirmed booking");
+    }
+
+    @Test
+    void acceptBooking_concurrencyLockAndSlotCollision_shouldFail() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+        when(photographerProfileRepository.findByIdWithLock(10L)).thenReturn(Optional.of(photographerProfile));
+        doThrow(new PhotographerUnavailableException("The requested time slot conflicts with an existing confirmed booking."))
+                .when(scheduleService).validateSlotAvailability(eq(10L), eq(booking.getBookingDate()), any(), anyInt(), eq(50L));
+
+        assertThatThrownBy(() -> bookingService.acceptBooking(50L, 2L))
+                .isInstanceOf(PhotographerUnavailableException.class)
+                .hasMessageContaining("conflicts with an existing confirmed booking");
+
+        verify(photographerProfileRepository).findByIdWithLock(10L);
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptBooking_concurrencyLockAcquired_success() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+        when(photographerProfileRepository.findByIdWithLock(10L)).thenReturn(Optional.of(photographerProfile));
+
+        bookingService.acceptBooking(50L, 2L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
+        verify(photographerProfileRepository).findByIdWithLock(10L);
+        verify(bookingRepository).save(booking);
     }
 }

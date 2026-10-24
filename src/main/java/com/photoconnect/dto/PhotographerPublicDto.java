@@ -48,6 +48,9 @@ public class PhotographerPublicDto {
     private final Double averageRating;
     private final Integer reviewCount;
     private final Integer profileCompleteness;
+    private final Double recommendationScore;
+    private final Integer completedBookingsCount;
+    private final Boolean availableOnRequestedDate;
 
     private PhotographerPublicDto(Long id, String displayName, String headline, String bio,
                                   String city, String country, Integer experienceYears,
@@ -59,6 +62,25 @@ public class PhotographerPublicDto {
                                   LocalDateTime createdAt,
                                   String coverImageUrl, Double averageRating,
                                   Integer reviewCount, Integer profileCompleteness) {
+        this(id, displayName, headline, bio, city, country, experienceYears, priceFrom, specialties,
+             specialtyDisplayNames, websiteUrl, instagramUrl, facebookUrl, equipmentSummary,
+             languages, travelAvailable, createdAt, coverImageUrl, averageRating, reviewCount,
+             profileCompleteness, null, null, null);
+    }
+
+    private PhotographerPublicDto(Long id, String displayName, String headline, String bio,
+                                  String city, String country, Integer experienceYears,
+                                  BigDecimal priceFrom, String specialties,
+                                  List<String> specialtyDisplayNames,
+                                  String websiteUrl, String instagramUrl, String facebookUrl,
+                                  String equipmentSummary, String languages,
+                                  boolean travelAvailable,
+                                  LocalDateTime createdAt,
+                                  String coverImageUrl, Double averageRating,
+                                  Integer reviewCount, Integer profileCompleteness,
+                                  Double recommendationScore,
+                                  Integer completedBookingsCount,
+                                  Boolean availableOnRequestedDate) {
         this.id = id;
         this.displayName = displayName;
         this.headline = headline;
@@ -80,6 +102,9 @@ public class PhotographerPublicDto {
         this.averageRating = averageRating;
         this.reviewCount = reviewCount;
         this.profileCompleteness = profileCompleteness;
+        this.recommendationScore = recommendationScore;
+        this.completedBookingsCount = completedBookingsCount;
+        this.availableOnRequestedDate = availableOnRequestedDate;
     }
 
     /**
@@ -100,6 +125,15 @@ public class PhotographerPublicDto {
      * Maps a fully-initialized PhotographerProfile into a public-safe DTO with cover image and completeness.
      */
     public static PhotographerPublicDto from(PhotographerProfile profile, String coverImageUrl, Integer profileCompleteness) {
+        return from(profile, coverImageUrl, profileCompleteness, null, null, null);
+    }
+
+    public static PhotographerPublicDto from(PhotographerProfile profile,
+                                             String coverImageUrl,
+                                             Integer profileCompleteness,
+                                             Double recommendationScore,
+                                             Integer completedBookingsCount,
+                                             Boolean availableOnRequestedDate) {
         List<String> displayNames = profile.getSpecialties() != null
                 ? PhotographerSpecialty.toDisplayNames(profile.getSpecialties())
                 : Collections.emptyList();
@@ -125,7 +159,10 @@ public class PhotographerPublicDto {
                 coverImageUrl,
                 profile.getAverageRating() != null ? profile.getAverageRating() : 0.0,
                 profile.getReviewCount() != null ? profile.getReviewCount() : 0,
-                profileCompleteness
+                profileCompleteness,
+                recommendationScore,
+                completedBookingsCount,
+                availableOnRequestedDate
         );
     }
 
@@ -221,5 +258,24 @@ public class PhotographerPublicDto {
 
     public Integer getProfileCompleteness() {
         return profileCompleteness;
+    }
+
+    public Double getRecommendationScore() {
+        return recommendationScore;
+    }
+
+    public Integer getCompletedBookingsCount() {
+        return completedBookingsCount;
+    }
+
+    public Boolean getAvailableOnRequestedDate() {
+        return availableOnRequestedDate;
+    }
+
+    public int getRecommendationPercent() {
+        if (recommendationScore == null) {
+            return 0;
+        }
+        return (int) Math.round(recommendationScore * 100);
     }
 }

@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class BookingController {
@@ -29,6 +33,8 @@ public class BookingController {
     private final PublicPhotographerService publicPhotographerService;
     private final com.photoconnect.service.DepositService depositService;
     private final com.photoconnect.service.ReviewService reviewService;
+    private final com.photoconnect.service.ServicePackageService servicePackageService;
+    private final com.photoconnect.service.RescheduleService rescheduleService;
 
     private String requireCustomer(HttpSession session) {
         return com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
@@ -38,10 +44,30 @@ public class BookingController {
                              PublicPhotographerService publicPhotographerService,
                              com.photoconnect.service.DepositService depositService,
                              com.photoconnect.service.ReviewService reviewService) {
+        this(bookingService, publicPhotographerService, depositService, reviewService, null, null);
+    }
+
+    public BookingController(BookingService bookingService,
+                             PublicPhotographerService publicPhotographerService,
+                             com.photoconnect.service.DepositService depositService,
+                             com.photoconnect.service.ReviewService reviewService,
+                             com.photoconnect.service.ServicePackageService servicePackageService) {
+        this(bookingService, publicPhotographerService, depositService, reviewService, servicePackageService, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public BookingController(BookingService bookingService,
+                             PublicPhotographerService publicPhotographerService,
+                             com.photoconnect.service.DepositService depositService,
+                             com.photoconnect.service.ReviewService reviewService,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.ServicePackageService servicePackageService,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.RescheduleService rescheduleService) {
         this.bookingService = bookingService;
         this.publicPhotographerService = publicPhotographerService;
         this.depositService = depositService;
         this.reviewService = reviewService;
+        this.servicePackageService = servicePackageService;
+        this.rescheduleService = rescheduleService;
     }
 
     /**
@@ -49,6 +75,7 @@ public class BookingController {
      */
     @GetMapping("/photographers/{id}/book")
     public String showBookingForm(@PathVariable("id") Long photographerId,
+                                  @org.springframework.web.bind.annotation.RequestParam(value = "packageId", required = false) Long packageId,
                                   HttpSession session,
                                   Model model) {
         String redirect = requireCustomer(session);
@@ -59,10 +86,16 @@ public class BookingController {
 
             BookingRequest bookingRequest = new BookingRequest();
             bookingRequest.setPhotographerId(photographerId);
+            bookingRequest.setPackageId(packageId);
             bookingRequest.setBookingDate(LocalDate.now().plusDays(1));
+
+            List<com.photoconnect.dto.ServicePackageDto> packages = servicePackageService != null
+                    ? servicePackageService.getActivePackagesForPhotographer(photographerId)
+                    : java.util.Collections.emptyList();
 
             model.addAttribute("photographer", photographer);
             model.addAttribute("bookingRequest", bookingRequest);
+            model.addAttribute("packages", packages);
             model.addAttribute("minBookingDate", LocalDate.now().toString());
 
             return "booking-form";
@@ -147,6 +180,9 @@ public class BookingController {
     /**
      * View customer booking details.
      */
+    /**
+     * View customer booking details.
+     */
     @GetMapping("/bookings/{id}")
     public String viewCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
         String redirect = requireCustomer(session);
@@ -164,6 +200,13 @@ public class BookingController {
             // Add review information
             com.photoconnect.dto.ReviewDto review = reviewService.getReviewByBookingId(bookingId, userId);
             model.addAttribute("review", review);
+
+            // Add rescheduling information
+            if (rescheduleService != null) {
+                model.addAttribute("rescheduleRequests", rescheduleService.getRescheduleRequestsForBooking(bookingId, userId));
+                rescheduleService.getPendingRescheduleRequest(bookingId, userId)
+                        .ifPresent(p -> model.addAttribute("pendingReschedule", p));
+            }
             
             return "booking-detail";
         } catch (InvalidBookingException ex) {
@@ -175,15 +218,130 @@ public class BookingController {
      * Cancel customer booking.
      */
     @PostMapping("/bookings/{id}/cancel")
-    public String cancelCustomerBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String cancelCustomerBooking(@PathVariable("id") Long bookingId,
+                                        @RequestParam(value = "reason", required = false) String reason,
+                                        HttpSession session,
+                                        RedirectAttributes redirectAttributes) {
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
         Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
 
         try {
-            bookingService.cancelBooking(bookingId, userId);
+            bookingService.cancelBooking(bookingId, userId, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Booking cancelled successfully.");
         } catch (InvalidBookingException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
+    }
+
+    /**
+     * Customer requests session reschedule.
+     */
+    @PostMapping("/bookings/{id}/reschedule")
+    public String requestCustomerReschedule(@PathVariable("id") Long bookingId,
+                                            @RequestParam("proposedDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate proposedDate,
+                                            @RequestParam("proposedTime") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime proposedTime,
+                                            @RequestParam(value = "reason", required = false) String reason,
+                                            HttpSession session,
+                                            RedirectAttributes redirectAttributes) {
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+
+        if (rescheduleService == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
+            return "redirect:/bookings/" + bookingId;
+        }
+
+        try {
+            rescheduleService.createRescheduleRequest(bookingId, userId, proposedDate, proposedTime, reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Reschedule proposal submitted to photographer.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
+    }
+
+    /**
+     * Customer accepts photographer-initiated reschedule request.
+     */
+    @PostMapping("/bookings/{id}/reschedule/{requestId}/accept")
+    public String acceptCustomerReschedule(@PathVariable("id") Long bookingId,
+                                          @PathVariable("requestId") Long requestId,
+                                          @RequestParam(value = "responseNote", required = false) String responseNote,
+                                          HttpSession session,
+                                          RedirectAttributes redirectAttributes) {
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+
+        if (rescheduleService == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
+            return "redirect:/bookings/" + bookingId;
+        }
+
+        try {
+            rescheduleService.acceptReschedule(requestId, userId, responseNote);
+            redirectAttributes.addFlashAttribute("successMessage", "Reschedule confirmed! Session time updated.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
+    }
+
+    /**
+     * Customer declines photographer-initiated reschedule request.
+     */
+    @PostMapping("/bookings/{id}/reschedule/{requestId}/reject")
+    public String rejectCustomerReschedule(@PathVariable("id") Long bookingId,
+                                          @PathVariable("requestId") Long requestId,
+                                          @RequestParam(value = "reason", required = false) String reason,
+                                          HttpSession session,
+                                          RedirectAttributes redirectAttributes) {
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+
+        if (rescheduleService == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
+            return "redirect:/bookings/" + bookingId;
+        }
+
+        try {
+            rescheduleService.rejectReschedule(requestId, userId, reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Reschedule request declined. Original time preserved.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
+    }
+
+    /**
+     * Customer cancels their own pending reschedule request.
+     */
+    @PostMapping("/bookings/{id}/reschedule/{requestId}/cancel")
+    public String cancelCustomerReschedule(@PathVariable("id") Long bookingId,
+                                          @PathVariable("requestId") Long requestId,
+                                          HttpSession session,
+                                          RedirectAttributes redirectAttributes) {
+        String redirect = requireCustomer(session);
+        if (redirect != null) return redirect;
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+
+        if (rescheduleService == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
+            return "redirect:/bookings/" + bookingId;
+        }
+
+        try {
+            rescheduleService.cancelReschedule(requestId, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Reschedule proposal withdrawn.");
+        } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 

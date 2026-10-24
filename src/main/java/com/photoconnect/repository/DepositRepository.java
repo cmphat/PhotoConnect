@@ -41,4 +41,12 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
 
     @Query("SELECT d FROM Deposit d JOIN FETCH d.booking b WHERE b.id IN :bookingIds")
     List<Deposit> findByBookingIdIn(@Param("bookingIds") List<Long> bookingIds);
+
+    @Query("""
+            SELECT COALESCE(SUM(d.amount), 0)
+            FROM Deposit d
+            WHERE d.booking.photographerProfile.id = :profileId
+              AND d.status = com.photoconnect.entity.DepositStatus.PAID
+            """)
+    java.math.BigDecimal calculateConfirmedDepositsForPhotographer(@Param("profileId") Long profileId);
 }

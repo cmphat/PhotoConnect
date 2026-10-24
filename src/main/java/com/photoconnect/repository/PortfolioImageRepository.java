@@ -90,4 +90,14 @@ public interface PortfolioImageRepository extends JpaRepository<PortfolioImage, 
                      i.id DESC
             """)
     List<PortfolioImage> findStudioPreview(@Param("profileId") Long profileId, Pageable pageable);
+
+    @Query("""
+            SELECT i FROM PortfolioImage i
+            JOIN FETCH i.photographerProfile p
+            JOIN FETCH p.user u
+            WHERE p.verificationStatus = com.photoconnect.entity.PhotographerVerificationStatus.APPROVED
+              AND (:category IS NULL OR i.category = :category)
+            ORDER BY i.createdAt DESC, i.id DESC
+            """)
+    List<PortfolioImage> findFeedImages(@Param("category") com.photoconnect.entity.PortfolioCategory category, Pageable pageable);
 }

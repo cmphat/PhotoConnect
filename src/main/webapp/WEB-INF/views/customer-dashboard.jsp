@@ -123,7 +123,7 @@
                                 <div class="attention-card__category"><c:out value="${item.category}"/> · Booking #<c:out value="${item.bookingId}"/></div>
                                 <h3><c:out value="${item.title}"/></h3>
                                 <p><c:out value="${item.description}"/></p>
-                                <c:if test="${not empty item.amount}"><div class="attention-card__amount"><fmt:formatNumber value="${item.amount}" pattern="#,#00"/> VND</div></c:if>
+                                <c:if test="${not empty item.amount}"><div class="attention-card__amount"><fmt:formatNumber value="${item.amount}" pattern="#,##0"/> VND</div></c:if>
                                 <c:url value="${item.action.path}" var="attentionUrl"/>
                                 <a href="${attentionUrl}" class="attention-card__action btn ${item.action.style == 'primary' ? 'btn-primary' : 'btn-secondary'}"><c:out value="${item.action.label}"/></a>
                             </article>
@@ -162,8 +162,8 @@
                                     <div class="dashboard-booking__facts">
                                         <div><strong>Date &amp; time</strong><c:out value="${booking.bookingDate}"/> at <c:out value="${booking.bookingTime}"/></div>
                                         <div><strong>Location</strong><c:out value="${booking.location}"/></div>
-                                        <div><strong>Session price</strong><fmt:formatNumber value="${booking.agreedPrice}" pattern="#,#00"/> VND</div>
-                                        <div><strong>Deposit</strong><c:choose><c:when test="${not empty booking.depositAmount}"><fmt:formatNumber value="${booking.depositAmount}" pattern="#,#00"/> VND</c:when><c:otherwise><c:out value="${booking.depositLabel}"/></c:otherwise></c:choose></div>
+                                        <div><strong>Session price</strong><fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0"/> VND</div>
+                                        <div><strong>Deposit</strong><c:choose><c:when test="${not empty booking.depositAmount}"><fmt:formatNumber value="${booking.depositAmount}" pattern="#,##0"/> VND</c:when><c:otherwise><c:out value="${booking.depositLabel}"/></c:otherwise></c:choose></div>
                                     </div>
                                 </div>
                                 <div class="dashboard-booking__actions">
@@ -210,7 +210,7 @@
                                     <h3><c:out value="${photographer.displayName}"/></h3>
                                     <div class="saved-preview-card__headline"><c:out value="${photographer.headline}" default="Approved PhotoConnect photographer"/></div>
                                     <div class="saved-preview-card__meta"><span><c:out value="${photographer.location}" default="Location flexible"/></span><span>★ <fmt:formatNumber value="${photographer.averageRating}" pattern="0.0"/></span></div>
-                                    <c:if test="${not empty photographer.priceFrom}"><div class="saved-preview-card__meta"><span>From</span><strong><fmt:formatNumber value="${photographer.priceFrom}" pattern="#,#00"/> VND</strong></div></c:if>
+                                    <c:if test="${not empty photographer.priceFrom}"><div class="saved-preview-card__meta"><span>From</span><strong><fmt:formatNumber value="${photographer.priceFrom}" pattern="#,##0"/> VND</strong></div></c:if>
                                     <a class="btn btn-secondary" href="${pageContext.request.contextPath}/photographers/${photographer.photographerId}">View Profile</a>
                                 </div>
                             </article>

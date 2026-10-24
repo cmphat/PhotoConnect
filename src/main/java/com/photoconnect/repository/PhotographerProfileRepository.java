@@ -17,6 +17,10 @@ public interface PhotographerProfileRepository extends JpaRepository<Photographe
 
     Optional<PhotographerProfile> findByUserId(Long userId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM PhotographerProfile p WHERE p.id = :id")
+    Optional<PhotographerProfile> findByIdWithLock(@Param("id") Long id);
+
     @Query("""
             SELECT p FROM PhotographerProfile p
             JOIN FETCH p.user

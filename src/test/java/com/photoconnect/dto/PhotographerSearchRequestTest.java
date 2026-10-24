@@ -118,4 +118,48 @@ class PhotographerSearchRequestTest {
         assertThat(request.getPageOrDefault()).isEqualTo(2);
         assertThat(request.hasFilters()).isFalse();
     }
+
+    @Test
+    void shouldValidateMinRatingBounds() {
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setMinRating(-0.1);
+        assertThat(request.isValid()).isFalse();
+        assertThat(request.getValidationError()).contains("Minimum rating must be between 0 and 5");
+
+        request.setMinRating(5.5);
+        assertThat(request.isValid()).isFalse();
+        assertThat(request.getValidationError()).contains("Minimum rating must be between 0 and 5");
+
+        request.setMinRating(4.5);
+        assertThat(request.isValid()).isTrue();
+        assertThat(request.hasFilters()).isTrue();
+    }
+
+    @Test
+    void shouldNormalizeCategoryAndDetectFilters() {
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setCategory("  Portrait  ");
+        assertThat(request.getNormalizedCategory()).isEqualTo("Portrait");
+        assertThat(request.hasFilters()).isTrue();
+
+        request.setCategory("ALL");
+        assertThat(request.getNormalizedCategory()).isNull();
+    }
+
+    @Test
+    void shouldValidateSortOptions() {
+        PhotographerSearchRequest request = new PhotographerSearchRequest();
+        request.setSortBy("INVALID_SORT");
+        assertThat(request.isValid()).isFalse();
+        assertThat(request.getValidationError()).contains("Invalid sort option");
+
+        request.setSortBy("rating_desc");
+        assertThat(request.isValid()).isTrue();
+        assertThat(request.getNormalizedSortBy()).isEqualTo("RATING_DESC");
+        assertThat(request.getEffectiveSortBy()).isEqualTo("RATING_DESC");
+        assertThat(request.hasAdvancedFiltersOrSort()).isTrue();
+
+        request.setSortBy(null);
+        assertThat(request.getEffectiveSortBy()).isEqualTo("RECOMMENDED");
+    }
 }

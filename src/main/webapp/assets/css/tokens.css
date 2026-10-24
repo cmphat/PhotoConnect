@@ -1,0 +1,292 @@
+/* ==========================================================================
+   PhotoConnect – Midnight Blue Design System Tokens
+   Official Palette & Primitives
+   ========================================================================== */
+
+:root {
+  /* Brand */
+  --pc-primary: #2563eb;
+  --pc-primary-hover: #1d4ed8;
+  --pc-primary-active: #1e40af;
+  --pc-navy: #0f172a;
+  --pc-navy-deep: #172554;
+
+  /* Surfaces */
+  --pc-bg: #f8fafc;
+  --pc-background: #f8fafc;
+  --pc-surface: #ffffff;
+  --pc-surface-muted: #e9eef5;
+  --pc-surface-secondary: #e9eef5;
+
+  /* Text */
+  --pc-text: #0f172a;
+  --pc-text-primary: #0f172a;
+  --pc-text-muted: #64748b;
+  --pc-text-secondary: #64748b;
+  --pc-border: #cbd5e1;
+
+  /* Semantic */
+  --pc-success: #15803d;
+  --pc-warning: #b45309;
+  --pc-danger: #b91c1c;
+
+  /* Typography */
+  --pc-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --pc-font-editorial: "Playfair Display", Georgia, serif;
+
+  /* Layout & Geometry */
+  --pc-container: 1280px;
+  --pc-content-max: 1280px;
+  --pc-radius-sm: 6px;
+  --pc-radius-md: 10px;
+  --pc-radius-lg: 14px;
+
+  /* Spacing Scale (4, 8, 12, 16, 24, 32, 48, 64px) */
+  --pc-space-1: 4px;
+  --pc-space-2: 8px;
+  --pc-space-3: 12px;
+  --pc-space-4: 16px;
+  --pc-space-5: 24px;
+  --pc-space-6: 32px;
+  --pc-space-7: 48px;
+  --pc-space-8: 64px;
+
+  /* Elevation & Shadows */
+  --pc-shadow-card: 0 2px 12px rgba(15, 23, 42, 0.05);
+  --pc-shadow-card-hover: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --pc-shadow-floating: 0 20px 40px rgba(15, 23, 42, 0.12);
+
+  /* Legacy & Semantic Compatibility Bindings */
+  --background: var(--pc-bg);
+  --surface: var(--pc-surface);
+  --surface-elevated: var(--pc-surface-muted);
+  --surface-raised: var(--pc-surface);
+  --surface-subtle: var(--pc-surface-muted);
+  --surface-hover: var(--pc-bg);
+
+  --text: var(--pc-text);
+  --text-strong: var(--pc-navy);
+  --muted: var(--pc-text-muted);
+  --border: var(--pc-border);
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
+
+  --accent: var(--pc-primary);
+  --accent-hover: var(--pc-primary-hover);
+  --accent-subtle: rgba(37, 99, 235, 0.08);
+
+  --deep-navy: var(--pc-navy-deep);
+  --navy-surface: var(--pc-navy);
+  --navy-text: #f8fafc;
+
+  --success: var(--pc-success);
+  --success-bg: rgba(21, 128, 61, 0.08);
+  --success-border: rgba(21, 128, 61, 0.25);
+
+  --warning: var(--pc-warning);
+  --warning-bg: rgba(180, 83, 9, 0.08);
+  --warning-border: rgba(180, 83, 9, 0.25);
+
+  --danger: var(--pc-danger);
+  --danger-bg: rgba(185, 28, 28, 0.08);
+  --danger-border: rgba(185, 28, 28, 0.25);
+
+  --font-primary: var(--pc-font);
+  --font-editorial: var(--pc-font-editorial);
+
+  /* Bootstrap 5 Theme Overrides */
+  --bs-body-font-family: var(--pc-font);
+  --bs-body-bg: var(--pc-bg);
+  --bs-body-color: var(--pc-text);
+  --bs-border-color: var(--pc-border);
+  --bs-primary: var(--pc-primary);
+  --bs-primary-rgb: 37, 99, 235;
+  --bs-card-bg: var(--pc-surface);
+  --bs-card-border-color: var(--pc-border);
+}
+
+:root[data-theme="dark"] {
+  /* Dark Midnight Blue Palette */
+  --pc-bg: #070b12;
+  --pc-background: #070b12;
+  --pc-surface: #0f172a;
+  --pc-surface-muted: #1e293b;
+  --pc-surface-secondary: #1e293b;
+  --pc-text: #f8fafc;
+  --pc-text-primary: #f8fafc;
+  --pc-text-muted: #94a3b8;
+  --pc-text-secondary: #94a3b8;
+  --pc-border: #334155;
+  --pc-navy: #f8fafc;
+  --pc-navy-deep: #0f172a;
+  --text-strong: #ffffff;
+
+  --background: #070b12;
+  --surface: #0f172a;
+  --surface-elevated: #1e293b;
+  --surface-raised: #0f172a;
+  --surface-subtle: #1e293b;
+  --surface-hover: #1e293b;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border: #334155;
+
+  --pc-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --pc-shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* Base Body Application */
+body {
+  background: var(--pc-bg);
+  color: var(--pc-text);
+  font-family: var(--pc-font);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Layout Container */
+.pc-container {
+  width: min(100% - 32px, var(--pc-container));
+  margin-inline: auto;
+}
+
+/* Standardized Buttons */
+.pc-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid var(--pc-primary);
+  border-radius: var(--pc-radius-sm);
+  background: var(--pc-primary);
+  color: #fff;
+  font-family: var(--pc-font);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+
+.pc-btn-primary:hover {
+  background: var(--pc-primary-hover);
+  border-color: var(--pc-primary-hover);
+  color: #fff !important;
+}
+
+.pc-btn-primary:active {
+  background: var(--pc-primary-active);
+  border-color: var(--pc-primary-active);
+  transform: translateY(1px);
+}
+
+.pc-btn-primary:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.pc-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid var(--pc-border);
+  border-radius: var(--pc-radius-sm);
+  background: var(--pc-surface);
+  color: var(--pc-text);
+  font-family: var(--pc-font);
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.pc-btn-secondary:hover {
+  background: var(--pc-surface-muted);
+  border-color: #94a3b8;
+  color: var(--pc-text);
+}
+
+.pc-btn-secondary:focus-visible {
+  outline: 3px solid #cbd5e1;
+  outline-offset: 3px;
+}
+
+.pc-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--pc-primary);
+  border-radius: var(--pc-radius-sm);
+  background: transparent;
+  color: var(--pc-primary);
+  font-family: var(--pc-font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.pc-btn-outline:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--pc-primary-hover);
+}
+
+.pc-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--pc-danger);
+  border-radius: var(--pc-radius-sm);
+  background: var(--pc-danger);
+  color: #fff !important;
+  font-family: var(--pc-font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pc-btn-danger:hover {
+  background: #991b1b;
+  border-color: #991b1b;
+}
+
+.pc-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--pc-radius-sm);
+  background: transparent;
+  color: var(--pc-text-muted);
+  font-family: var(--pc-font);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+
+.pc-btn-ghost:hover {
+  color: var(--pc-text);
+  background: var(--pc-surface-muted);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

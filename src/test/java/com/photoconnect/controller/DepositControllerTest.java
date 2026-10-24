@@ -56,6 +56,12 @@ class DepositControllerTest {
     @MockBean
     private BookingService bookingService;
 
+    @MockBean
+    private com.photoconnect.service.BookingStateMachineService bookingStateMachineService;
+
+    @MockBean
+    private com.photoconnect.service.NotificationService notificationService;
+
     private Booking booking;
     private DepositViewDto deposit;
     private MockHttpSession customerSession;

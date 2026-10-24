@@ -57,7 +57,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         long paidDepositsCount = depositRepository.countByStatus(DepositStatus.PAID);
         BigDecimal simulatedDepositAmount = depositRepository.sumAmountByStatus(DepositStatus.PAID);
 
-        return new AdminDashboardStatsDto(
+        AdminDashboardStatsDto dto = new AdminDashboardStatsDto(
                 totalUsers,
                 totalCustomers,
                 totalPhotographers,
@@ -70,5 +70,23 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 paidDepositsCount,
                 simulatedDepositAmount
         );
+
+        dto.setDisputedBookings(bookingRepository.countByStatus(BookingStatus.DISPUTED));
+        dto.setCancelledBookings(bookingRepository.countByStatus(BookingStatus.CANCELLED));
+
+        BigDecimal totalVolume = bookingRepository.calculateTotalPlatformBookingVolume();
+        BigDecimal completedRev = bookingRepository.calculateTotalPlatformCompletedRevenue();
+        dto.setTotalPlatformBookingVolume(totalVolume != null ? totalVolume : BigDecimal.ZERO);
+        dto.setCompletedRevenue(completedRev != null ? completedRev : BigDecimal.ZERO);
+        dto.setPlatformFeeRevenue(dto.getCompletedRevenue().multiply(new BigDecimal("0.10")));
+
+        BigDecimal refundedAmt = depositRepository.sumAmountByStatus(DepositStatus.REFUNDED);
+        BigDecimal forfeitedAmt = depositRepository.sumAmountByStatus(DepositStatus.FORFEITED);
+        dto.setRefundedDepositsAmount(refundedAmt != null ? refundedAmt : BigDecimal.ZERO);
+        dto.setForfeitedDepositsAmount(forfeitedAmt != null ? forfeitedAmt : BigDecimal.ZERO);
+        dto.setRefundedDepositsCount(depositRepository.countByStatus(DepositStatus.REFUNDED));
+        dto.setForfeitedDepositsCount(depositRepository.countByStatus(DepositStatus.FORFEITED));
+
+        return dto;
     }
 }

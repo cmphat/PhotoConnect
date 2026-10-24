@@ -87,6 +87,7 @@
                 <c:if test="${dashboard.publicProfileAvailable}">
                     <a class="btn btn-secondary" href="${pageContext.request.contextPath}/photographers/${dashboard.profileId}">View Public Profile</a>
                 </c:if>
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/photographer/packages">Service Packages</a>
                 <a class="btn btn-primary" href="${pageContext.request.contextPath}/photographer/profile/edit">Edit Profile</a>
             </div>
         </header>

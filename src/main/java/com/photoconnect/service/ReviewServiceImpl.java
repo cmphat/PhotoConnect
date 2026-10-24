@@ -26,13 +26,23 @@ public class ReviewServiceImpl implements ReviewService {
     private final BookingRepository bookingRepository;
     private final ReviewRepository reviewRepository;
     private final PhotographerProfileRepository photographerProfileRepository;
+    private final NotificationService notificationService;
 
     public ReviewServiceImpl(BookingRepository bookingRepository,
                              ReviewRepository reviewRepository,
                              PhotographerProfileRepository photographerProfileRepository) {
+        this(bookingRepository, reviewRepository, photographerProfileRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ReviewServiceImpl(BookingRepository bookingRepository,
+                             ReviewRepository reviewRepository,
+                             PhotographerProfileRepository photographerProfileRepository,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.reviewRepository = reviewRepository;
         this.photographerProfileRepository = photographerProfileRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -92,6 +102,17 @@ public class ReviewServiceImpl implements ReviewService {
 
         // 7. Recalculate photographer rating stats
         recalculatePhotographerRating(booking.getPhotographerProfile().getId());
+
+        if (notificationService != null && booking.getPhotographerProfile() != null && booking.getPhotographerProfile().getUser() != null) {
+            notificationService.sendNotification(
+                    booking.getPhotographerProfile().getUser().getId(),
+                    com.photoconnect.entity.NotificationType.NEW_REVIEW,
+                    "New Client Review (" + request.getRating() + "★)",
+                    "A client left a review: " + (trimmedComment != null ? trimmedComment : "5-star rating"),
+                    review.getId(),
+                    "/photographers/" + booking.getPhotographerProfile().getId()
+            );
+        }
 
         return ReviewDto.from(review);
     }

@@ -25,13 +25,23 @@ public class ChatServiceImpl implements ChatService {
     private final MessageRepository messageRepository;
     private final BookingRepository bookingRepository;
     private final SimpMessageSendingOperations messagingTemplate;
+    private final NotificationService notificationService;
 
     public ChatServiceImpl(MessageRepository messageRepository,
                            BookingRepository bookingRepository,
                            SimpMessageSendingOperations messagingTemplate) {
+        this(messageRepository, bookingRepository, messagingTemplate, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ChatServiceImpl(MessageRepository messageRepository,
+                           BookingRepository bookingRepository,
+                           SimpMessageSendingOperations messagingTemplate,
+                           @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService) {
         this.messageRepository = messageRepository;
         this.bookingRepository = bookingRepository;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -94,6 +104,18 @@ public class ChatServiceImpl implements ChatService {
             messagingTemplate.convertAndSend("/topic/booking/" + bookingId + "/chat", dto);
         } catch (Exception e) {
             // Log warning but do not fail the persistent transaction
+        }
+
+        if (notificationService != null && receiver != null) {
+            String preview = trimmedContent.length() > 60 ? trimmedContent.substring(0, 57) + "..." : trimmedContent;
+            notificationService.sendNotification(
+                    receiver.getId(),
+                    com.photoconnect.entity.NotificationType.NEW_MESSAGE,
+                    "New Message from " + sender.getFullName(),
+                    preview,
+                    bookingId,
+                    "/bookings/" + bookingId + "/chat"
+            );
         }
 
         return dto;

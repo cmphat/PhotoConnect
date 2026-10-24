@@ -13,45 +13,52 @@
     })();
 </script>
 <header class="nav-container" id="site-header">
-    <div class="nav-left">
+    <div class="nav-brand-wrap">
         <a class="nav-brand" href="${pageContext.request.contextPath}/" aria-label="PhotoConnect Home">
-            PhotoConnect
+            <span class="brand-mark">●</span> PhotoConnect
         </a>
-        <button type="button" class="nav-menu-toggle btn btn-secondary btn-sm" id="navToggleBtn" aria-label="Toggle navigation" aria-expanded="false" data-bs-toggle="collapse" data-bs-target="#navLinksMenu" aria-controls="navLinksMenu">
-            Menu ▾
-        </button>
-        <nav class="nav-links" id="navLinksMenu" aria-label="Primary navigation">
-            <c:choose>
-                <c:when test="${not empty sessionScope.userId}">
-                    <c:choose>
+    </div>
+
+    <!-- Center Navigation Links -->
+    <nav class="nav-links" id="navLinksMenu" aria-label="Primary navigation">
+        <c:choose>
+            <c:when test="${not empty sessionScope.userId}">
+                <c:choose>
                     <c:when test="${sessionScope.userRole == 'ADMIN'}">
                         <a class="nav-link" href="${pageContext.request.contextPath}/">Home</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/feed">Feed</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard">Admin</a>
                     </c:when>
                     <c:when test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/dashboard">Studio</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/analytics">Analytics</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/bookings">Bookings</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/portfolio">Portfolio</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/packages">Packages</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/schedule">Availability</a>
                     </c:when>
                     <c:otherwise>
                         <a class="nav-link" href="${pageContext.request.contextPath}/customer/dashboard">Dashboard</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/customer/saved-photographers">Saved</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/bookings">Bookings</a>
                     </c:otherwise>
-                    </c:choose>
-                </c:when>
-                <c:otherwise>
-                    <a class="nav-link" href="${pageContext.request.contextPath}/">Home</a>
-                    <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
-                </c:otherwise>
-            </c:choose>
-        </nav>
-    </div>
+                </c:choose>
+            </c:when>
+            <c:otherwise>
+                <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Photographers</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
+            </c:otherwise>
+        </c:choose>
+    </nav>
+
+    <!-- Right Controls & User Navigation -->
     <div class="nav-right" id="navRightSection">
-        <button type="button" class="theme-toggle-btn btn btn-ghost" id="themeToggleBtn" aria-label="Toggle visual theme" title="Toggle theme">
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle visual theme" title="Toggle theme">
             <!-- Sun icon for switching to light mode -->
             <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="5"></circle>
@@ -68,9 +75,21 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
         </button>
+
         <c:choose>
             <c:when test="${not empty sessionScope.userId}">
-                <span class="nav-user">Account</span>
+                <a class="nav-link position-relative d-inline-flex align-items-center" href="${pageContext.request.contextPath}/notifications" id="navNotificationBell" title="Notifications">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span id="navNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                        0
+                    </span>
+                </a>
+                <a class="nav-link nav-account-link" href="${pageContext.request.contextPath}/profile/me">
+                    Profile
+                </a>
                 <a class="nav-link" href="${pageContext.request.contextPath}/auth/google/link">Link Google</a>
                 <form action="${pageContext.request.contextPath}/logout" method="post" class="nav-form">
                     <%@ include file="csrf-input.jsp" %>
@@ -78,10 +97,19 @@
                 </form>
             </c:when>
             <c:otherwise>
-                <a class="nav-link" href="${pageContext.request.contextPath}/login">Sign In</a>
-                <a class="primary-link" href="${pageContext.request.contextPath}/register">Join PhotoConnect</a>
+                <a class="nav-link nav-signin" href="${pageContext.request.contextPath}/login">Sign In</a>
+                <a class="pc-btn-primary pc-btn-nav" href="${pageContext.request.contextPath}/register">Join PhotoConnect</a>
             </c:otherwise>
         </c:choose>
+
+        <!-- Mobile Menu Toggle Button (Strictly hidden on desktop) -->
+        <button type="button" class="nav-menu-toggle btn btn-sm" id="navToggleBtn" data-bs-toggle="collapse" data-bs-target="#navLinksMenu" aria-label="Toggle navigation" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
     </div>
 </header>
 <script>
@@ -114,6 +142,26 @@
                 try { localStorage.setItem('pc-theme', next); } catch(e) {}
                 updateThemeBtn();
             });
+        }
+
+        // Notification unread count badge sync
+        const notifBadge = document.getElementById('navNotificationBadge');
+        if (notifBadge) {
+            function updateNotifCount() {
+                fetch('${pageContext.request.contextPath}/api/notifications')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.unreadCount > 0) {
+                            notifBadge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
+                            notifBadge.classList.remove('d-none');
+                        } else {
+                            notifBadge.classList.add('d-none');
+                        }
+                    })
+                    .catch(() => {});
+            }
+            updateNotifCount();
+            setInterval(updateNotifCount, 30000);
         }
     })();
 </script>

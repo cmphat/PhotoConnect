@@ -46,4 +46,26 @@ public class PhotographerDashboardController {
             return "redirect:/photographer/onboarding-status";
         }
     }
+
+    @GetMapping({"/photographer/analytics", "/photographer/performance"})
+    public String analytics(HttpServletRequest request, HttpServletResponse response, Model model)
+            throws IOException {
+        AuthenticatedUser currentUser = currentUserContext.current(request).orElse(null);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        if (currentUser.role() != UserRole.PHOTOGRAPHER) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "Only photographers can access Analytics.");
+            return null;
+        }
+
+        try {
+            model.addAttribute("analytics",
+                    photographerDashboardService.getAnalytics(currentUser.userId()));
+            return "photographer-analytics";
+        } catch (PhotographerStudioProfileNotFoundException ex) {
+            return "redirect:/photographer/onboarding-status";
+        }
+    }
 }

@@ -104,4 +104,33 @@ class AdminBookingControllerTest {
         mockMvc.perform(post("/admin/bookings").session(adminSession()))
                 .andExpect(status().isMethodNotAllowed());
     }
+
+    @Test
+    void adminGetBookingDetail_shouldReturnDetailView() throws Exception {
+        Booking booking = new Booking();
+        booking.setId(10L);
+        when(adminBookingService.getBookingDetails(10L)).thenReturn(booking);
+        when(adminBookingService.getBookingAuditLogs(10L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/bookings/10").session(adminSession()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-booking-detail"))
+                .andExpect(model().attribute("booking", booking))
+                .andExpect(model().attributeExists("auditLogs"));
+
+        verify(adminBookingService).getBookingDetails(10L);
+    }
+
+    @Test
+    void adminResolveDispute_shouldCallServiceAndRedirect() throws Exception {
+        mockMvc.perform(post("/admin/bookings/10/resolve-dispute")
+                        .param("resolution", "REFUND_CUSTOMER")
+                        .param("adminNotes", "Client was unable to attend due to emergency")
+                        .session(adminSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/bookings/10"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        verify(adminBookingService).resolveDispute(10L, "REFUND_CUSTOMER", "Client was unable to attend due to emergency", 99L);
+    }
 }
