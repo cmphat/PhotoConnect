@@ -10,6 +10,7 @@ import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.PhotographerProfileRepository;
 import com.photoconnect.repository.ReviewRepository;
 import com.photoconnect.repository.UserRepository;
+import com.photoconnect.util.ImageValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -215,18 +216,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional
     public String updateAvatar(Long userId, MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Please select an image file to upload.");
-        }
-
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException("Invalid file format. Only JPG, PNG, and WebP images are allowed.");
-        }
-
-        if (file.getSize() > MAX_AVATAR_SIZE) {
-            throw new IllegalArgumentException("File size exceeds 5MB limit.");
-        }
+        ImageValidationUtils.validateImage(file, MAX_AVATAR_SIZE);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));

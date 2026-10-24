@@ -33,6 +33,7 @@ public class RescheduleServiceImpl implements RescheduleService {
     private final ScheduleService scheduleService;
     private final BookingHistoryRepository bookingHistoryRepository;
     private final NotificationService notificationService;
+    private final com.photoconnect.repository.PhotographerProfileRepository photographerProfileRepository;
 
     @Autowired
     public RescheduleServiceImpl(RescheduleRequestRepository rescheduleRequestRepository,
@@ -40,13 +41,24 @@ public class RescheduleServiceImpl implements RescheduleService {
                                  UserRepository userRepository,
                                  ScheduleService scheduleService,
                                  BookingHistoryRepository bookingHistoryRepository,
-                                 @Autowired(required = false) NotificationService notificationService) {
+                                 @Autowired(required = false) NotificationService notificationService,
+                                 @Autowired(required = false) com.photoconnect.repository.PhotographerProfileRepository photographerProfileRepository) {
         this.rescheduleRequestRepository = rescheduleRequestRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.scheduleService = scheduleService;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.notificationService = notificationService;
+        this.photographerProfileRepository = photographerProfileRepository;
+    }
+
+    public RescheduleServiceImpl(RescheduleRequestRepository rescheduleRequestRepository,
+                                 BookingRepository bookingRepository,
+                                 UserRepository userRepository,
+                                 ScheduleService scheduleService,
+                                 BookingHistoryRepository bookingHistoryRepository,
+                                 NotificationService notificationService) {
+        this(rescheduleRequestRepository, bookingRepository, userRepository, scheduleService, bookingHistoryRepository, notificationService, null);
     }
 
     @Override
@@ -125,6 +137,11 @@ public class RescheduleServiceImpl implements RescheduleService {
 
         if (request.getRequestedBy().getId().equals(actorUserId)) {
             throw new UnauthorizedException("You cannot accept your own reschedule request.");
+        }
+
+        // Concurrency control: acquire database lock on photographer profile to prevent race conditions
+        if (photographerProfileRepository != null && booking.getPhotographerProfile() != null) {
+            photographerProfileRepository.findByIdWithLock(booking.getPhotographerProfile().getId());
         }
 
         // Re-validate photographer availability

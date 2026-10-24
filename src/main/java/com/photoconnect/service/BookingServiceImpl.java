@@ -8,6 +8,7 @@ import com.photoconnect.entity.PhotographerVerificationStatus;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserRole;
 import com.photoconnect.entity.UserStatus;
+import com.photoconnect.exception.ErrorCode;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.PhotographerUnavailableException;
 import com.photoconnect.exception.SelfBookingNotAllowedException;
@@ -243,12 +244,12 @@ public class BookingServiceImpl implements BookingService {
         handleDepositCancellation(booking, true);
         cancelPendingReschedules(bookingId);
 
-        booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
         if (bookingStateMachineService != null) {
             bookingStateMachineService.transition(bookingId, BookingStatus.CANCELLED, customerUserId, effectiveReason);
         }
+        booking.setStatus(BookingStatus.CANCELLED);
 
         if (notificationService != null && booking.getPhotographerProfile() != null && booking.getPhotographerProfile().getUser() != null) {
             notificationService.sendNotification(
@@ -271,7 +272,7 @@ public class BookingServiceImpl implements BookingService {
             booking.getStatus() != BookingStatus.ACCEPTED &&
             booking.getStatus() != BookingStatus.DEPOSIT_PENDING &&
             booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new InvalidBookingException("Cannot cancel booking in current state: " + booking.getStatus());
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS, "Cannot cancel booking in current state: " + booking.getStatus());
         }
 
         String effectiveReason = (reason != null && !reason.isBlank()) ? reason : "Cancelled by photographer";
@@ -282,12 +283,12 @@ public class BookingServiceImpl implements BookingService {
         handleDepositCancellation(booking, false);
         cancelPendingReschedules(bookingId);
 
-        booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
         if (bookingStateMachineService != null) {
             bookingStateMachineService.transition(bookingId, BookingStatus.CANCELLED, photographerUserId, effectiveReason);
         }
+        booking.setStatus(BookingStatus.CANCELLED);
 
         if (notificationService != null && booking.getCustomer() != null) {
             notificationService.sendNotification(
@@ -348,7 +349,7 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getPhotographerProfile() == null || 
             booking.getPhotographerProfile().getUser() == null || 
             !booking.getPhotographerProfile().getUser().getId().equals(photographerUserId)) {
-            throw new InvalidBookingException("You are not authorized to view this booking.");
+            throw new InvalidBookingException(ErrorCode.BOOKING_005_NOT_OWNER, "You are not authorized to view this booking.");
         }
 
         return booking;
@@ -372,7 +373,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new InvalidBookingException("Only PENDING bookings can be accepted.");
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS, "Only PENDING bookings can be accepted.");
         }
 
         // Concurrency control: acquire database lock on photographer profile to prevent race conditions
@@ -393,6 +394,9 @@ public class BookingServiceImpl implements BookingService {
                 booking.getId()
         );
 
+        if (bookingStateMachineService != null) {
+            bookingStateMachineService.transition(booking.getId(), BookingStatus.ACCEPTED, photographerUserId, "Photographer accepted booking request");
+        }
         booking.setStatus(BookingStatus.ACCEPTED);
         bookingRepository.save(booking);
 
@@ -414,6 +418,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
 
         if (booking.getStatus() == BookingStatus.PENDING) {
+            if (bookingStateMachineService != null) {
+                bookingStateMachineService.transition(bookingId, BookingStatus.REJECTED, photographerUserId, "Photographer declined booking request");
+            }
             booking.setStatus(BookingStatus.REJECTED);
             bookingRepository.save(booking);
 
@@ -428,7 +435,7 @@ public class BookingServiceImpl implements BookingService {
                 );
             }
         } else {
-            throw new InvalidBookingException("Only PENDING bookings can be rejected.");
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS, "Only PENDING bookings can be rejected.");
         }
     }
 
@@ -437,10 +444,13 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getBookingForPhotographer(bookingId, photographerUserId);
 
         if (booking.getStatus() == BookingStatus.ACCEPTED) {
+            if (bookingStateMachineService != null) {
+                bookingStateMachineService.transition(bookingId, BookingStatus.COMPLETED, photographerUserId, "Booking completed by photographer");
+            }
             booking.setStatus(BookingStatus.COMPLETED);
             bookingRepository.save(booking);
         } else {
-            throw new InvalidBookingException("Only ACCEPTED bookings can be marked as completed.");
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS, "Only ACCEPTED bookings can be marked as completed.");
         }
     }
 }

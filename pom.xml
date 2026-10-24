@@ -137,6 +137,16 @@
             <artifactId>sitemesh</artifactId>
             <version>3.3.0-RC1</version>
         </dependency>
+
+        <!-- Database Migration (Flyway) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-sqlserver</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -157,6 +167,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
                     <systemPropertyVariables>
                         <!-- Explicit test-only key; never use outside automated tests. -->
                         <photoconnect.jwt.secret>UGhvdG9Db25uZWN0LUQwMS10ZXN0LW9ubHktc2VjcmV0LWtleS0yMDI2</photoconnect.jwt.secret>

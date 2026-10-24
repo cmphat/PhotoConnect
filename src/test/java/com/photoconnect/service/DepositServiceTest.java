@@ -30,6 +30,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +46,9 @@ class DepositServiceTest {
 
     @Mock
     private BookingRepository bookingRepository;
+
+    @Mock
+    private BookingStateMachineService bookingStateMachineService;
 
     @InjectMocks
     private DepositServiceImpl depositService;
@@ -265,6 +270,99 @@ class DepositServiceTest {
         assertThrows(IllegalStateException.class,
                 () -> depositService.getOrCreateDepositForBooking(100L, 10L));
         verify(bookingRepository, never()).findByIdWithDetails(any());
+    }
+
+    @Test
+    void processDemoPayment_whenPaymentSucceeds_transitionsBookingToConfirmedAtomically() {
+        Deposit pending = pendingDeposit();
+        stubPaymentAttempt(pending);
+        DemoPaymentRequest request = new DemoPaymentRequest();
+        request.setPaymentMethod("DEMO_QR");
+
+        DepositViewDto dto = depositService.processDemoPayment(100L, 10L, request);
+
+        assertThat(dto.getStatus()).isEqualTo(DepositStatus.PAID);
+        verify(depositRepository).flush();
+        verify(bookingStateMachineService).transition(eq(100L), eq(BookingStatus.CONFIRMED), eq(10L), any());
+    }
+
+    @Test
+    void processDemoPayment_whenBookingTransitionThrowsException_propagatesExceptionForTransactionRollback() {
+        Deposit pending = pendingDeposit();
+        stubPaymentAttempt(pending);
+        DemoPaymentRequest request = new DemoPaymentRequest();
+        request.setPaymentMethod("DEMO_QR");
+
+        when(bookingStateMachineService.transition(eq(100L), eq(BookingStatus.CONFIRMED), eq(10L), any()))
+                .thenThrow(new IllegalStateException("Booking state machine invariant violated"));
+
+        assertThrows(IllegalStateException.class, () ->
+                depositService.processDemoPayment(100L, 10L, request));
+    }
+
+    @Test
+    void processDemoPayment_idempotentRetry_whenDepositAlreadyPaid_recoversUnconfirmedBooking() {
+        Deposit paid = pendingDeposit();
+        paid.setStatus(DepositStatus.PAID);
+        paid.setPaidAt(LocalDateTime.now());
+        paid.setPaymentMethod(DemoPaymentMethod.DEMO_CARD);
+        booking.setStatus(BookingStatus.ACCEPTED);
+        when(bookingRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdForUpdate(100L)).thenReturn(Optional.of(paid));
+
+        DepositViewDto dto = depositService.processDemoPayment(100L, 10L,
+                cardRequest("4242 4242 4242 4242", "12/40", "123"));
+
+        assertThat(dto.getStatus()).isEqualTo(DepositStatus.PAID);
+        verify(bookingStateMachineService).transition(eq(100L), eq(BookingStatus.CONFIRMED), eq(10L), any());
+    }
+
+    @Test
+    void processDemoPayment_idempotentRetry_whenDepositPaidAndBookingAlreadyConfirmed_doesNotRetransition() {
+        Deposit paid = pendingDeposit();
+        paid.setStatus(DepositStatus.PAID);
+        paid.setPaidAt(LocalDateTime.now());
+        paid.setPaymentMethod(DemoPaymentMethod.DEMO_CARD);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        when(bookingRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdForUpdate(100L)).thenReturn(Optional.of(paid));
+
+        DepositViewDto dto = depositService.processDemoPayment(100L, 10L,
+                cardRequest("4242 4242 4242 4242", "12/40", "123"));
+
+        assertThat(dto.getStatus()).isEqualTo(DepositStatus.PAID);
+        verify(bookingStateMachineService, never()).transition(anyLong(), any(), anyLong(), any());
+    }
+
+    @Test
+    void processDemoPayment_allowsDepositPendingBookingState() {
+        booking.setStatus(BookingStatus.DEPOSIT_PENDING);
+        Deposit pending = pendingDeposit();
+        stubPaymentAttempt(pending);
+        DemoPaymentRequest request = new DemoPaymentRequest();
+        request.setPaymentMethod("DEMO_QR");
+
+        DepositViewDto dto = depositService.processDemoPayment(100L, 10L, request);
+
+        assertThat(dto.getStatus()).isEqualTo(DepositStatus.PAID);
+        verify(bookingStateMachineService).transition(eq(100L), eq(BookingStatus.CONFIRMED), eq(10L), any());
+    }
+
+    @Test
+    void getOrCreateDeposit_allowsDepositPendingBookingState() {
+        booking.setStatus(BookingStatus.DEPOSIT_PENDING);
+        when(bookingRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(booking));
+        when(depositRepository.findByBookingIdWithDetails(100L)).thenReturn(Optional.empty());
+        when(depositRepository.save(any(Deposit.class))).thenAnswer(invocation -> {
+            Deposit saved = invocation.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+
+        DepositViewDto dto = depositService.getOrCreateDepositForBooking(100L, 10L);
+
+        assertThat(dto.getStatus()).isEqualTo(DepositStatus.PENDING);
+        assertThat(dto.getAmount()).isEqualByComparingTo("600000.00");
     }
 
     private Deposit pendingDeposit() {

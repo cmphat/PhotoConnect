@@ -243,7 +243,7 @@
                             <div class="spec-item-value">
                                 <strong><c:out value="${booking.packageName}"/></strong>
                                 <span style="font-size: 0.88rem; color: var(--muted); margin-left: 0.5rem;">
-                                    (${booking.durationMinutes} mins · ${not empty booking.editedPhotoCount ? booking.editedPhotoCount : 'Standard'} photos · ${not empty booking.deliveryDays ? booking.deliveryDays : 'Standard'} days delivery)
+                                    (<c:out value="${booking.durationMinutes}"/> mins · <c:out value="${not empty booking.editedPhotoCount ? booking.editedPhotoCount : 'Standard'}"/> photos · <c:out value="${not empty booking.deliveryDays ? booking.deliveryDays : 'Standard'}"/> days delivery)
                                 </span>
                             </div>
                         </div>

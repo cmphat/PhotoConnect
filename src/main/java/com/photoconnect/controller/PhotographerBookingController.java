@@ -2,43 +2,47 @@ package com.photoconnect.controller;
 
 import com.photoconnect.dto.BookingViewDto;
 import com.photoconnect.entity.Booking;
+import com.photoconnect.entity.BookingStatus;
 import com.photoconnect.entity.UserRole;
+import com.photoconnect.exception.ErrorCode;
 import com.photoconnect.exception.InvalidBookingException;
+import com.photoconnect.exception.PhotographerUnavailableException;
+import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.service.BookingService;
+import com.photoconnect.service.BookingStateMachineService;
+import com.photoconnect.service.RescheduleService;
+import com.photoconnect.util.SessionSecurityUtils;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/photographer/bookings")
 public class PhotographerBookingController {
 
     private final BookingService bookingService;
-    private final com.photoconnect.service.BookingStateMachineService bookingStateMachineService;
-    private final com.photoconnect.service.RescheduleService rescheduleService;
+    private final BookingStateMachineService bookingStateMachineService;
+    private final RescheduleService rescheduleService;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public PhotographerBookingController(BookingService bookingService,
-                                         @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.BookingStateMachineService bookingStateMachineService,
-                                         @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.RescheduleService rescheduleService) {
+                                         @Autowired(required = false) BookingStateMachineService bookingStateMachineService,
+                                         @Autowired(required = false) RescheduleService rescheduleService) {
         this.bookingService = bookingService;
         this.bookingStateMachineService = bookingStateMachineService;
         this.rescheduleService = rescheduleService;
     }
 
     public PhotographerBookingController(BookingService bookingService,
-                                         com.photoconnect.service.BookingStateMachineService bookingStateMachineService) {
+                                         BookingStateMachineService bookingStateMachineService) {
         this(bookingService, bookingStateMachineService, null);
     }
 
@@ -48,9 +52,9 @@ public class PhotographerBookingController {
 
     @GetMapping
     public String listPhotographerBookings(HttpSession session, Model model) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         List<Booking> bookings = bookingService.getPhotographerBookings(userId);
         model.addAttribute("bookings", bookings.stream().map(BookingViewDto::from).toList());
@@ -59,9 +63,9 @@ public class PhotographerBookingController {
 
     @GetMapping("/{id}")
     public String viewPhotographerBooking(@PathVariable("id") Long bookingId, HttpSession session, Model model) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         try {
             Booking booking = bookingService.getBookingForPhotographer(bookingId, userId);
@@ -76,20 +80,27 @@ public class PhotographerBookingController {
             }
             return "photographer-booking-detail";
         } catch (InvalidBookingException ex) {
+            if (ex.getErrorCode() == ErrorCode.BOOKING_005_NOT_OWNER || ex.getErrorCode() == ErrorCode.AUTH_005_ACCESS_DENIED) {
+                throw ex;
+            }
             return "redirect:/photographer/bookings";
         }
     }
 
     @PostMapping("/{id}/accept")
     public String acceptBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         try {
             bookingService.acceptBooking(bookingId, userId);
             redirectAttributes.addFlashAttribute("successMessage", "Booking accepted successfully.");
         } catch (InvalidBookingException ex) {
+            if (ex.getErrorCode() == ErrorCode.BOOKING_005_NOT_OWNER || ex.getErrorCode() == ErrorCode.AUTH_005_ACCESS_DENIED
+                    || ex.getErrorCode() == ErrorCode.BOOKING_003_INVALID_STATUS || ex.getErrorCode() == ErrorCode.BOOKING_002_TIME_CONFLICT) {
+                throw ex;
+            }
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
@@ -98,14 +109,18 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/reject")
     public String rejectBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         try {
             bookingService.rejectBooking(bookingId, userId);
             redirectAttributes.addFlashAttribute("successMessage", "Booking rejected.");
         } catch (InvalidBookingException ex) {
+            if (ex.getErrorCode() == ErrorCode.BOOKING_005_NOT_OWNER || ex.getErrorCode() == ErrorCode.AUTH_005_ACCESS_DENIED
+                    || ex.getErrorCode() == ErrorCode.BOOKING_003_INVALID_STATUS) {
+                throw ex;
+            }
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
@@ -114,14 +129,18 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/complete")
     public String completeBooking(@PathVariable("id") Long bookingId, HttpSession session, RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         try {
             bookingService.completeBooking(bookingId, userId);
             redirectAttributes.addFlashAttribute("successMessage", "Booking marked as completed.");
         } catch (InvalidBookingException ex) {
+            if (ex.getErrorCode() == ErrorCode.BOOKING_005_NOT_OWNER || ex.getErrorCode() == ErrorCode.AUTH_005_ACCESS_DENIED
+                    || ex.getErrorCode() == ErrorCode.BOOKING_003_INVALID_STATUS) {
+                throw ex;
+            }
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
@@ -130,13 +149,22 @@ public class PhotographerBookingController {
 
     @PostMapping("/{id}/advance-status")
     public String advanceStatus(@PathVariable("id") Long bookingId,
-                                @org.springframework.web.bind.annotation.RequestParam("targetStatus") com.photoconnect.entity.BookingStatus targetStatus,
-                                @org.springframework.web.bind.annotation.RequestParam(value = "reason", required = false) String reason,
+                                @RequestParam("targetStatus") BookingStatus targetStatus,
+                                @RequestParam(value = "reason", required = false) String reason,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
+
+        // SEC-01: Validate actor's authority over that booking
+        bookingService.getBookingForPhotographer(bookingId, userId);
+
+        // SEC-01: Restrict target status transitions allowed by photographer via advance-status
+        if (targetStatus != BookingStatus.SHOOTING && targetStatus != BookingStatus.POST_PROCESSING) {
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS,
+                    "Photographers can only advance status to SHOOTING or POST_PROCESSING.");
+        }
 
         if (bookingStateMachineService == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "State machine service is not configured.");
@@ -146,6 +174,8 @@ public class PhotographerBookingController {
         try {
             bookingStateMachineService.transition(bookingId, targetStatus, userId, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Booking advanced to " + targetStatus.getDisplayName() + ".");
+        } catch (InvalidBookingException | UnauthorizedException | IllegalStateException ex) {
+            throw ex;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -158,14 +188,18 @@ public class PhotographerBookingController {
                                             @RequestParam(value = "reason", required = false) String reason,
                                             HttpSession session,
                                             RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
 
         try {
             bookingService.cancelBookingByPhotographer(bookingId, userId, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Booking cancelled. Client has been notified and any paid deposit credited for full refund.");
         } catch (InvalidBookingException ex) {
+            if (ex.getErrorCode() == ErrorCode.BOOKING_005_NOT_OWNER || ex.getErrorCode() == ErrorCode.AUTH_005_ACCESS_DENIED
+                    || ex.getErrorCode() == ErrorCode.BOOKING_003_INVALID_STATUS) {
+                throw ex;
+            }
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
@@ -179,9 +213,12 @@ public class PhotographerBookingController {
                                                 @RequestParam(value = "reason", required = false) String reason,
                                                 HttpSession session,
                                                 RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
+
+        // SEC-01: Validate actor's authority over that booking
+        bookingService.getBookingForPhotographer(bookingId, userId);
 
         if (rescheduleService == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
@@ -191,6 +228,8 @@ public class PhotographerBookingController {
         try {
             rescheduleService.createRescheduleRequest(bookingId, userId, proposedDate, proposedTime, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Reschedule proposal submitted to client.");
+        } catch (InvalidBookingException | PhotographerUnavailableException | UnauthorizedException | IllegalStateException ex) {
+            throw ex;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -204,9 +243,12 @@ public class PhotographerBookingController {
                                               @RequestParam(value = "responseNote", required = false) String responseNote,
                                               HttpSession session,
                                               RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
+
+        // SEC-01: Validate actor's authority over that booking
+        bookingService.getBookingForPhotographer(bookingId, userId);
 
         if (rescheduleService == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
@@ -216,6 +258,8 @@ public class PhotographerBookingController {
         try {
             rescheduleService.acceptReschedule(requestId, userId, responseNote);
             redirectAttributes.addFlashAttribute("successMessage", "Reschedule confirmed! Session date and time updated.");
+        } catch (InvalidBookingException | PhotographerUnavailableException | UnauthorizedException | IllegalStateException ex) {
+            throw ex;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -229,9 +273,12 @@ public class PhotographerBookingController {
                                               @RequestParam(value = "reason", required = false) String reason,
                                               HttpSession session,
                                               RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
+
+        // SEC-01: Validate actor's authority over that booking
+        bookingService.getBookingForPhotographer(bookingId, userId);
 
         if (rescheduleService == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
@@ -241,6 +288,8 @@ public class PhotographerBookingController {
         try {
             rescheduleService.rejectReschedule(requestId, userId, reason);
             redirectAttributes.addFlashAttribute("successMessage", "Reschedule request declined. Original schedule preserved.");
+        } catch (InvalidBookingException | PhotographerUnavailableException | UnauthorizedException | IllegalStateException ex) {
+            throw ex;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -253,9 +302,12 @@ public class PhotographerBookingController {
                                               @PathVariable("requestId") Long requestId,
                                               HttpSession session,
                                               RedirectAttributes redirectAttributes) {
-        String redirect = com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
+        String redirect = SessionSecurityUtils.requireRole(session, UserRole.PHOTOGRAPHER);
         if (redirect != null) return redirect;
-        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        Long userId = SessionSecurityUtils.userId(session);
+
+        // SEC-01: Validate actor's authority over that booking
+        bookingService.getBookingForPhotographer(bookingId, userId);
 
         if (rescheduleService == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rescheduling service is currently unavailable.");
@@ -265,6 +317,8 @@ public class PhotographerBookingController {
         try {
             rescheduleService.cancelReschedule(requestId, userId);
             redirectAttributes.addFlashAttribute("successMessage", "Reschedule proposal withdrawn.");
+        } catch (InvalidBookingException | PhotographerUnavailableException | UnauthorizedException | IllegalStateException ex) {
+            throw ex;
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

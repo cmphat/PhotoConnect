@@ -2,6 +2,8 @@ package com.photoconnect.service;
 
 import com.photoconnect.dto.BookingHistoryDto;
 import com.photoconnect.entity.*;
+import com.photoconnect.exception.ErrorCode;
+import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.repository.BookingHistoryRepository;
 import com.photoconnect.repository.BookingRepository;
@@ -182,5 +184,105 @@ class AdminBookingServiceTest {
 
         assertThrows(UnauthorizedException.class, () ->
                 adminBookingService.resolveDispute(100L, "REFUND_CUSTOMER", "notes", 10L));
+    }
+
+    @Test
+    void resolveDispute_whenBookingInConfirmedStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
+        User admin = new User();
+        admin.setId(99L);
+        admin.setRole(UserRole.ADMIN);
+        when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
+
+        Booking booking = new Booking();
+        booking.setId(101L);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        when(bookingRepository.findByIdWithDetails(101L)).thenReturn(Optional.of(booking));
+
+        InvalidBookingException ex = assertThrows(InvalidBookingException.class, () ->
+                adminBookingService.resolveDispute(101L, "REFUND_CUSTOMER", "Customer request", 99L));
+
+        assertEquals(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getErrorCode());
+        verify(bookingRepository, never()).save(any());
+        verify(depositRepository, never()).save(any());
+    }
+
+    @Test
+    void resolveDispute_whenBookingInPendingStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
+        User admin = new User();
+        admin.setId(99L);
+        admin.setRole(UserRole.ADMIN);
+        when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
+
+        Booking booking = new Booking();
+        booking.setId(102L);
+        booking.setStatus(BookingStatus.PENDING);
+        when(bookingRepository.findByIdWithDetails(102L)).thenReturn(Optional.of(booking));
+
+        InvalidBookingException ex = assertThrows(InvalidBookingException.class, () ->
+                adminBookingService.resolveDispute(102L, "REFUND_CUSTOMER", "Customer request", 99L));
+
+        assertEquals(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getErrorCode());
+        verify(bookingRepository, never()).save(any());
+        verify(depositRepository, never()).save(any());
+    }
+
+    @Test
+    void resolveDispute_whenBookingInCompletedStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
+        User admin = new User();
+        admin.setId(99L);
+        admin.setRole(UserRole.ADMIN);
+        when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
+
+        Booking booking = new Booking();
+        booking.setId(103L);
+        booking.setStatus(BookingStatus.COMPLETED);
+        when(bookingRepository.findByIdWithDetails(103L)).thenReturn(Optional.of(booking));
+
+        InvalidBookingException ex = assertThrows(InvalidBookingException.class, () ->
+                adminBookingService.resolveDispute(103L, "PAY_PHOTOGRAPHER", "Admin review", 99L));
+
+        assertEquals(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getErrorCode());
+        verify(bookingRepository, never()).save(any());
+        verify(depositRepository, never()).save(any());
+    }
+
+    @Test
+    void resolveDispute_whenBookingInCancelledStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
+        User admin = new User();
+        admin.setId(99L);
+        admin.setRole(UserRole.ADMIN);
+        when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
+
+        Booking booking = new Booking();
+        booking.setId(104L);
+        booking.setStatus(BookingStatus.CANCELLED);
+        when(bookingRepository.findByIdWithDetails(104L)).thenReturn(Optional.of(booking));
+
+        InvalidBookingException ex = assertThrows(InvalidBookingException.class, () ->
+                adminBookingService.resolveDispute(104L, "REFUND_CUSTOMER", "Admin review", 99L));
+
+        assertEquals(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getErrorCode());
+        verify(bookingRepository, never()).save(any());
+        verify(depositRepository, never()).save(any());
+    }
+
+    @Test
+    void resolveDispute_whenBookingInAcceptedStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
+        User admin = new User();
+        admin.setId(99L);
+        admin.setRole(UserRole.ADMIN);
+        when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
+
+        Booking booking = new Booking();
+        booking.setId(105L);
+        booking.setStatus(BookingStatus.ACCEPTED);
+        when(bookingRepository.findByIdWithDetails(105L)).thenReturn(Optional.of(booking));
+
+        InvalidBookingException ex = assertThrows(InvalidBookingException.class, () ->
+                adminBookingService.resolveDispute(105L, "REFUND_CUSTOMER", "Admin review", 99L));
+
+        assertEquals(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getErrorCode());
+        verify(bookingRepository, never()).save(any());
+        verify(depositRepository, never()).save(any());
     }
 }

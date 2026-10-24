@@ -23,10 +23,10 @@ public record DeliveredPhotoDto(
                 entity.getId(),
                 entity.getAlbum() != null ? entity.getAlbum().getId() : null,
                 entity.getCloudinaryPublicId(),
-                entity.getSecureUrl(),
-                entity.getThumbnailUrl(),
-                entity.getPreviewUrl(),
-                entity.getDownloadUrl(),
+                null, // Redacted: direct permanent storage URLs are never exposed in public client DTOs
+                null, // Redacted: access requires authorized controller endpoint
+                null, // Redacted: access requires authorized controller endpoint
+                null, // Redacted: access requires authorized controller endpoint
                 entity.getFileName(),
                 entity.getFileSizeBytes(),
                 entity.getCreatedAt()

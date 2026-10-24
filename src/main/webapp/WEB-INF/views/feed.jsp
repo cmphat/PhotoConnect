@@ -429,11 +429,11 @@
         <div class="stories-container">
             <div class="stories-track">
                 <c:forEach var="c" items="${featuredCreators}">
-                    <a href="${pageContext.request.contextPath}/photographers/${c.photographerId}" class="story-item" title="View ${c.displayName}'s profile">
+                    <a href="${pageContext.request.contextPath}/photographers/${c.photographerId}" class="story-item" title="View <c:out value='${c.displayName}'/>'s profile">
                         <div class="story-avatar-ring">
                             <c:choose>
                                 <c:when test="${not empty c.avatarUrl}">
-                                    <img src="<c:out value='${c.avatarUrl}'/>" alt="${c.displayName}" class="story-avatar-img">
+                                    <img src="<c:out value='${c.avatarUrl}'/>" alt="<c:out value='${c.displayName}'/>" class="story-avatar-img">
                                 </c:when>
                                 <c:otherwise>
                                     <div class="story-initial-avatar">
@@ -468,138 +468,129 @@
                     <c:when test="${empty posts}">
                         <div class="pc-empty-state text-center p-5 bg-surface border rounded-4">
                             <h3 style="font-weight: 800;">No works found in this category</h3>
-                            <p class="text-muted">Try selecting another category or view all photographic works.</p>
-                            <a href="${pageContext.request.contextPath}/feed" class="btn btn-primary mt-2 rounded-pill px-4">View All Works</a>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach var="post" items="${posts}">
-                            <article class="feed-post-card" id="post-${post.imageId}">
-                                <!-- Post Header -->
-                                <div class="post-header">
-                                    <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
-                                        <c:choose>
-                                            <c:when test="${not empty post.photographerAvatarUrl}">
-                                                <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="${post.photographerName}" class="post-author-avatar">
-                                            </c:when>
-                                            <c:otherwise>
-                                                <div class="post-author-initial">
-                                                    <c:out value="${fn:toUpperCase(fn:substring(post.photographerName, 0, 1))}"/>
-                                                </div>
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <div>
-                                            <div class="post-author-name">
-                                                <c:out value="${post.photographerName}"/>
-                                                <span class="verified-badge" title="Verified Creator">
-                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                                </span>
-                                            </div>
-                                            <div class="post-meta-sub">
-                                                <span><c:out value="${post.photographerCity}"/></span>
-                                                <span>•</span>
-                                                <span><c:out value="${post.timeAgo}"/></span>
-                                            </div>
-                                        </div>
-                                    </a>
+                                        <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
+                                         <c:choose>
+                                             <c:when test="${not empty post.photographerAvatarUrl}">
+                                                 <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="<c:out value='${post.photographerName}'/>" class="post-author-avatar">
+                                             </c:when>
+                                             <c:otherwise>
+                                                 <div class="post-author-initial">
+                                                     <c:out value="${fn:toUpperCase(fn:substring(post.photographerName, 0, 1))}"/>
+                                                 </div>
+                                             </c:otherwise>
+                                         </c:choose>
+                                         <div>
+                                             <div class="post-author-name">
+                                                 <c:out value="${post.photographerName}"/>
+                                                 <span class="verified-badge" title="Verified Creator">
+                                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                                 </span>
+                                             </div>
+                                             <div class="post-meta-sub">
+                                                 <span><c:out value="${post.photographerCity}"/></span>
+                                                 <span>•</span>
+                                                 <span><c:out value="${post.timeAgo}"/></span>
+                                             </div>
+                                         </div>
+                                     </a>
 
-                                    <div class="d-flex align-items-center gap-2">
-                                        <c:if test="${post.isSaved}">
-                                            <span class="badge bg-danger-subtle text-danger" style="font-size: 0.72rem;">♥ Saved</span>
-                                        </c:if>
-                                        <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="btn btn-sm btn-ghost" title="View Profile">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                                        </a>
-                                    </div>
-                                </div>
+                                     <div class="d-flex align-items-center gap-2">
+                                         <c:if test="${post.isSaved}">
+                                             <span class="badge bg-danger-subtle text-danger" style="font-size: 0.72rem;">♥ Saved</span>
+                                         </c:if>
+                                         <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="btn btn-sm btn-ghost" title="View Profile">
+                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                                         </a>
+                                     </div>
+                                 </div>
 
-                                <!-- Post Caption -->
-                                <div class="post-caption-box">
-                                    <c:if test="${not empty post.categoryDisplayName}">
-                                        <a href="${pageContext.request.contextPath}/feed?category=${post.category}" class="post-category-tag">
-                                            #<c:out value="${post.categoryDisplayName}"/>
-                                        </a>
-                                    </c:if>
-                                    <div><c:out value="${post.caption}"/></div>
-                                </div>
+                                 <!-- Post Caption -->
+                                 <div class="post-caption-box">
+                                     <c:if test="${not empty post.categoryDisplayName}">
+                                         <a href="${pageContext.request.contextPath}/feed?category=${post.category}" class="post-category-tag">
+                                             #<c:out value="${post.categoryDisplayName}"/>
+                                         </a>
+                                     </c:if>
+                                     <div><c:out value="${post.caption}"/></div>
+                                 </div>
 
-                                <!-- Post Photography Image (Double-click to Like) -->
-                                <div class="post-media-frame" ondblclick="handleDoubleTap(this, ${post.imageId})">
-                                    <img src="<c:out value='${post.imageUrl}'/>" alt="${post.caption}" class="post-media-img" loading="lazy">
-                                    <div class="heart-float" id="heart-anim-${post.imageId}">❤️</div>
-                                </div>
+                                 <!-- Post Photography Image (Double-click to Like) -->
+                                 <div class="post-media-frame post-media-dblclick" data-image-id="<c:out value='${post.imageId}'/>">
+                                     <img src="<c:out value='${post.imageUrl}'/>" alt="<c:out value='${post.caption}'/>" class="post-media-img" loading="lazy">
+                                     <div class="heart-float" id="heart-anim-<c:out value='${post.imageId}'/>">❤️</div>
+                                 </div>
 
-                                <!-- Social Interaction Bar -->
-                                <div class="post-actions-bar">
-                                    <div class="social-left-actions">
-                                        <!-- Like Button -->
-                                        <button type="button" class="action-icon-btn like-btn" id="like-btn-${post.imageId}" onclick="toggleLike(${post.imageId})">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                            <span id="like-count-${post.imageId}"><c:out value="${post.likeCount}"/></span>
-                                        </button>
+                                 <!-- Social Interaction Bar -->
+                                 <div class="post-actions-bar">
+                                     <div class="social-left-actions">
+                                         <!-- Like Button -->
+                                         <button type="button" class="action-icon-btn like-btn action-toggle-like" id="like-btn-<c:out value='${post.imageId}'/>" data-image-id="<c:out value='${post.imageId}'/>">
+                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                             <span id="like-count-<c:out value='${post.imageId}'/>"><c:out value="${post.likeCount}"/></span>
+                                         </button>
 
-                                        <!-- Comment Toggle Button -->
-                                        <button type="button" class="action-icon-btn" onclick="toggleComments(${post.imageId})">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                            <span><c:out value="${post.commentCount}"/></span>
-                                        </button>
+                                         <!-- Comment Toggle Button -->
+                                         <button type="button" class="action-icon-btn action-toggle-comments" data-image-id="<c:out value='${post.imageId}'/>">
+                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                             <span><c:out value="${post.commentCount}"/></span>
+                                         </button>
 
-                                        <!-- Share Button -->
-                                        <button type="button" class="action-icon-btn" onclick="sharePost(${post.photographerId})" title="Share Link">
-                                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                                        </button>
-                                    </div>
+                                         <!-- Share Button -->
+                                         <button type="button" class="action-icon-btn action-share-post" data-photographer-id="<c:out value='${post.photographerId}'/>" title="Share Link">
+                                             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                         </button>
+                                     </div>
 
-                                    <!-- Direct Booking Call-To-Action -->
-                                    <a href="${pageContext.request.contextPath}/bookings/new?photographerId=${post.photographerId}" class="btn-book-cta">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                        Book Shoot • From <fmt:formatNumber value="${post.startingPrice}" type="number" maxFractionDigits="0"/> VND
-                                    </a>
-                                </div>
+                                     <!-- Direct Booking Call-To-Action -->
+                                     <a href="${pageContext.request.contextPath}/bookings/new?photographerId=${post.photographerId}" class="btn-book-cta">
+                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                         Book Shoot • From <fmt:formatNumber value="${post.startingPrice}" type="number" maxFractionDigits="0"/> VND
+                                     </a>
+                                 </div>
 
-                                <!-- Comments Section -->
-                                <div class="post-comments-section" id="comments-section-${post.imageId}">
-                                    <div id="dynamic-comments-${post.imageId}"></div>
+                                 <!-- Comments Section -->
+                                 <div class="post-comments-section" id="comments-section-<c:out value='${post.imageId}'/>">
+                                     <div id="dynamic-comments-<c:out value='${post.imageId}'/>"></div>
 
-                                    <div class="comment-input-wrap">
-                                        <input type="text"
-                                               class="comment-input-field"
-                                               id="comment-input-${post.imageId}"
-                                               placeholder="Write a comment on this work..."
-                                               onkeydown="if(event.key === 'Enter') submitComment(${post.imageId})">
-                                        <button type="button" class="btn btn-sm btn-primary rounded-2 px-3" onclick="submitComment(${post.imageId})">
-                                            Post
-                                        </button>
-                                    </div>
-                                </div>
-                            </article>
-                        </c:forEach>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+                                     <div class="comment-input-wrap">
+                                         <input type="text"
+                                                class="comment-input-field"
+                                                id="comment-input-<c:out value='${post.imageId}'/>"
+                                                data-image-id="<c:out value='${post.imageId}'/>"
+                                                placeholder="Write a comment on this work...">
+                                         <button type="button" class="btn btn-sm btn-primary rounded-2 px-3 action-submit-comment" data-image-id="<c:out value='${post.imageId}'/>">
+                                             Post
+                                         </button>
+                                     </div>
+                                 </div>
+                             </article>
+                         </c:forEach>
+                     </c:otherwise>
+                 </c:choose>
+             </div>
 
-            <!-- Right Sticky Sidebar -->
-            <div class="col-12 col-lg-4">
-                <div style="position: sticky; top: 85px;">
-                    <!-- Suggested Creators Card -->
-                    <div class="sidebar-card">
-                        <div class="sidebar-title">
-                            <span>Featured Photographers</span>
-                            <a href="${pageContext.request.contextPath}/photographers" class="text-primary small text-decoration-none fw-semibold">View all</a>
-                        </div>
-                        <c:forEach var="sc" items="${featuredCreators}" end="4">
-                            <div class="creator-mini-row">
-                                <a href="${pageContext.request.contextPath}/photographers/${sc.photographerId}" class="d-flex align-items-center gap-2 text-decoration-none color-inherit">
-                                    <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
-                                        <c:choose>
-                                            <c:when test="${not empty sc.avatarUrl}">
-                                                <img src="${sc.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;">
-                                            </c:when>
-                                            <c:otherwise>
-                                                <c:out value="${fn:toUpperCase(fn:substring(sc.displayName, 0, 1))}"/>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
+             <!-- Right Sticky Sidebar -->
+             <div class="col-12 col-lg-4">
+                 <div style="position: sticky; top: 85px;">
+                     <!-- Suggested Creators Card -->
+                     <div class="sidebar-card">
+                         <div class="sidebar-title">
+                             <span>Featured Photographers</span>
+                             <a href="${pageContext.request.contextPath}/photographers" class="text-primary small text-decoration-none fw-semibold">View all</a>
+                         </div>
+                         <c:forEach var="sc" items="${featuredCreators}" end="4">
+                             <div class="creator-mini-row">
+                                 <a href="${pageContext.request.contextPath}/photographers/${sc.photographerId}" class="d-flex align-items-center gap-2 text-decoration-none color-inherit">
+                                     <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                                         <c:choose>
+                                             <c:when test="${not empty sc.avatarUrl}">
+                                                 <img src="<c:out value='${sc.avatarUrl}'/>" alt="<c:out value='${sc.displayName}'/>" style="width: 100%; height: 100%; object-fit: cover;">
+                                             </c:when>
+                                             <c:otherwise>
+                                                 <c:out value="${fn:toUpperCase(fn:substring(sc.displayName, 0, 1))}"/>
+                                             </c:otherwise>
+                                         </c:choose>
+                                     </div>
                                     <div>
                                         <div style="font-weight: 700; font-size: 0.88rem; color: var(--text);"><c:out value="${sc.displayName}"/></div>
                                         <div style="font-size: 0.74rem; color: var(--muted);"><c:out value="${sc.city}"/></div>
@@ -662,7 +653,7 @@
         }
     }
 
-    // Submit live comment
+    // Submit live comment safely without innerHTML
     function submitComment(imageId) {
         const input = document.getElementById('comment-input-' + imageId);
         const list = document.getElementById('dynamic-comments-' + imageId);
@@ -671,15 +662,26 @@
         const text = input.value.trim();
         if (!text) return;
 
-        const commentEl = document.createElement('div');
-        commentEl.className = 'comment-item';
-        commentEl.innerHTML = `
-            <div class="comment-bubble" style="background: var(--surface); border-color: var(--accent);">
-                <span class="comment-user">You</span>
-                <span>\${escapeHtml(text)}</span>
-            </div>
-        `;
-        list.appendChild(commentEl);
+        const commentItem = document.createElement('div');
+        commentItem.className = 'comment-item';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'comment-bubble';
+        bubble.style.background = 'var(--surface)';
+        bubble.style.borderColor = 'var(--accent)';
+
+        const userSpan = document.createElement('span');
+        userSpan.className = 'comment-user';
+        userSpan.textContent = 'You';
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+
+        bubble.appendChild(userSpan);
+        bubble.appendChild(document.createTextNode(' '));
+        bubble.appendChild(textSpan);
+        commentItem.appendChild(bubble);
+        list.appendChild(commentItem);
         input.value = '';
     }
 
@@ -695,9 +697,49 @@
         }
     }
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    // Unobtrusive Event Listeners (No inline handlers)
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('dblclick', function(e) {
+            const frame = e.target.closest('.post-media-dblclick');
+            if (frame && frame.dataset.imageId) {
+                handleDoubleTap(frame, frame.dataset.imageId);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const likeBtn = e.target.closest('.action-toggle-like');
+            if (likeBtn && likeBtn.dataset.imageId) {
+                toggleLike(likeBtn.dataset.imageId);
+                return;
+            }
+
+            const commentToggleBtn = e.target.closest('.action-toggle-comments');
+            if (commentToggleBtn && commentToggleBtn.dataset.imageId) {
+                toggleComments(commentToggleBtn.dataset.imageId);
+                return;
+            }
+
+            const shareBtn = e.target.closest('.action-share-post');
+            if (shareBtn && shareBtn.dataset.photographerId) {
+                sharePost(shareBtn.dataset.photographerId);
+                return;
+            }
+
+            const submitBtn = e.target.closest('.action-submit-comment');
+            if (submitBtn && submitBtn.dataset.imageId) {
+                submitComment(submitBtn.dataset.imageId);
+                return;
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const input = e.target.closest('.comment-input-field');
+                if (input && input.dataset.imageId) {
+                    e.preventDefault();
+                    submitComment(input.dataset.imageId);
+                }
+            }
+        });
+    });
 </script>

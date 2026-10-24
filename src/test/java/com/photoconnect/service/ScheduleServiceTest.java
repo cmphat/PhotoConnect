@@ -312,4 +312,48 @@ public class ScheduleServiceTest {
         assertFalse(slots.isEmpty());
         assertTrue(slots.stream().allMatch(TimeSlotDto::isAvailable));
     }
+
+    @Test
+    void validateSlotAvailability_eachTimeReservingStatus_blocksOverlappingBooking() {
+        LocalDate shootDate = LocalDate.now().plusDays(4);
+        LocalTime shootTime = LocalTime.of(10, 0);
+
+        when(scheduleRepository.existsByPhotographerProfileIdAndDate(1L, shootDate)).thenReturn(false);
+
+        for (BookingStatus status : BookingStatus.TIME_RESERVING_STATUSES) {
+            Booking existing = new Booking();
+            existing.setId(50L);
+            existing.setBookingDate(shootDate);
+            existing.setBookingTime(LocalTime.of(10, 0));
+            existing.setDurationMinutes(120);
+            existing.setStatus(status);
+
+            when(bookingRepository.findActiveBookingsOnDate(eq(1L), eq(shootDate), eq(BookingStatus.TIME_RESERVING_STATUSES_LIST), isNull()))
+                    .thenReturn(List.of(existing));
+
+            PhotographerUnavailableException ex = assertThrows(PhotographerUnavailableException.class, () ->
+                    scheduleService.validateSlotAvailability(1L, shootDate, shootTime, 120, null),
+                    "Status " + status + " should block overlapping bookings"
+            );
+            assertTrue(ex.getMessage().contains("conflicts with an existing confirmed booking"));
+        }
+    }
+
+    @Test
+    void validateSlotAvailability_queriesWithAuthoritativeTimeReservingStatuses() {
+        LocalDate shootDate = LocalDate.now().plusDays(4);
+        LocalTime shootTime = LocalTime.of(14, 0);
+
+        when(scheduleRepository.existsByPhotographerProfileIdAndDate(1L, shootDate)).thenReturn(false);
+        when(bookingRepository.findActiveBookingsOnDate(eq(1L), eq(shootDate), eq(BookingStatus.TIME_RESERVING_STATUSES_LIST), isNull()))
+                .thenReturn(Collections.emptyList());
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(profile));
+        when(calendarEventRepository.findConflictingEvents(eq(20L), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        assertDoesNotThrow(() ->
+                scheduleService.validateSlotAvailability(1L, shootDate, shootTime, 120, null));
+
+        verify(bookingRepository).findActiveBookingsOnDate(eq(1L), eq(shootDate), eq(BookingStatus.TIME_RESERVING_STATUSES_LIST), isNull());
+    }
 }

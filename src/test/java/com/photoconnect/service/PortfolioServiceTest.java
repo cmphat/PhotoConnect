@@ -100,12 +100,23 @@ class PortfolioServiceTest {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private static byte[] createValidImageBytes(int width, int height, String format) {
+        try {
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(img, format, baos);
+            return baos.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private MockMultipartFile validJpegFile() {
         return new MockMultipartFile(
                 "imageFile",
                 "photo.jpg",
                 "image/jpeg",
-                new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF} // minimal JPEG-like bytes
+                createValidImageBytes(100, 100, "jpeg")
         );
     }
 
@@ -114,7 +125,7 @@ class PortfolioServiceTest {
                 "imageFile",
                 "photo.png",
                 "image/png",
-                new byte[100]
+                createValidImageBytes(100, 100, "png")
         );
     }
 

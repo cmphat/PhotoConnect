@@ -21,6 +21,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.mockito.ArgumentCaptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -216,6 +217,55 @@ class BookingStateMachineServiceTest {
     }
 
     @Test
+    void transition_Shooting_ByAnotherPhotographer_ThrowsUnauthorized() {
+        booking.setStatus(BookingStatus.CONFIRMED);
+        User anotherPhotographer = new User();
+        anotherPhotographer.setId(77L);
+        anotherPhotographer.setFullName("Photographer Eve");
+        anotherPhotographer.setRole(UserRole.PHOTOGRAPHER);
+
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(77L)).thenReturn(Optional.of(anotherPhotographer));
+
+        assertThatThrownBy(() -> stateMachineService.transition(500L, BookingStatus.SHOOTING, 77L, "Malicious attempt"))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Only the assigned photographer can perform this action");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void transition_PostProcessing_ByCustomer_ThrowsUnauthorized() {
+        booking.setStatus(BookingStatus.SHOOTING);
+
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(customer));
+
+        assertThatThrownBy(() -> stateMachineService.transition(500L, BookingStatus.POST_PROCESSING, 10L, "Customer trying to advance editing"))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Only the assigned photographer can perform this action");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void transition_Delivered_ByAnotherPhotographer_ThrowsUnauthorized() {
+        booking.setStatus(BookingStatus.POST_PROCESSING);
+        User anotherPhotographer = new User();
+        anotherPhotographer.setId(77L);
+        anotherPhotographer.setRole(UserRole.PHOTOGRAPHER);
+
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(77L)).thenReturn(Optional.of(anotherPhotographer));
+
+        assertThatThrownBy(() -> stateMachineService.transition(500L, BookingStatus.DELIVERED, 77L, "Malicious delivery"))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Only the assigned photographer can perform this action");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
     void getHistoryForBooking_AuthorizedParticipants_ReturnsList() {
         BookingHistory h = new BookingHistory(booking, BookingStatus.PENDING, BookingStatus.ACCEPTED, photographerUser, "Approved");
         h.setId(101L);
@@ -241,5 +291,135 @@ class BookingStateMachineServiceTest {
         assertThatThrownBy(() -> stateMachineService.getHistoryForBooking(500L, 99L))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("You are not authorized to view the history");
+    }
+
+    @Test
+    void transition_CapturesAccurateBookingHistory_WithAllRequiredAuditFields() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(photographerUser));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        stateMachineService.transition(500L, BookingStatus.ACCEPTED, 20L, "Detailed acceptance note");
+
+        ArgumentCaptor<BookingHistory> captor = ArgumentCaptor.forClass(BookingHistory.class);
+        verify(bookingHistoryRepository).save(captor.capture());
+
+        BookingHistory savedHistory = captor.getValue();
+        assertThat(savedHistory.getBooking().getId()).isEqualTo(500L);
+        assertThat(savedHistory.getOldStatus()).isEqualTo(BookingStatus.PENDING);
+        assertThat(savedHistory.getNewStatus()).isEqualTo(BookingStatus.ACCEPTED);
+        assertThat(savedHistory.getChangedBy().getId()).isEqualTo(20L);
+        assertThat(savedHistory.getChangedBy().getRole()).isEqualTo(UserRole.PHOTOGRAPHER);
+        assertThat(savedHistory.getReason()).isEqualTo("Detailed acceptance note");
+        assertThat(savedHistory.getChangedAt()).isNotNull();
+        assertThat(savedHistory.getChangedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+    }
+
+    @Test
+    void transition_PendingToRejected_GeneratesExactOneHistoryRecord() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(photographerUser));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        stateMachineService.transition(500L, BookingStatus.REJECTED, 20L, "Schedule fully booked");
+
+        ArgumentCaptor<BookingHistory> captor = ArgumentCaptor.forClass(BookingHistory.class);
+        verify(bookingHistoryRepository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo(BookingStatus.PENDING);
+        assertThat(captor.getValue().getNewStatus()).isEqualTo(BookingStatus.REJECTED);
+        assertThat(captor.getValue().getReason()).isEqualTo("Schedule fully booked");
+    }
+
+    @Test
+    void transition_PendingToCancelled_GeneratesExactOneHistoryRecord() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(customer));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        stateMachineService.transition(500L, BookingStatus.CANCELLED, 10L, "Changed plans");
+
+        ArgumentCaptor<BookingHistory> captor = ArgumentCaptor.forClass(BookingHistory.class);
+        verify(bookingHistoryRepository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo(BookingStatus.PENDING);
+        assertThat(captor.getValue().getNewStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(captor.getValue().getChangedBy().getId()).isEqualTo(10L);
+    }
+
+    @Test
+    void transition_DisputedTransitions_ByAdmin_GeneratesExactOneHistoryRecord() {
+        User admin = new User();
+        admin.setId(1L);
+        admin.setFullName("Admin Root");
+        admin.setRole(UserRole.ADMIN);
+
+        booking.setStatus(BookingStatus.DISPUTED);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        stateMachineService.transition(500L, BookingStatus.COMPLETED, 1L, "Admin resolved dispute in favor of photographer");
+
+        ArgumentCaptor<BookingHistory> captor = ArgumentCaptor.forClass(BookingHistory.class);
+        verify(bookingHistoryRepository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo(BookingStatus.DISPUTED);
+        assertThat(captor.getValue().getNewStatus()).isEqualTo(BookingStatus.COMPLETED);
+        assertThat(captor.getValue().getChangedBy().getRole()).isEqualTo(UserRole.ADMIN);
+    }
+
+    @Test
+    void transition_DeliveredToPostProcessing_ByCustomer_Success() {
+        booking.setStatus(BookingStatus.DELIVERED);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(customer));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Booking result = stateMachineService.transition(500L, BookingStatus.POST_PROCESSING, 10L, "Client requested color adjustments");
+
+        assertThat(result.getStatus()).isEqualTo(BookingStatus.POST_PROCESSING);
+        ArgumentCaptor<BookingHistory> captor = ArgumentCaptor.forClass(BookingHistory.class);
+        verify(bookingHistoryRepository).save(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo(BookingStatus.DELIVERED);
+        assertThat(captor.getValue().getNewStatus()).isEqualTo(BookingStatus.POST_PROCESSING);
+        assertThat(captor.getValue().getChangedBy().getId()).isEqualTo(10L);
+        assertThat(captor.getValue().getReason()).isEqualTo("Client requested color adjustments");
+    }
+
+    @Test
+    void transition_DeliveredToPostProcessing_ByStranger_ThrowsUnauthorized() {
+        booking.setStatus(BookingStatus.DELIVERED);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(99L)).thenReturn(Optional.of(stranger));
+
+        assertThatThrownBy(() -> stateMachineService.transition(500L, BookingStatus.POST_PROCESSING, 99L, "Malicious revision request"))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Only the booking customer or assigned photographer can return delivery to post-processing");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void transition_DeliveredToCompleted_ByPhotographer_ThrowsUnauthorized() {
+        booking.setStatus(BookingStatus.DELIVERED);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(photographerUser));
+
+        assertThatThrownBy(() -> stateMachineService.transition(500L, BookingStatus.COMPLETED, 20L, "Photographer trying to force complete"))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Only the customer can accept delivery and complete the booking");
+
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void transition_DeliveredToCompleted_ByCustomer_Success() {
+        booking.setStatus(BookingStatus.DELIVERED);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(customer));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Booking result = stateMachineService.transition(500L, BookingStatus.COMPLETED, 10L, "Customer confirmed receipt");
+
+        assertThat(result.getStatus()).isEqualTo(BookingStatus.COMPLETED);
+        verify(bookingHistoryRepository).save(any(BookingHistory.class));
     }
 }

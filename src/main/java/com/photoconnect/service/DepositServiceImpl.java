@@ -34,13 +34,22 @@ public class DepositServiceImpl implements DepositService {
 
     private final DepositRepository depositRepository;
     private final BookingRepository bookingRepository;
+    private final BookingStateMachineService bookingStateMachineService;
 
     @Value("${photoconnect.payment.simulation-enabled:true}")
     private boolean simulationEnabled;
 
-    public DepositServiceImpl(DepositRepository depositRepository, BookingRepository bookingRepository) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public DepositServiceImpl(DepositRepository depositRepository,
+                              BookingRepository bookingRepository,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService) {
         this.depositRepository = depositRepository;
         this.bookingRepository = bookingRepository;
+        this.bookingStateMachineService = bookingStateMachineService;
+    }
+
+    public DepositServiceImpl(DepositRepository depositRepository, BookingRepository bookingRepository) {
+        this(depositRepository, bookingRepository, null);
     }
 
     @Override
@@ -103,6 +112,16 @@ public class DepositServiceImpl implements DepositService {
                 .orElseThrow(() -> new InvalidBookingException("Deposit not found for this booking."));
 
         if (deposit.getStatus() == DepositStatus.PAID) {
+            // Idempotent recovery: ensure booking is CONFIRMED if left in ACCEPTED or DEPOSIT_PENDING
+            if (booking.getStatus() == BookingStatus.ACCEPTED || booking.getStatus() == BookingStatus.DEPOSIT_PENDING) {
+                if (bookingStateMachineService != null) {
+                    bookingStateMachineService.transition(bookingId, BookingStatus.CONFIRMED, customerUserId,
+                            "Customer confirmed deposit payment (idempotent recovery)");
+                } else {
+                    booking.setStatus(BookingStatus.CONFIRMED);
+                    bookingRepository.save(booking);
+                }
+            }
             return mapToDto(deposit);
         }
 
@@ -137,7 +156,20 @@ public class DepositServiceImpl implements DepositService {
             applyDemoCardOutcome(deposit, request);
         }
 
-        return mapToDto(depositRepository.save(deposit));
+        Deposit savedDeposit = depositRepository.save(deposit);
+
+        if (savedDeposit.getStatus() == DepositStatus.PAID) {
+            depositRepository.flush();
+            if (bookingStateMachineService != null) {
+                bookingStateMachineService.transition(bookingId, BookingStatus.CONFIRMED, customerUserId,
+                        "Customer completed deposit payment");
+            } else {
+                booking.setStatus(BookingStatus.CONFIRMED);
+                bookingRepository.save(booking);
+            }
+        }
+
+        return mapToDto(savedDeposit);
     }
 
     @Override
@@ -197,9 +229,9 @@ public class DepositServiceImpl implements DepositService {
     }
 
     private void requireAccepted(Booking booking) {
-        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+        if (booking.getStatus() != BookingStatus.ACCEPTED && booking.getStatus() != BookingStatus.DEPOSIT_PENDING) {
             throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS,
-                    "Deposit payment is available only for an ACCEPTED booking.");
+                    "Deposit payment is available only for an ACCEPTED or DEPOSIT_PENDING booking.");
         }
     }
 

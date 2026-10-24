@@ -1042,10 +1042,12 @@
         document.getElementById('viewEventDescription').textContent = desc;
 
         const statusEl = document.getElementById('viewEventStatus');
+        statusEl.textContent = '';
         if (props.isBooking && props.bookingStatus) {
-            statusEl.innerHTML = '<span class="badge bg-primary">Status: ' + props.bookingStatus + '</span>';
-        } else {
-            statusEl.innerHTML = '';
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary';
+            badge.textContent = 'Status: ' + props.bookingStatus;
+            statusEl.appendChild(badge);
         }
 
         const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));

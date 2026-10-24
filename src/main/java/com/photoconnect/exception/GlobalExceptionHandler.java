@@ -123,6 +123,19 @@ public class GlobalExceptionHandler {
                 ex.getMessage(), ErrorCode.SYSTEM_003_VALIDATION_ERROR.getCode());
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public Object handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+        log.warn("State conflict on {}: {}", request.getRequestURI(), ex.getMessage());
+
+        if (isJsonRequest(request)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error(ErrorCode.BOOKING_003_INVALID_STATUS, ex.getMessage()));
+        }
+
+        return createErrorModelAndView(HttpStatus.CONFLICT, "State Conflict",
+                ex.getMessage(), ErrorCode.BOOKING_003_INVALID_STATUS.getCode());
+    }
+
     // ── HTTP & Framework Handlers ────────────────────────────────────────────
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

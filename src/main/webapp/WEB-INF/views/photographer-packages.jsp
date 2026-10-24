@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <fmt:setLocale value="en_US" />
 <head>
     <title>Service Packages — PhotoConnect Studio</title>
@@ -225,12 +226,12 @@
     <!-- Flash Messages -->
     <c:if test="${not empty successMessage}">
         <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert">
-            <span>✓</span> <div>${successMessage}</div>
+            <span>✓</span> <div><c:out value="${successMessage}"/></div>
         </div>
     </c:if>
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
-            <span>⚠</span> <div>${errorMessage}</div>
+            <span>⚠</span> <div><c:out value="${errorMessage}"/></div>
         </div>
     </c:if>
 
@@ -242,32 +243,32 @@
                     <div class="package-card ${pkg.active ? '' : 'is-inactive'}">
                         <div>
                             <div class="package-badge-row">
-                                <span class="category-badge">${pkg.categoryDisplayName}</span>
+                                <span class="category-badge"><c:out value="${pkg.categoryDisplayName}"/></span>
                                 <span class="status-pill ${pkg.active ? 'active' : 'inactive'}">
-                                    ${pkg.active ? 'Active' : 'Inactive'}
+                                    <c:out value="${pkg.active ? 'Active' : 'Inactive'}"/>
                                 </span>
                             </div>
-                            <h2 class="package-name">${pkg.name}</h2>
-                            <div class="package-price">${pkg.formattedPrice}</div>
+                            <h2 class="package-name"><c:out value="${pkg.name}"/></h2>
+                            <div class="package-price"><c:out value="${pkg.formattedPrice}"/></div>
                             
                             <div class="package-deliverables">
                                 <div class="deliverable-item">
                                     <span class="deliverable-label">Duration</span>
-                                    <span class="deliverable-val">${pkg.formattedDuration}</span>
+                                    <span class="deliverable-val"><c:out value="${pkg.formattedDuration}"/></span>
                                 </div>
                                 <div class="deliverable-item">
                                     <span class="deliverable-label">Photos</span>
-                                    <span class="deliverable-val">${pkg.editedPhotoCount} edited</span>
+                                    <span class="deliverable-val"><c:out value="${pkg.editedPhotoCount}"/> edited</span>
                                 </div>
                                 <div class="deliverable-item">
                                     <span class="deliverable-label">Delivery</span>
-                                    <span class="deliverable-val">${pkg.deliveryDays} days</span>
+                                    <span class="deliverable-val"><c:out value="${pkg.deliveryDays}"/> days</span>
                                 </div>
                             </div>
 
                             <p class="package-desc">
                                 <c:choose>
-                                    <c:when test="${not empty pkg.description}">${pkg.description}</c:when>
+                                    <c:when test="${not empty pkg.description}"><c:out value="${pkg.description}"/></c:when>
                                     <c:otherwise><span class="text-muted fst-italic">No custom description provided.</span></c:otherwise>
                                 </c:choose>
                             </p>
@@ -275,14 +276,14 @@
 
                         <div class="package-actions">
                             <button type="button" class="btn btn-sm btn-outline-secondary edit-package-btn"
-                                    data-id="${pkg.id}"
-                                    data-name="${pkg.name}"
-                                    data-category="${pkg.category}"
-                                    data-price="${pkg.price}"
-                                    data-duration="${pkg.durationMinutes}"
-                                    data-photos="${pkg.editedPhotoCount}"
-                                    data-delivery="${pkg.deliveryDays}"
-                                    data-desc="${pkg.description}">
+                                    data-id="<c:out value='${pkg.id}'/>"
+                                    data-name="<c:out value='${pkg.name}'/>"
+                                    data-category="<c:out value='${pkg.category}'/>"
+                                    data-price="<c:out value='${pkg.price}'/>"
+                                    data-duration="<c:out value='${pkg.durationMinutes}'/>"
+                                    data-photos="<c:out value='${pkg.editedPhotoCount}'/>"
+                                    data-delivery="<c:out value='${pkg.deliveryDays}'/>"
+                                    data-desc="<c:out value='${pkg.description}'/>">
                                 Edit
                             </button>
 
@@ -290,7 +291,7 @@
                                 <jsp:include page="fragments/csrf-input.jsp" />
                                 <input type="hidden" name="active" value="${!pkg.active}">
                                 <button type="submit" class="btn btn-sm ${pkg.active ? 'btn-outline-warning' : 'btn-outline-success'}">
-                                    ${pkg.active ? 'Deactivate' : 'Activate'}
+                                    <c:out value="${pkg.active ? 'Deactivate' : 'Activate'}"/>
                                 </button>
                             </form>
 
@@ -338,7 +339,7 @@
                     <label for="pkgCategory">Photography Category *</label>
                     <select id="pkgCategory" name="category" required>
                         <c:forEach var="cat" items="${categories}">
-                            <option value="${cat.name()}">${cat.displayName}</option>
+                            <option value="<c:out value='${cat.name()}'/>"><c:out value="${cat.displayName}"/></option>
                         </c:forEach>
                     </select>
                 </div>

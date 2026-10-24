@@ -68,14 +68,32 @@ public class DeliveredPhoto {
         return buildTransformedUrl(this.secureUrl, "fl_attachment");
     }
 
+    public String getDeliveryType() {
+        if (this.secureUrl != null && this.secureUrl.contains("/authenticated/")) {
+            return "authenticated";
+        }
+        return "upload";
+    }
+
     public static String buildTransformedUrl(String url, String transformation) {
-        if (url == null || !url.contains("/upload/")) {
-            return url;
+        if (url == null) {
+            return null;
         }
-        if (url.contains("/upload/c_") || url.contains("/upload/w_") || url.contains("/upload/fl_")) {
-            return url;
+        String authPattern = "/authenticated/";
+        if (url.contains(authPattern)) {
+            if (url.contains("/authenticated/c_") || url.contains("/authenticated/w_") || url.contains("/authenticated/fl_")) {
+                return url;
+            }
+            return url.replaceFirst(authPattern, "/authenticated/" + transformation + "/");
         }
-        return url.replaceFirst("/upload/", "/upload/" + transformation + "/");
+        String uploadPattern = "/upload/";
+        if (url.contains(uploadPattern)) {
+            if (url.contains("/upload/c_") || url.contains("/upload/w_") || url.contains("/upload/fl_")) {
+                return url;
+            }
+            return url.replaceFirst(uploadPattern, "/upload/" + transformation + "/");
+        }
+        return url;
     }
 
     // Getters and Setters

@@ -40,7 +40,7 @@ public enum ErrorCode {
     // ── BOOKING ──────────────────────────────────────────────────────────────
     BOOKING_001_NOT_FOUND(HttpStatus.NOT_FOUND, "Booking not found"),
     BOOKING_002_TIME_CONFLICT(HttpStatus.CONFLICT, "Photographer is not available at this time"),
-    BOOKING_003_INVALID_STATUS(HttpStatus.BAD_REQUEST, "Invalid booking status transition"),
+    BOOKING_003_INVALID_STATUS(HttpStatus.CONFLICT, "Invalid booking status transition"),
     BOOKING_004_PAST_TIME(HttpStatus.BAD_REQUEST, "Booking time cannot be in the past"),
     BOOKING_005_NOT_OWNER(HttpStatus.FORBIDDEN, "Booking does not belong to current user"),
     BOOKING_006_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "Booking cannot be cancelled in its current state"),

@@ -37,8 +37,35 @@ public enum BookingStatus {
         return this == COMPLETED || this == CANCELLED || this == REJECTED || this == EXPIRED;
     }
 
+    public static final java.util.Set<BookingStatus> TIME_RESERVING_STATUSES = java.util.Set.of(
+            ACCEPTED,
+            DEPOSIT_PENDING,
+            CONFIRMED,
+            SHOOTING,
+            POST_PROCESSING,
+            DELIVERED,
+            COMPLETED
+    );
+
+    public static final java.util.List<BookingStatus> TIME_RESERVING_STATUSES_LIST = java.util.List.of(
+            ACCEPTED,
+            DEPOSIT_PENDING,
+            CONFIRMED,
+            SHOOTING,
+            POST_PROCESSING,
+            DELIVERED,
+            COMPLETED
+    );
+
+    public static java.util.Set<BookingStatus> getTimeReservingStatuses() {
+        return TIME_RESERVING_STATUSES;
+    }
+
+    public static java.util.List<BookingStatus> getTimeReservingStatusesList() {
+        return TIME_RESERVING_STATUSES_LIST;
+    }
+
     public boolean isTimeReserving() {
-        return this == ACCEPTED || this == DEPOSIT_PENDING || this == CONFIRMED ||
-               this == SHOOTING || this == POST_PROCESSING || this == DELIVERED || this == COMPLETED;
+        return TIME_RESERVING_STATUSES.contains(this);
     }
 }

@@ -10,6 +10,7 @@ import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.DeliveredPhotoRepository;
 import com.photoconnect.repository.DeliveryAlbumRepository;
 import com.photoconnect.repository.UserRepository;
+import com.photoconnect.util.ImageValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -97,7 +98,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         // Upload to Cloudinary under photoconnect/delivery/booking_{id}
         String folder = CLOUDINARY_FOLDER + "/booking_" + bookingId;
         CloudinaryStorageService.CloudinaryUploadResult uploadResult =
-                cloudinaryStorageService.uploadImage(file, folder);
+                cloudinaryStorageService.uploadPrivateImage(file, folder);
 
         String originalFilename = file.getOriginalFilename();
         if (originalFilename != null && originalFilename.length() > 250) {
@@ -318,8 +319,78 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional(readOnly = true)
     public String getAuthorizedDownloadUrl(Long bookingId, Long photoId, Long currentUserId) {
+        DeliveredPhoto photo = getAuthorizedPhoto(bookingId, photoId, currentUserId);
+        String signedUrl = cloudinaryStorageService.generateAuthorizedUrl(
+                photo.getCloudinaryPublicId(),
+                photo.getDeliveryType(),
+                "fl_attachment",
+                300L
+        );
+        if (signedUrl == null || signedUrl.isBlank()) {
+            throw new IllegalStateException("Unable to generate authorized download link for photo #" + photoId);
+        }
+        return signedUrl;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getAuthorizedPreviewUrl(Long bookingId, Long photoId, Long currentUserId) {
+        DeliveredPhoto photo = getAuthorizedPhoto(bookingId, photoId, currentUserId);
+        String signedUrl = cloudinaryStorageService.generateAuthorizedUrl(
+                photo.getCloudinaryPublicId(),
+                photo.getDeliveryType(),
+                "c_limit,w_1600,h_1600,q_auto,f_auto",
+                300L
+        );
+        if (signedUrl == null || signedUrl.isBlank()) {
+            throw new IllegalStateException("Unable to generate authorized preview link for photo #" + photoId);
+        }
+        return signedUrl;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getAuthorizedThumbnailUrl(Long bookingId, Long photoId, Long currentUserId) {
+        DeliveredPhoto photo = getAuthorizedPhoto(bookingId, photoId, currentUserId);
+        String signedUrl = cloudinaryStorageService.generateAuthorizedUrl(
+                photo.getCloudinaryPublicId(),
+                photo.getDeliveryType(),
+                "c_fill,w_500,h_500,q_auto,f_auto",
+                300L
+        );
+        if (signedUrl == null || signedUrl.isBlank()) {
+            throw new IllegalStateException("Unable to generate authorized thumbnail link for photo #" + photoId);
+        }
+        return signedUrl;
+    }
+
+    @Override
+    @Transactional
+    public boolean migratePhotoToAuthenticated(Long photoId) {
+        if (photoId == null) {
+            return false;
+        }
+        DeliveredPhoto photo = deliveredPhotoRepository.findById(photoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivered photo not found: " + photoId));
+
+        if ("authenticated".equals(photo.getDeliveryType())) {
+            return true;
+        }
+
+        boolean migrated = cloudinaryStorageService.migrateAssetToAuthenticated(photo.getCloudinaryPublicId());
+        if (migrated) {
+            String updatedUrl = photo.getSecureUrl().replaceFirst("/image/upload/", "/image/authenticated/");
+            photo.setSecureUrl(updatedUrl);
+            deliveredPhotoRepository.save(photo);
+            log.info("Migrated photo [{}] publicId [{}] to authenticated storage", photoId, photo.getCloudinaryPublicId());
+            return true;
+        }
+        return false;
+    }
+
+    private DeliveredPhoto getAuthorizedPhoto(Long bookingId, Long photoId, Long currentUserId) {
         if (currentUserId == null) {
-            throw new UnauthorizedException("Authentication is required to download photos.");
+            throw new UnauthorizedException("Authentication is required to access delivery photos.");
         }
 
         Booking booking = bookingRepository.findByIdWithDetails(bookingId)
@@ -335,21 +406,19 @@ public class DeliveryServiceImpl implements DeliveryService {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
 
         if (!isCustomer && !isPhotographer && !isAdmin) {
-            throw new UnauthorizedException("You are not authorized to download photos from this booking.");
+            throw new UnauthorizedException("You are not authorized to access photos from this booking.");
         }
 
         DeliveryAlbum album = deliveryAlbumRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Delivery album not found for booking: " + bookingId));
 
-        // Customers cannot download if album is still in DRAFT
+        // Customers cannot access if album is still in DRAFT
         if (isCustomer && album.getStatus() == DeliveryAlbumStatus.DRAFT) {
-            throw new UnauthorizedException("This album is not yet published for customer download.");
+            throw new UnauthorizedException("This album is not yet published for customer access.");
         }
 
-        DeliveredPhoto photo = deliveredPhotoRepository.findByIdAndAlbumId(photoId, album.getId())
+        return deliveredPhotoRepository.findByIdAndAlbumId(photoId, album.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Photo not found in this album: " + photoId));
-
-        return photo.getDownloadUrl();
     }
 
     // ── Internal Helpers ──────────────────────────────────────────────────────
@@ -408,15 +477,6 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Please select an image file to upload.");
-        }
-        if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-            throw new IllegalArgumentException("File size exceeds 15 MB limit. Please optimize the photo before uploading.");
-        }
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException("Invalid file format. Only JPEG, PNG, and WEBP images are supported.");
-        }
+        ImageValidationUtils.validateImage(file, MAX_FILE_SIZE_BYTES);
     }
 }

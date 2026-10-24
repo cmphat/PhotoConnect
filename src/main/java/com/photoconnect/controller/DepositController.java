@@ -86,36 +86,35 @@ public class DepositController {
     @PostMapping("/bookings/{id}/deposit/process")
     public String processPayment(@PathVariable("id") Long bookingId,
                                  @ModelAttribute DemoPaymentRequest paymentRequest,
-                                 HttpSession session) {
+                                 HttpSession session,
+                                 org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
         Long userId = SessionSecurityUtils.userId(session);
-        DepositViewDto outcome = depositService.processDemoPayment(bookingId, userId, paymentRequest);
-        if (outcome != null && outcome.getStatus() == com.photoconnect.entity.DepositStatus.PAID) {
-            if (bookingStateMachineService != null) {
-                try {
-                    bookingStateMachineService.transition(bookingId, com.photoconnect.entity.BookingStatus.CONFIRMED, userId, "Customer verified deposit payment");
-                } catch (Exception e) {
-                    // Log and continue to result screen
+        try {
+            DepositViewDto outcome = depositService.processDemoPayment(bookingId, userId, paymentRequest);
+            if (outcome != null && outcome.getStatus() == com.photoconnect.entity.DepositStatus.PAID) {
+                if (notificationService != null) {
+                    try {
+                        Booking b = bookingService.getBookingForCustomer(bookingId, userId);
+                        if (b != null && b.getPhotographerProfile() != null && b.getPhotographerProfile().getUser() != null) {
+                            notificationService.sendNotification(
+                                    b.getPhotographerProfile().getUser().getId(),
+                                    com.photoconnect.entity.NotificationType.DEPOSIT_CONFIRMED,
+                                    "Deposit Paid",
+                                    "Deposit payment confirmed for booking #" + bookingId,
+                                    bookingId,
+                                    "/photographer/bookings/" + bookingId
+                            );
+                        }
+                    } catch (Exception ignored) {}
                 }
             }
-            if (notificationService != null) {
-                try {
-                    Booking b = bookingService.getBookingForCustomer(bookingId, userId);
-                    if (b != null && b.getPhotographerProfile() != null && b.getPhotographerProfile().getUser() != null) {
-                        notificationService.sendNotification(
-                                b.getPhotographerProfile().getUser().getId(),
-                                com.photoconnect.entity.NotificationType.DEPOSIT_CONFIRMED,
-                                "Deposit Paid",
-                                "Deposit payment confirmed for booking #" + bookingId,
-                                bookingId,
-                                "/photographer/bookings/" + bookingId
-                        );
-                    }
-                } catch (Exception ignored) {}
-            }
+            return "redirect:/bookings/" + bookingId + "/deposit/result";
+        } catch (com.photoconnect.exception.InvalidBookingException | IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/bookings/" + bookingId + "/deposit/checkout";
         }
-        return "redirect:/bookings/" + bookingId + "/deposit/result";
     }
 
     @PostMapping("/bookings/{id}/deposit/cancel")

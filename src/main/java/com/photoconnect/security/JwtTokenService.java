@@ -17,6 +17,11 @@ import java.util.UUID;
 
 public class JwtTokenService {
 
+    private static final java.util.Set<String> COMPROMISED_KNOWN_SECRETS = java.util.Set.of(
+            "dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JwaG90b2Nvbm5lY3QyMDI2", // thisisaverysecurejwtsecretforphotoconnect2026
+            "c2VjdXJlLXBob3RvY29ubmVjdC1qd3Qtc2VjcmV0LWtleS0yMDI2LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=" // secure-photoconnect-jwt-secret-key-2026-must-be-at-least-256-bits
+    );
+
     private final SecretKey signingKey;
     private final Duration lifetime;
     private final Clock clock;
@@ -29,13 +34,16 @@ public class JwtTokenService {
         if (base64Secret == null || base64Secret.isBlank()) {
             throw new IllegalStateException("JWT_SECRET is required and must be Base64 encoded");
         }
+        if (COMPROMISED_KNOWN_SECRETS.contains(base64Secret.trim())) {
+            throw new IllegalStateException("CRITICAL: The configured JWT_SECRET is a known compromised or default signing key. Application startup aborted.");
+        }
         if (lifetime == null || lifetime.isZero() || lifetime.isNegative() || lifetime.compareTo(Duration.ofHours(24)) > 0) {
             throw new IllegalStateException("JWT expiration must be greater than zero and no more than 24 hours");
         }
         try {
             byte[] keyBytes = Decoders.BASE64.decode(base64Secret.trim());
             if (keyBytes.length < 32) {
-                throw new IllegalStateException("JWT_SECRET must decode to at least 32 bytes");
+                throw new IllegalStateException("JWT_SECRET must decode to at least 32 bytes (256 bits) for HMAC-SHA256");
             }
             this.signingKey = Keys.hmacShaKeyFor(keyBytes);
         } catch (IllegalStateException ex) {

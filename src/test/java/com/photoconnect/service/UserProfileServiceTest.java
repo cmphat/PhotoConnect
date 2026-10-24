@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -150,5 +151,50 @@ class UserProfileServiceTest {
         assertThat(owner.getAvatarUrl()).isNull();
         assertThat(owner.getAvatarPublicId()).isNull();
         verify(cloudinaryStorageService).deleteImage("avatars/user_1_abc");
+    }
+
+    @Test
+    void updateAvatar_validImage_uploadsAndUpdatesUser() throws Exception {
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(150, 150, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(img, "png", baos);
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "avatarFile", "avatar.png", "image/png", baos.toByteArray());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(cloudinaryStorageService.uploadImage(any(), eq("photoconnect/avatars")))
+                .thenReturn(new CloudinaryStorageService.CloudinaryUploadResult("https://res.cloudinary.com/demo/avatar.png", "avatars/alex_123"));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String url = userProfileService.updateAvatar(1L, file);
+
+        assertThat(url).isEqualTo("https://res.cloudinary.com/demo/avatar.png");
+        assertThat(owner.getAvatarUrl()).isEqualTo("https://res.cloudinary.com/demo/avatar.png");
+        assertThat(owner.getAvatarPublicId()).isEqualTo("avatars/alex_123");
+        verify(cloudinaryStorageService).uploadImage(any(), eq("photoconnect/avatars"));
+    }
+
+    @Test
+    void updateAvatar_spoofedExeDisguisedAsJpeg_rejected() {
+        byte[] exeBytes = new byte[]{0x4D, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "avatarFile", "avatar.jpg", "image/jpeg", exeBytes);
+
+        assertThatThrownBy(() -> userProfileService.updateAvatar(1L, file))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid file format");
+    }
+
+    @Test
+    void updateAvatar_dimensionsTooSmall_rejected() throws Exception {
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(50, 50, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(img, "jpeg", baos);
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "avatarFile", "avatar.jpg", "image/jpeg", baos.toByteArray());
+
+        assertThatThrownBy(() -> userProfileService.updateAvatar(1L, file))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Image dimensions too small");
     }
 }

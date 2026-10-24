@@ -81,10 +81,41 @@ class JwtTokenServiceTest {
                 () -> assertThrows(IllegalStateException.class,
                         () -> new JwtTokenService("", Duration.ofMinutes(30))),
                 () -> assertThrows(IllegalStateException.class,
+                        () -> new JwtTokenService("   ", Duration.ofMinutes(30))),
+                () -> assertThrows(IllegalStateException.class,
                         () -> new JwtTokenService("c2hvcnQ=", Duration.ofMinutes(30))),
                 () -> assertThrows(IllegalStateException.class,
                         () -> new JwtTokenService(SECRET, Duration.ofDays(2)))
         );
+    }
+
+    @Test
+    void refusesCompromisedKnownSecrets() {
+        assertAll(
+                () -> assertThrows(IllegalStateException.class,
+                        () -> new JwtTokenService("dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JwaG90b2Nvbm5lY3QyMDI2", Duration.ofMinutes(30))),
+                () -> assertThrows(IllegalStateException.class,
+                        () -> new JwtTokenService("c2VjdXJlLXBob3RvY29ubmVjdC1qd3Qtc2VjcmV0LWtleS0yMDI2LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=", Duration.ofMinutes(30)))
+        );
+    }
+
+    @Test
+    void rejectsForgedTokenSignedWithCompromisedSecret() {
+        // Suppose an attacker creates a token signed with the old compromised secret
+        byte[] compromisedKeyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode("dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JwaG90b2Nvbm5lY3QyMDI2");
+        javax.crypto.SecretKey attackerKey = io.jsonwebtoken.security.Keys.hmacShaKeyFor(compromisedKeyBytes);
+        String forgedToken = io.jsonwebtoken.Jwts.builder()
+                .subject("1")
+                .claim("role", "ADMIN")
+                .issuedAt(java.util.Date.from(NOW))
+                .expiration(java.util.Date.from(NOW.plus(Duration.ofMinutes(30))))
+                .id(java.util.UUID.randomUUID().toString())
+                .signWith(attackerKey)
+                .compact();
+
+        // The secure server using SECRET must strictly reject the forged token
+        JwtTokenService service = serviceAt(NOW);
+        assertThrows(JwtValidationException.class, () -> service.parseToken(forgedToken));
     }
 
     private JwtTokenService serviceAt(Instant instant) {

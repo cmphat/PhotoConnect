@@ -218,8 +218,14 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
                 }
             }
             case POST_PROCESSING -> {
-                if (!isPhotographer && !isCustomer) {
-                    throw new UnauthorizedException("Only booking participants can transition to post processing.");
+                if (booking.getStatus() == BookingStatus.DELIVERED) {
+                    if (!isCustomer && !isPhotographer) {
+                        throw new UnauthorizedException("Only the booking customer or assigned photographer can return delivery to post-processing for revisions.");
+                    }
+                } else {
+                    if (!isPhotographer) {
+                        throw new UnauthorizedException("Only the assigned photographer can perform this action.");
+                    }
                 }
             }
             case CONFIRMED -> {
@@ -228,8 +234,14 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
                 }
             }
             case COMPLETED -> {
-                if (!isCustomer && !isPhotographer) {
-                    throw new UnauthorizedException("Only booking participants can complete this booking.");
+                if (booking.getStatus() == BookingStatus.DELIVERED) {
+                    if (!isCustomer) {
+                        throw new UnauthorizedException("Only the customer can accept delivery and complete the booking.");
+                    }
+                } else {
+                    if (!isCustomer && !isPhotographer) {
+                        throw new UnauthorizedException("Only booking participants can complete this booking.");
+                    }
                 }
             }
             case CANCELLED -> {
@@ -243,7 +255,9 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
                 }
             }
             case DEPOSIT_PENDING, EXPIRED -> {
-                // Allowed for system or participants
+                if (!isCustomer && !isPhotographer) {
+                    throw new UnauthorizedException("Only booking participants can trigger this transition.");
+                }
             }
         }
     }

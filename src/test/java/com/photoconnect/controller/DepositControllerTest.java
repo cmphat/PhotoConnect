@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 
 @WebMvcTest(DepositController.class)
 @Import(DemoQrCodeService.class)
@@ -217,6 +218,40 @@ class DepositControllerTest {
         mockMvc.perform(get("/bookings/100/deposit/receipt").session(customerSession))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/bookings/100/deposit/result"));
+    }
+
+    @Test
+    void processPayment_whenPaymentSucceeds_notifiesPhotographerAndRedirectsToResult() throws Exception {
+        deposit.setStatus(DepositStatus.PAID);
+        when(depositService.processDemoPayment(eq(100L), eq(10L), any(DemoPaymentRequest.class)))
+                .thenReturn(deposit);
+        when(bookingService.getBookingForCustomer(100L, 10L)).thenReturn(booking);
+
+        mockMvc.perform(post("/bookings/100/deposit/process").session(customerSession)
+                        .param("paymentMethod", "DEMO_QR"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/bookings/100/deposit/result"));
+
+        verify(notificationService).sendNotification(
+                eq(booking.getPhotographerProfile().getUser().getId()),
+                eq(com.photoconnect.entity.NotificationType.DEPOSIT_CONFIRMED),
+                any(),
+                any(),
+                eq(100L),
+                any()
+        );
+    }
+
+    @Test
+    void processPayment_whenTransitionThrowsException_redirectsToCheckoutWithFlashErrorMessage() throws Exception {
+        when(depositService.processDemoPayment(eq(100L), eq(10L), any(DemoPaymentRequest.class)))
+                .thenThrow(new IllegalStateException("Booking state machine invariant violated"));
+
+        mockMvc.perform(post("/bookings/100/deposit/process").session(customerSession)
+                        .param("paymentMethod", "DEMO_QR"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/bookings/100/deposit/checkout"))
+                .andExpect(flash().attribute("errorMessage", "Booking state machine invariant violated"));
     }
 
     private void stubCheckout() {

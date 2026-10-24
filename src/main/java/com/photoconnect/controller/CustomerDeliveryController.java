@@ -103,9 +103,54 @@ public class CustomerDeliveryController {
         try {
             String downloadUrl = deliveryService.getAuthorizedDownloadUrl(bookingId, photoId, userId);
             return "redirect:" + downloadUrl;
+        } catch (com.photoconnect.exception.UnauthorizedException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to download photo [{}] for booking [{}]: {}", photoId, bookingId, e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Download failed: " + e.getMessage());
+            return "redirect:/bookings/" + bookingId + "/delivery";
+        }
+    }
+
+    @GetMapping("/photos/{photoId}/preview")
+    public String previewPhoto(@PathVariable Long bookingId,
+                               @PathVariable Long photoId,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        Long userId = SessionSecurityUtils.userId(session);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            String previewUrl = deliveryService.getAuthorizedPreviewUrl(bookingId, photoId, userId);
+            return "redirect:" + previewUrl;
+        } catch (com.photoconnect.exception.UnauthorizedException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to preview photo [{}] for booking [{}]: {}", photoId, bookingId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Preview failed: " + e.getMessage());
+            return "redirect:/bookings/" + bookingId + "/delivery";
+        }
+    }
+
+    @GetMapping("/photos/{photoId}/thumbnail")
+    public String thumbnailPhoto(@PathVariable Long bookingId,
+                                 @PathVariable Long photoId,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+        Long userId = SessionSecurityUtils.userId(session);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            String thumbUrl = deliveryService.getAuthorizedThumbnailUrl(bookingId, photoId, userId);
+            return "redirect:" + thumbUrl;
+        } catch (com.photoconnect.exception.UnauthorizedException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to load thumbnail for photo [{}] booking [{}]: {}", photoId, bookingId, e.getMessage());
             return "redirect:/bookings/" + bookingId + "/delivery";
         }
     }

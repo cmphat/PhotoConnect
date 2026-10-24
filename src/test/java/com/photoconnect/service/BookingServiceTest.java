@@ -385,6 +385,7 @@ class BookingServiceTest {
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
         verify(bookingRepository).save(booking);
+        verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.CANCELLED), eq(1L), any());
     }
 
     @Test
@@ -477,6 +478,7 @@ class BookingServiceTest {
         assertThat(deposit.getStatus()).isEqualTo(com.photoconnect.entity.DepositStatus.REFUNDED);
         assertThat(deposit.getFailureReason()).contains("Photographer cancelled");
         verify(depositRepository).save(deposit);
+        verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.CANCELLED), eq(2L), any());
     }
 
     @Test
@@ -604,6 +606,37 @@ class BookingServiceTest {
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
         verify(photographerProfileRepository).findByIdWithLock(10L);
+        verify(bookingRepository).save(booking);
+        verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.ACCEPTED), eq(2L), any());
+    }
+
+    @Test
+    void rejectBooking_invokesStateMachineTransitionAndSetsRejected() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.PENDING);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.rejectBooking(50L, 2L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.REJECTED);
+        verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.REJECTED), eq(2L), any());
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void completeBooking_invokesStateMachineTransitionAndSetsCompleted() {
+        Booking booking = new Booking(customer, photographerProfile, LocalDate.now().plusDays(2), LocalTime.of(15, 0), "Studio", null, new BigDecimal("2000000"));
+        booking.setId(50L);
+        booking.setStatus(BookingStatus.ACCEPTED);
+
+        when(bookingRepository.findByIdWithDetails(50L)).thenReturn(Optional.of(booking));
+
+        bookingService.completeBooking(50L, 2L);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.COMPLETED);
+        verify(bookingStateMachineService).transition(eq(50L), eq(BookingStatus.COMPLETED), eq(2L), any());
         verify(bookingRepository).save(booking);
     }
 }

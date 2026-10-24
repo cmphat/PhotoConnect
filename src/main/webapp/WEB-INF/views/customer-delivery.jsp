@@ -134,9 +134,9 @@
                         <c:forEach var="photo" items="${album.photos()}">
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="card h-100 border rounded-3 overflow-hidden shadow-xs">
-                                    <a href="<c:out value='${photo.previewUrl()}'/>" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                                    <a href="${pageContext.request.contextPath}/bookings/${bookingId}/delivery/photos/${photo.id()}/preview" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
                                         <div style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #0F172A;">
-                                            <img src="<c:out value='${photo.thumbnailUrl()}'/>" alt="Finished deliverable" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="${pageContext.request.contextPath}/bookings/${bookingId}/delivery/photos/${photo.id()}/thumbnail" alt="Finished deliverable" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
                                         </div>
                                     </a>
                                     <div class="card-body p-2 d-flex justify-content-between align-items-center">

@@ -28,10 +28,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduleServiceImpl.class);
 
-    private static final List<BookingStatus> RESERVING_STATUSES = List.of(
-            BookingStatus.ACCEPTED,
-            BookingStatus.COMPLETED
-    );
+    private static final List<BookingStatus> RESERVING_STATUSES = BookingStatus.TIME_RESERVING_STATUSES_LIST;
 
     private final PhotographerUnavailableDateRepository scheduleRepository;
     private final PhotographerProfileRepository profileRepository;

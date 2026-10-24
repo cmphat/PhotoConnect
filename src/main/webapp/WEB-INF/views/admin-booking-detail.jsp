@@ -114,35 +114,45 @@
                         As an administrator, review evidence, cancel with full refund to customer, or confirm session fulfillment in favor of the creator.
                     </p>
 
-                    <form action="${pageContext.request.contextPath}/admin/bookings/${booking.id}/resolve-dispute" method="post">
-                        <%@ include file="fragments/csrf-input.jsp" %>
-                        <div class="mb-3">
-                            <label class="form-label" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Decision / Action</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="resolution" id="resRefund" value="REFUND_CUSTOMER" checked>
-                                <label class="form-check-label" for="resRefund">
-                                    <strong>Refund Customer (Force Cancel)</strong>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Cancels booking, refunds deposit 100%, and notifies both parties.</div>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="resolution" id="resPay" value="PAY_PHOTOGRAPHER">
-                                <label class="form-check-label" for="resPay">
-                                    <strong>Pay Photographer (Confirm Completed)</strong>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Marks booking completed and settles deposit to photographer.</div>
-                                </label>
-                            </div>
-                        </div>
+                    <c:choose>
+                        <c:when test="${booking.status == 'DISPUTED'}">
+                            <form action="${pageContext.request.contextPath}/admin/bookings/${booking.id}/resolve-dispute" method="post">
+                                <%@ include file="fragments/csrf-input.jsp" %>
+                                <div class="mb-3">
+                                    <label class="form-label" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Decision / Action</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="resolution" id="resRefund" value="REFUND_CUSTOMER" checked>
+                                        <label class="form-check-label" for="resRefund">
+                                            <strong>Refund Customer (Force Cancel)</strong>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Cancels booking, refunds deposit 100%, and notifies both parties.</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="resolution" id="resPay" value="PAY_PHOTOGRAPHER">
+                                        <label class="form-check-label" for="resPay">
+                                            <strong>Pay Photographer (Confirm Completed)</strong>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Marks booking completed and settles deposit to photographer.</div>
+                                        </label>
+                                    </div>
+                                </div>
 
-                        <div class="mb-3">
-                            <label for="adminNotes" class="form-label" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Audit Reason / Decision Notes</label>
-                            <textarea id="adminNotes" name="adminNotes" class="form-control" rows="3" placeholder="Provide detailed audit rationale for this decision..." required></textarea>
-                        </div>
+                                <div class="mb-3">
+                                    <label for="adminNotes" class="form-label" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Audit Reason / Decision Notes</label>
+                                    <textarea id="adminNotes" name="adminNotes" class="form-control" rows="3" placeholder="Provide detailed audit rationale for this decision..." required></textarea>
+                                </div>
 
-                        <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Confirm administrative dispute resolution? This action will update booking status, escrow funds, and notify both parties.')">
-                            Execute Dispute Decision
-                        </button>
-                    </form>
+                                <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Confirm administrative dispute resolution? This action will update booking status, escrow funds, and notify both parties.')">
+                                    Execute Dispute Decision
+                                </button>
+                            </form>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="alert alert-secondary" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; padding: 0.85rem; border-radius: 6px;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Dispute resolution is disabled. This booking is in <strong><c:out value="${booking.status}"/></strong> status. Only bookings in <strong>DISPUTED</strong> status can be resolved.
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </div>

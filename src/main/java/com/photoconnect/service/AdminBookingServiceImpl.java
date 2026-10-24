@@ -2,6 +2,8 @@ package com.photoconnect.service;
 
 import com.photoconnect.dto.BookingHistoryDto;
 import com.photoconnect.entity.*;
+import com.photoconnect.exception.ErrorCode;
+import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.repository.BookingHistoryRepository;
 import com.photoconnect.repository.BookingRepository;
@@ -102,6 +104,11 @@ public class AdminBookingServiceImpl implements AdminBookingService {
 
         Booking booking = bookingRepository.findByIdWithDetails(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+
+        if (booking.getStatus() != BookingStatus.DISPUTED) {
+            throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS,
+                    "Only DISPUTED bookings can be resolved by admin. Current status is " + booking.getStatus() + ".");
+        }
 
         String notes = (adminNotes != null && !adminNotes.isBlank()) ? adminNotes.trim() : "Admin dispute resolution";
 

@@ -148,9 +148,11 @@
                         <c:forEach var="photo" items="${album.photos()}">
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="card h-100 border rounded-3 overflow-hidden shadow-xs">
-                                    <div style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #0F172A;">
-                                        <img src="<c:out value='${photo.thumbnailUrl()}'/>" alt="Delivered photo" style="width: 100%; height: 100%; object-fit: cover;">
-                                    </div>
+                                    <a href="${pageContext.request.contextPath}/photographer/bookings/${bookingId}/delivery/photos/${photo.id()}/preview" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                                        <div style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #0F172A;">
+                                            <img src="${pageContext.request.contextPath}/photographer/bookings/${bookingId}/delivery/photos/${photo.id()}/thumbnail" alt="Delivered photo" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    </a>
                                     <div class="card-body p-2 d-flex justify-content-between align-items-center">
                                         <div class="text-truncate me-2 small text-muted" title="<c:out value='${photo.fileName()}'/>">
                                             <c:out value="${empty photo.fileName() ? 'Photo deliverable' : photo.fileName()}"/>

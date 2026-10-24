@@ -7,6 +7,7 @@ import com.photoconnect.entity.PortfolioCategory;
 import com.photoconnect.entity.PortfolioImage;
 import com.photoconnect.repository.PhotographerProfileRepository;
 import com.photoconnect.repository.PortfolioImageRepository;
+import com.photoconnect.util.ImageValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -273,19 +274,6 @@ public class PortfolioServiceImpl implements PortfolioService {
      *   server-side check it provides reasonable defense-in-depth.
      */
     private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Please select a file to upload.");
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-            throw new IllegalArgumentException(
-                    "File size exceeds the 10 MB limit. Please choose a smaller image.");
-        }
-
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException(
-                    "Invalid file type. Only JPEG, PNG, and WEBP images are allowed.");
-        }
+        ImageValidationUtils.validateImage(file, MAX_FILE_SIZE_BYTES);
     }
 }

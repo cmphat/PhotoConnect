@@ -131,6 +131,17 @@ class DeliveryServiceTest {
                 .hasMessageContaining("You are not the photographer");
     }
 
+    private static byte[] createValidImageBytes(int width, int height, String format) {
+        try {
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(img, format, baos);
+            return baos.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     @DisplayName("Photographer successfully uploads photo to delivery album")
     void addPhoto_Success() {
@@ -141,10 +152,10 @@ class DeliveryServiceTest {
         when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
 
         MockMultipartFile file = new MockMultipartFile(
-                "photo", "portrait.jpg", "image/jpeg", new byte[]{1, 2, 3, 4}
+                "photo", "portrait.jpg", "image/jpeg", createValidImageBytes(100, 100, "jpeg")
         );
 
-        when(cloudinaryStorageService.uploadImage(eq(file), eq("photoconnect/delivery/booking_500")))
+        when(cloudinaryStorageService.uploadPrivateImage(eq(file), eq("photoconnect/delivery/booking_500")))
                 .thenReturn(new CloudinaryStorageService.CloudinaryUploadResult("https://res.cloudinary.com/test/p1.jpg", "deliv_p1"));
 
         when(deliveredPhotoRepository.save(any(DeliveredPhoto.class))).thenAnswer(inv -> {
@@ -158,7 +169,7 @@ class DeliveryServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(101L);
         assertThat(result.cloudinaryPublicId()).isEqualTo("deliv_p1");
-        assertThat(result.secureUrl()).isEqualTo("https://res.cloudinary.com/test/p1.jpg");
+        assertThat(result.secureUrl()).isNull(); // Direct storage URL is safely redacted in client DTO
         verify(deliveredPhotoRepository).save(any(DeliveredPhoto.class));
     }
 
@@ -188,10 +199,10 @@ class DeliveryServiceTest {
         when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
 
         MockMultipartFile file = new MockMultipartFile(
-                "photo", "pic.jpg", "image/jpeg", new byte[]{1, 2, 3}
+                "photo", "pic.jpg", "image/jpeg", createValidImageBytes(100, 100, "jpeg")
         );
 
-        when(cloudinaryStorageService.uploadImage(any(), any()))
+        when(cloudinaryStorageService.uploadPrivateImage(any(), any()))
                 .thenReturn(new CloudinaryStorageService.CloudinaryUploadResult("https://res.cloudinary.com/test/p1.jpg", "deliv_p1"));
 
         when(deliveredPhotoRepository.save(any(DeliveredPhoto.class)))
@@ -350,10 +361,125 @@ class DeliveryServiceTest {
         photo.setId(101L);
 
         when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+        when(cloudinaryStorageService.generateAuthorizedUrl(eq("deliv_p1"), eq("upload"), eq("fl_attachment"), eq(300L)))
+                .thenReturn("https://res.cloudinary.com/demo/image/upload/s--signed--/fl_attachment/deliv_p1.jpg?__cld_token__=123");
 
         String downloadUrl = deliveryService.getAuthorizedDownloadUrl(500L, 101L, 20L);
 
-        assertThat(downloadUrl).contains("fl_attachment");
+        assertThat(downloadUrl).contains("s--signed--");
+        verify(cloudinaryStorageService).generateAuthorizedUrl("deliv_p1", "upload", "fl_attachment", 300L);
+    }
+
+    @Test
+    @DisplayName("Authorized customer gets short-lived preview URL for photo")
+    void getAuthorizedPreviewUrl_CustomerSuccess() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(customerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DELIVERED);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+
+        when(cloudinaryStorageService.generateAuthorizedUrl(eq("deliv_p1"), eq("upload"), eq("c_limit,w_1600,h_1600,q_auto,f_auto"), eq(300L)))
+                .thenReturn("https://res.cloudinary.com/demo/image/upload/s--signed-preview--/sample.jpg");
+
+        String previewUrl = deliveryService.getAuthorizedPreviewUrl(500L, 101L, 20L);
+
+        assertThat(previewUrl).isEqualTo("https://res.cloudinary.com/demo/image/upload/s--signed-preview--/sample.jpg");
+    }
+
+    @Test
+    @DisplayName("Authorized customer gets short-lived thumbnail URL for photo")
+    void getAuthorizedThumbnailUrl_CustomerSuccess() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(customerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DELIVERED);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+
+        when(cloudinaryStorageService.generateAuthorizedUrl(eq("deliv_p1"), eq("upload"), eq("c_fill,w_500,h_500,q_auto,f_auto"), eq(300L)))
+                .thenReturn("https://res.cloudinary.com/demo/image/upload/s--signed-thumb--/sample.jpg");
+
+        String thumbUrl = deliveryService.getAuthorizedThumbnailUrl(500L, 101L, 20L);
+
+        assertThat(thumbUrl).isEqualTo("https://res.cloudinary.com/demo/image/upload/s--signed-thumb--/sample.jpg");
+    }
+
+    @Test
+    @DisplayName("Customer cannot access photo preview while album is in DRAFT")
+    void getAuthorizedPreviewUrl_DraftAlbum_CustomerBlocked() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(customerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DRAFT);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        assertThatThrownBy(() -> deliveryService.getAuthorizedPreviewUrl(500L, 101L, 20L))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("not yet published for customer access");
+    }
+
+    @Test
+    @DisplayName("Assigned photographer can access photo preview even when album is in DRAFT")
+    void getAuthorizedPreviewUrl_DraftAlbum_PhotographerAllowed() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(photographerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DRAFT);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+
+        when(cloudinaryStorageService.generateAuthorizedUrl(eq("deliv_p1"), eq("upload"), anyString(), eq(300L)))
+                .thenReturn("https://res.cloudinary.com/demo/signed-photographer-preview.jpg");
+
+        String previewUrl = deliveryService.getAuthorizedPreviewUrl(500L, 101L, 10L);
+
+        assertThat(previewUrl).isEqualTo("https://res.cloudinary.com/demo/signed-photographer-preview.jpg");
+    }
+
+    @Test
+    @DisplayName("Admin can access photo download for any booking")
+    void getAuthorizedDownloadUrl_AdminSuccess() {
+        User adminUser = new User();
+        adminUser.setId(1L);
+        adminUser.setRole(UserRole.ADMIN);
+
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DELIVERED);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+
+        when(cloudinaryStorageService.generateAuthorizedUrl(eq("deliv_p1"), eq("upload"), eq("fl_attachment"), eq(300L)))
+                .thenReturn("https://res.cloudinary.com/demo/admin-signed-download.jpg");
+
+        String downloadUrl = deliveryService.getAuthorizedDownloadUrl(500L, 101L, 1L);
+
+        assertThat(downloadUrl).isEqualTo("https://res.cloudinary.com/demo/admin-signed-download.jpg");
     }
 
     @Test
@@ -365,5 +491,88 @@ class DeliveryServiceTest {
         assertThatThrownBy(() -> deliveryService.getAuthorizedDownloadUrl(500L, 101L, 99L))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("You are not authorized");
+    }
+
+    @Test
+    @DisplayName("Safe Migration: migratePhotoToAuthenticated updates URL only after Cloudinary confirms rename")
+    void migratePhotoToAuthenticated_Success() {
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        DeliveredPhoto photo = new DeliveredPhoto(album, "booking_500/photo1",
+                "https://res.cloudinary.com/demo/image/upload/v1234/booking_500/photo1.jpg", "photo1.jpg", 500L);
+        photo.setId(201L);
+
+        when(deliveredPhotoRepository.findById(201L)).thenReturn(Optional.of(photo));
+        when(cloudinaryStorageService.migrateAssetToAuthenticated("booking_500/photo1")).thenReturn(true);
+        when(deliveredPhotoRepository.save(any(DeliveredPhoto.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        boolean result = deliveryService.migratePhotoToAuthenticated(201L);
+
+        assertThat(result).isTrue();
+        assertThat(photo.getSecureUrl()).contains("/image/authenticated/");
+        assertThat(photo.getDeliveryType()).isEqualTo("authenticated");
+        verify(deliveredPhotoRepository).save(photo);
+    }
+
+    @Test
+    @DisplayName("Safe Migration: Cloudinary failure aborts migration without deleting or modifying database record")
+    void migratePhotoToAuthenticated_FailurePreservesRecord() {
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        DeliveredPhoto photo = new DeliveredPhoto(album, "booking_500/photo1",
+                "https://res.cloudinary.com/demo/image/upload/v1234/booking_500/photo1.jpg", "photo1.jpg", 500L);
+        photo.setId(201L);
+
+        when(deliveredPhotoRepository.findById(201L)).thenReturn(Optional.of(photo));
+        when(cloudinaryStorageService.migrateAssetToAuthenticated("booking_500/photo1")).thenReturn(false);
+
+        boolean result = deliveryService.migratePhotoToAuthenticated(201L);
+
+        assertThat(result).isFalse();
+        assertThat(photo.getSecureUrl()).contains("/image/upload/"); // Untouched
+        verify(deliveredPhotoRepository, never()).save(any());
+        verify(deliveredPhotoRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Fail Closed: getAuthorizedDownloadUrl throws IllegalStateException when signed URL generation fails")
+    void getAuthorizedDownloadUrl_GenerationFails_ThrowsIllegalStateException() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(customerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DELIVERED);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+        when(cloudinaryStorageService.generateAuthorizedUrl(any(), any(), any(), anyLong())).thenReturn(null);
+
+        assertThatThrownBy(() -> deliveryService.getAuthorizedDownloadUrl(500L, 101L, 20L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unable to generate authorized download link");
+    }
+
+    @Test
+    @DisplayName("Fail Closed: getAuthorizedPreviewUrl throws IllegalStateException when signed URL generation fails")
+    void getAuthorizedPreviewUrl_GenerationFails_ThrowsIllegalStateException() {
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(20L)).thenReturn(Optional.of(customerUser));
+
+        DeliveryAlbum album = new DeliveryAlbum(booking);
+        album.setId(1L);
+        album.setStatus(DeliveryAlbumStatus.DELIVERED);
+        when(deliveryAlbumRepository.findByBookingId(500L)).thenReturn(Optional.of(album));
+
+        DeliveredPhoto photo = new DeliveredPhoto(album, "deliv_p1", "https://res.cloudinary.com/demo/image/upload/sample.jpg", "sample.jpg", 200L);
+        photo.setId(101L);
+        when(deliveredPhotoRepository.findByIdAndAlbumId(101L, 1L)).thenReturn(Optional.of(photo));
+        when(cloudinaryStorageService.generateAuthorizedUrl(any(), any(), any(), anyLong())).thenReturn("");
+
+        assertThatThrownBy(() -> deliveryService.getAuthorizedPreviewUrl(500L, 101L, 20L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unable to generate authorized preview link");
     }
 }

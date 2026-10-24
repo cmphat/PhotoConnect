@@ -27,6 +27,11 @@ public class JwtSecurityConfig {
     public JwtTokenService jwtTokenService(
             @Value("${photoconnect.jwt.secret:}") String secret,
             @Value("${photoconnect.jwt.expiration:PT30M}") Duration expiration) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "CRITICAL SECURITY CONFIGURATION ERROR: 'photoconnect.jwt.secret' (JWT_SECRET) is missing or blank. " +
+                    "A secure 256-bit Base64-encoded secret must be provided via the JWT_SECRET environment variable.");
+        }
         return new JwtTokenService(secret, expiration);
     }
 

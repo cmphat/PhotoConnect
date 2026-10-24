@@ -45,4 +45,19 @@ public interface DeliveryService {
      * Authorizes and returns the secure download URL for an album photograph.
      */
     String getAuthorizedDownloadUrl(Long bookingId, Long photoId, Long currentUserId);
+
+    /**
+     * Authorizes and returns the secure, short-lived preview URL for an album photograph.
+     */
+    String getAuthorizedPreviewUrl(Long bookingId, Long photoId, Long currentUserId);
+
+    /**
+     * Authorizes and returns the secure, short-lived thumbnail URL for an album photograph.
+     */
+    String getAuthorizedThumbnailUrl(Long bookingId, Long photoId, Long currentUserId);
+
+    /**
+     * Safely migrates an existing deliverable photo to authenticated Cloudinary storage.
+     */
+    boolean migratePhotoToAuthenticated(Long photoId);
 }

@@ -2,6 +2,7 @@ package com.photoconnect.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.photoconnect.util.ImageValidationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +46,7 @@ public class CloudinaryStorageServiceImpl implements CloudinaryStorageService {
      */
     @Override
     public CloudinaryUploadResult uploadImage(MultipartFile file, String folder) {
+        ImageValidationUtils.validateImage(file);
         try {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(
                     file.getBytes(),
@@ -61,6 +63,76 @@ public class CloudinaryStorageServiceImpl implements CloudinaryStorageService {
         }
     }
 
+    @Override
+    public CloudinaryUploadResult uploadPrivateImage(MultipartFile file, String folder) {
+        ImageValidationUtils.validateImage(file);
+        try {
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", folder,
+                            "resource_type", "image",
+                            "type", "authenticated"
+                    )
+            );
+            String secureUrl = (String) uploadResult.get("secure_url");
+            String publicId = (String) uploadResult.get("public_id");
+            return new CloudinaryUploadResult(secureUrl, publicId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(CloudinaryStorageServiceImpl.class)
+                    .error("Authenticated Cloudinary upload failed. Public fallback is strictly forbidden for delivery assets: {}", e.getMessage());
+            throw new RuntimeException("Authenticated Cloudinary upload failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String generateAuthorizedUrl(String publicId, String deliveryType, String transformation, long expirationSeconds) {
+        if (publicId == null || publicId.isBlank()) {
+            return null;
+        }
+        try {
+            String type = (deliveryType != null && !deliveryType.isBlank()) ? deliveryType : "authenticated";
+            com.cloudinary.Url url = cloudinary.url()
+                    .resourceType("image")
+                    .type(type)
+                    .signed(true);
+
+            if (transformation != null && !transformation.isBlank()) {
+                url.transformation(new com.cloudinary.Transformation().rawTransformation(transformation));
+            }
+
+            if (cloudinary.config != null && cloudinary.config.apiSecret != null && !cloudinary.config.apiSecret.isBlank()) {
+                long duration = expirationSeconds > 0 ? expirationSeconds : 300L;
+                url.authToken(new com.cloudinary.AuthToken().duration(duration));
+            }
+
+            return url.generate(publicId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(CloudinaryStorageServiceImpl.class)
+                    .warn("Failed to generate signed Cloudinary URL for publicId [{}]: {}", publicId, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public boolean migrateAssetToAuthenticated(String publicId) {
+        if (publicId == null || publicId.isBlank()) {
+            return false;
+        }
+        try {
+            cloudinary.uploader().rename(
+                    publicId,
+                    publicId,
+                    ObjectUtils.asMap("type", "upload", "to_type", "authenticated", "overwrite", true)
+            );
+            return true;
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(CloudinaryStorageServiceImpl.class)
+                    .warn("Cloudinary asset migration to authenticated failed for publicId [{}]: {}", publicId, e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Deletes an asset from Cloudinary by publicId.
      *
@@ -73,10 +145,16 @@ public class CloudinaryStorageServiceImpl implements CloudinaryStorageService {
     @Override
     public void deleteImage(String publicId) {
         try {
-            cloudinary.uploader().destroy(
+            Map<?, ?> result = cloudinary.uploader().destroy(
                     publicId,
-                    ObjectUtils.asMap("resource_type", "image")
+                    ObjectUtils.asMap("resource_type", "image", "type", "authenticated")
             );
+            if (result != null && "not found".equalsIgnoreCase(String.valueOf(result.get("result")))) {
+                cloudinary.uploader().destroy(
+                        publicId,
+                        ObjectUtils.asMap("resource_type", "image", "type", "upload")
+                );
+            }
         } catch (Exception e) {
             throw new RuntimeException("Cloudinary deletion failed for publicId [" + publicId + "]: " + e.getMessage(), e);
         }
