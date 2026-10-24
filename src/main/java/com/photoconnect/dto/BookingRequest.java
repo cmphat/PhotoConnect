@@ -33,6 +33,25 @@ public class BookingRequest {
     @Size(max = 1000, message = "Notes cannot exceed 1000 characters")
     private String notes;
 
+    @Size(max = 1000, message = "Concept description cannot exceed 1000 characters")
+    private String conceptDescription;
+
+    @Size(max = 500, message = "Moodboard URL cannot exceed 500 characters")
+    private String moodboardUrl;
+
+    @Size(max = 255, message = "Backup location cannot exceed 255 characters")
+    private String backupLocation;
+
+    private Integer outfitCount;
+
+    @Size(max = 1500, message = "Shot list cannot exceed 1500 characters")
+    private String shotList;
+
+    @Size(max = 500, message = "Props needed cannot exceed 500 characters")
+    private String propsNeeded;
+
+    private Integer participantCount;
+
     public BookingRequest() {
     }
 
@@ -97,5 +116,61 @@ public class BookingRequest {
 
     public void setNotes(String notes) {
         this.notes = notes != null ? notes.trim() : null;
+    }
+
+    public String getConceptDescription() {
+        return conceptDescription;
+    }
+
+    public void setConceptDescription(String conceptDescription) {
+        this.conceptDescription = conceptDescription != null ? conceptDescription.trim() : null;
+    }
+
+    public String getMoodboardUrl() {
+        return moodboardUrl;
+    }
+
+    public void setMoodboardUrl(String moodboardUrl) {
+        this.moodboardUrl = moodboardUrl != null ? moodboardUrl.trim() : null;
+    }
+
+    public String getBackupLocation() {
+        return backupLocation;
+    }
+
+    public void setBackupLocation(String backupLocation) {
+        this.backupLocation = backupLocation != null ? backupLocation.trim() : null;
+    }
+
+    public Integer getOutfitCount() {
+        return outfitCount;
+    }
+
+    public void setOutfitCount(Integer outfitCount) {
+        this.outfitCount = outfitCount;
+    }
+
+    public String getShotList() {
+        return shotList;
+    }
+
+    public void setShotList(String shotList) {
+        this.shotList = shotList != null ? shotList.trim() : null;
+    }
+
+    public String getPropsNeeded() {
+        return propsNeeded;
+    }
+
+    public void setPropsNeeded(String propsNeeded) {
+        this.propsNeeded = propsNeeded != null ? propsNeeded.trim() : null;
+    }
+
+    public Integer getParticipantCount() {
+        return participantCount;
+    }
+
+    public void setParticipantCount(Integer participantCount) {
+        this.participantCount = participantCount;
     }
 }

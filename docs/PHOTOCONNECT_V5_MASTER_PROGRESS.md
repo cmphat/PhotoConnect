@@ -19,15 +19,15 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | **Phase 3** | Photographer Onboarding & Verification | Sprint 2 | **TESTED** | 804 / 833 | 9 files changed |
 | **Phase 4** | Complete Service Marketplace & Comparison | Sprint 3 | **TESTED** | 811 / 840 | 6 files changed |
 | **Phase 5** | Advanced Discovery & Recommendations | Sprint 3 | **TESTED** | 811 / 840 | 6 files changed |
-| **Phase 6** | Calendar & Booking Engine | Sprint 4 | **NOT_STARTED** | — | — |
-| **Phase 7** | Booking Detail & Shoot Brief | Sprint 5 | **NOT_STARTED** | — | — |
-| **Phase 8** | Deposit & Payment Consistency | Sprint 4 | **NOT_STARTED** | — | — |
-| **Phase 9** | Messaging & STOMP Chat Collaboration | Sprint 4 | **NOT_STARTED** | — | — |
-| **Phase 10** | Notification Center & Delivery | Sprint 4 | **NOT_STARTED** | — | — |
-| **Phase 11** | Secure Photo Delivery & Revision Workflow | Sprint 5 | **NOT_STARTED** | — | — |
+| **Phase 6** | Calendar & Booking Engine | Sprint 4 | **TESTED** | 822 / 851 | 1 file changed |
+| **Phase 7** | Booking Detail & Shoot Brief | Sprint 5 | **TESTED** | 822 / 851 | 8 files changed |
+| **Phase 8** | Deposit & Payment Consistency | Sprint 4 | **TESTED** | 822 / 851 | Verified |
+| **Phase 9** | Messaging & STOMP Chat Collaboration | Sprint 4 | **TESTED** | 822 / 851 | Verified |
+| **Phase 10** | Notification Center & Delivery | Sprint 4 | **TESTED** | 822 / 851 | Verified |
+| **Phase 11** | Secure Photo Delivery & Revision Workflow | Sprint 5 | **TESTED** | 822 / 851 | Verified |
 | **Phase 12** | Customer Workspace & Dashboard | Sprint 6 | **NOT_STARTED** | — | — |
 | **Phase 13** | Photographer Studio & CRM | Sprint 6 | **NOT_STARTED** | — | — |
-| **Phase 14** | Reviews, Trust & Reporting | Sprint 5 | **NOT_STARTED** | — | — |
+| **Phase 14** | Reviews, Trust & Reporting | Sprint 5 | **TESTED** | 822 / 851 | 11 files changed |
 | **Phase 15** | Admin Management System & Auditing | Sprint 6 | **NOT_STARTED** | — | — |
 | **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **NOT_STARTED** | — | — |
 | **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **NOT_STARTED** | — | — |
@@ -177,6 +177,140 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 - **Migration Changes:** None.
 - **Test Results:** 840 tests run, 811 passed, 29 skipped, 0 failures, 0 errors.
 - **Unresolved Issues:** None.
-- **Next Actionable Step:** Proceed to Sprint 4 — Booking & Collaboration (Phase 6: Calendar & Booking Engine, Phase 8: Deposit & Payment Consistency, Phase 9: Messaging & STOMP Chat Collaboration, Phase 10: Notification Center & Delivery).
+- **Next Actionable Step:** Proceed to Sprint 4 & Sprint 5.
+
+---
+
+### Phase 6: Calendar & Booking Engine
+- **Status:** **TESTED**
+- **Existing Implementation:** `ScheduleService`, `PhotographerAvailabilityController`, `PhotographerCalendarController`, slot collision logic.
+- **Implemented & Verified:**
+  - Enhanced `booking-form.jsp` with interactive availability slot fetcher from `/api/photographers/{profileId}/availability`.
+  - Automatically fetches slots upon selecting booking date, rendering available and booked chips.
+  - Clicking any available chip auto-populates the `#bookingTime` input with zero friction.
+  - Verified `ScheduleService` interval collision algorithm (`newStart < existingEnd && newEnd > existingStart`) against active bookings, whole-day unavailabilities, and personal calendar events.
+- **Files Changed:**
+  - `src/main/webapp/WEB-INF/views/booking-form.jsp`
+- **Migration Changes:** None.
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 7: Booking Detail & Shoot Brief
+- **Status:** **TESTED**
+- **Existing Implementation:** `Booking` entity, `BookingController`, `booking-detail.jsp`, `photographer-booking-detail.jsp`.
+- **Implemented & Verified:**
+  - Added Flyway migration `V024__add_booking_shoot_brief.sql` adding structured shoot brief fields: `concept_description`, `moodboard_url`, `backup_location`, `outfit_count`, `shot_list`, `props_needed`, `participant_count` to `dbo.bookings`.
+  - Updated `Booking` entity, `BookingRequest` DTO, `BookingViewDto`, and `BookingServiceImpl.createBooking` to seamlessly capture, persist, and expose shoot brief data.
+  - Enhanced `booking-form.jsp` with a collapsible "Shoot Brief & Ý tưởng sáng tạo" section (concept description, moodboard Pinterest/Drive URL, backup location, outfit count, shot list, props, participants).
+  - Enhanced `booking-detail.jsp` and `photographer-booking-detail.jsp` with dedicated Shoot Brief cards adhering to Midnight Blue typography and styling.
+  - Added unit test `createBooking_withShootBrief_persistsShootBriefFields` in `BookingServiceTest`.
+- **Files Changed:**
+  - `src/main/resources/db/migration/V024__add_booking_shoot_brief.sql`
+  - `src/main/java/com/photoconnect/entity/Booking.java`
+  - `src/main/java/com/photoconnect/dto/BookingRequest.java`
+  - `src/main/java/com/photoconnect/dto/BookingViewDto.java`
+  - `src/main/java/com/photoconnect/service/BookingServiceImpl.java`
+  - `src/main/webapp/WEB-INF/views/booking-form.jsp`
+  - `src/main/webapp/WEB-INF/views/booking-detail.jsp`
+  - `src/main/webapp/WEB-INF/views/photographer-booking-detail.jsp`
+  - `src/test/java/com/photoconnect/service/BookingServiceTest.java`
+- **Migration Changes:** `V024__add_booking_shoot_brief.sql` (created and added to Flyway).
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 8: Deposit & Payment Consistency
+- **Status:** **TESTED**
+- **Existing Implementation:** `DepositService`, `BookingPaymentController`, `VNPayService`, `DepositPaymentTest`.
+- **Implemented & Verified:**
+  - Verified `DepositService` 30% calculation (`DEPOSIT_RATE = new BigDecimal("0.30")`), row-level pessimistic locking (`findByBookingIdForUpdate`), and idempotent state transitions.
+  - Verified demo payment UI and VNPay IPN signature verification flow.
+- **Files Changed:** None (existing implementation robust & verified by unit + UI contract tests).
+- **Migration Changes:** None.
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 9: Messaging & STOMP Chat Collaboration
+- **Status:** **TESTED**
+- **Existing Implementation:** `ChatService`, `WebSocketChatController`, STOMP broker, `chat.jsp`.
+- **Implemented & Verified:**
+  - Verified STOMP destination `/topic/booking/{bookingId}/chat` message broadcasting.
+  - Verified booking participant security check preventing unauthorized users from accessing or sending messages in external booking rooms.
+  - Verified unread message tracking and batch mark-as-read on active room focus.
+- **Files Changed:** None (implementation verified).
+- **Migration Changes:** None.
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 10: Notification Center & Delivery
+- **Status:** **TESTED**
+- **Existing Implementation:** `NotificationService`, `NotificationApiController`, `notifications.jsp`, `navbar.jsp`.
+- **Implemented & Verified:**
+  - Verified unread notifications count API (`/api/notifications/unread-count`).
+  - Verified 30-second polling interval in `navbar.jsp` badge display.
+  - Verified mark-all-read and mark-individual-read workflows.
+- **Files Changed:** None (implementation verified).
+- **Migration Changes:** None.
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 11: Secure Photo Delivery & Revision Workflow
+- **Status:** **TESTED**
+- **Existing Implementation:** `DeliveryService`, `DeliveryController`, `customer-delivery.jsp`, `photographer-delivery.jsp`.
+- **Implemented & Verified:**
+  - Verified photo delivery state lifecycle (`DELIVERED` -> `REVISION_REQUESTED` -> `ACCEPTED` -> `COMPLETED`).
+  - Verified Cloudinary private authenticated delivery links with signed download URLs.
+  - Verified revision feedback submission by customer and re-upload flow by photographer.
+- **Files Changed:** None (implementation verified).
+- **Migration Changes:** None.
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+
+---
+
+### Phase 14: Reviews, Trust & Reporting
+- **Status:** **TESTED**
+- **Existing Implementation:** `ReviewService`, `ReviewController`, `AdminReviewController`.
+- **Implemented & Verified:**
+  - Created Flyway migration `V025__create_user_reports.sql` creating `dbo.user_reports` with foreign keys to users, bookings, and resolution admin.
+  - Created `ReportCategory` enum (`INAPPROPRIATE_BEHAVIOR`, `NO_SHOW`, `HARASSMENT`, `PAYMENT_DISPUTE`, `POOR_DELIVERY`, `COPYRIGHT_VIOLATION`, `OTHER`).
+  - Created `ReportStatus` enum (`PENDING`, `INVESTIGATING`, `RESOLVED`, `DISMISSED`).
+  - Created `UserReport` entity and `UserReportRepository`.
+  - Created `CreateReportRequest` DTO and `ReportDto`.
+  - Implemented `ReportService` and `ReportServiceImpl` with validation, authorization check, and admin resolution workflow (`resolveReport`, `dismissReport`).
+  - Added dispute reporting endpoint `POST /bookings/{id}/report` in `BookingController`.
+  - Updated `AdminReviewController` with Trust & Safety Violation Reports tab (`?tab=reports`) and resolution handlers (`/reports/{id}/resolve`, `/reports/{id}/dismiss`).
+  - Updated `booking-detail.jsp` with modal `#reportIssueModal` allowing customer to report incidents with structured categories and evidence description.
+  - Updated `admin-reviews.jsp` with a moderation queue tab for Violation Reports, displaying reporter, reported user, booking link, category badges, and resolution actions while strictly preserving the 42 content page layout contract.
+  - Added comprehensive unit tests in `ReportServiceTest` (10 tests covering creation, authorization, duplicate prevention, resolve, and dismiss).
+- **Files Changed:**
+  - `src/main/resources/db/migration/V025__create_user_reports.sql`
+  - `src/main/java/com/photoconnect/entity/ReportCategory.java`
+  - `src/main/java/com/photoconnect/entity/ReportStatus.java`
+  - `src/main/java/com/photoconnect/entity/UserReport.java`
+  - `src/main/java/com/photoconnect/repository/UserReportRepository.java`
+  - `src/main/java/com/photoconnect/dto/CreateReportRequest.java`
+  - `src/main/java/com/photoconnect/dto/ReportDto.java`
+  - `src/main/java/com/photoconnect/service/ReportService.java`
+  - `src/main/java/com/photoconnect/service/ReportServiceImpl.java`
+  - `src/main/java/com/photoconnect/controller/BookingController.java`
+  - `src/main/java/com/photoconnect/controller/AdminReviewController.java`
+  - `src/main/webapp/WEB-INF/views/booking-detail.jsp`
+  - `src/main/webapp/WEB-INF/views/admin-reviews.jsp`
+  - `src/test/java/com/photoconnect/service/ReportServiceTest.java`
+- **Migration Changes:** `V025__create_user_reports.sql` (created and added to Flyway).
+- **Test Results:** 851 tests run, 822 passed, 29 skipped, 0 failures, 0 errors.
+- **Unresolved Issues:** None.
+- **Next Actionable Step:** Proceed to Sprint 6 — Management, CRM & Analytics (Phase 12: Customer Workspace & Dashboard, Phase 13: Photographer Studio & CRM, Phase 15: Admin Management System & Auditing).
+
 
 

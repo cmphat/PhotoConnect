@@ -183,6 +183,13 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookingTime(request.getBookingTime());
         booking.setLocation(request.getLocation().trim());
         booking.setNotes(request.getNotes() != null ? request.getNotes().trim() : null);
+        booking.setConceptDescription(request.getConceptDescription() != null ? request.getConceptDescription().trim() : null);
+        booking.setMoodboardUrl(request.getMoodboardUrl() != null ? request.getMoodboardUrl().trim() : null);
+        booking.setBackupLocation(request.getBackupLocation() != null ? request.getBackupLocation().trim() : null);
+        booking.setOutfitCount(request.getOutfitCount());
+        booking.setShotList(request.getShotList() != null ? request.getShotList().trim() : null);
+        booking.setPropsNeeded(request.getPropsNeeded() != null ? request.getPropsNeeded().trim() : null);
+        booking.setParticipantCount(request.getParticipantCount());
         booking.setAgreedPrice(agreedPrice);
         booking.setStatus(BookingStatus.PENDING);
 

@@ -56,6 +56,13 @@ public class BookingViewDto {
             dto.setCancelledByName(booking.getCancelledBy().getFullName());
         }
         dto.setCancelledAt(booking.getCancelledAt());
+        dto.setConceptDescription(booking.getConceptDescription());
+        dto.setMoodboardUrl(booking.getMoodboardUrl());
+        dto.setBackupLocation(booking.getBackupLocation());
+        dto.setOutfitCount(booking.getOutfitCount());
+        dto.setShotList(booking.getShotList());
+        dto.setPropsNeeded(booking.getPropsNeeded());
+        dto.setParticipantCount(booking.getParticipantCount());
         return dto;
     }
 
@@ -226,5 +233,69 @@ public class BookingViewDto {
 
     public void setCancelledAt(LocalDateTime cancelledAt) {
         this.cancelledAt = cancelledAt;
+    }
+
+    private String conceptDescription;
+    private String moodboardUrl;
+    private String backupLocation;
+    private Integer outfitCount;
+    private String shotList;
+    private String propsNeeded;
+    private Integer participantCount;
+
+    public String getConceptDescription() {
+        return conceptDescription;
+    }
+
+    public void setConceptDescription(String conceptDescription) {
+        this.conceptDescription = conceptDescription;
+    }
+
+    public String getMoodboardUrl() {
+        return moodboardUrl;
+    }
+
+    public void setMoodboardUrl(String moodboardUrl) {
+        this.moodboardUrl = moodboardUrl;
+    }
+
+    public String getBackupLocation() {
+        return backupLocation;
+    }
+
+    public void setBackupLocation(String backupLocation) {
+        this.backupLocation = backupLocation;
+    }
+
+    public Integer getOutfitCount() {
+        return outfitCount;
+    }
+
+    public void setOutfitCount(Integer outfitCount) {
+        this.outfitCount = outfitCount;
+    }
+
+    public String getShotList() {
+        return shotList;
+    }
+
+    public void setShotList(String shotList) {
+        this.shotList = shotList;
+    }
+
+    public String getPropsNeeded() {
+        return propsNeeded;
+    }
+
+    public void setPropsNeeded(String propsNeeded) {
+        this.propsNeeded = propsNeeded;
+    }
+
+    public Integer getParticipantCount() {
+        return participantCount;
+    }
+
+    public void setParticipantCount(Integer participantCount) {
+        this.participantCount = participantCount;
     }
 }

@@ -166,6 +166,33 @@ class BookingServiceTest {
     }
 
     @Test
+    void createBooking_withShootBrief_persistsShootBriefFields() {
+        validRequest.setConceptDescription("Vintage Hanoi Autumn Street Style");
+        validRequest.setMoodboardUrl("https://pinterest.com/pin/123456");
+        validRequest.setBackupLocation("Indoor Studio Café, Ba Dinh");
+        validRequest.setOutfitCount(3);
+        validRequest.setShotList("1. Close-up portrait with autumn leaves\n2. Walking cross street wide shot");
+        validRequest.setPropsNeeded("Vintage film camera, dried flower bouquet");
+        validRequest.setParticipantCount(2);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(photographerProfileRepository.findById(10L)).thenReturn(Optional.of(photographerProfile));
+        when(scheduleService.isDateAvailable(10L, validRequest.getBookingDate())).thenReturn(true);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Booking result = bookingService.createBooking(1L, 10L, validRequest);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getConceptDescription()).isEqualTo("Vintage Hanoi Autumn Street Style");
+        assertThat(result.getMoodboardUrl()).isEqualTo("https://pinterest.com/pin/123456");
+        assertThat(result.getBackupLocation()).isEqualTo("Indoor Studio Café, Ba Dinh");
+        assertThat(result.getOutfitCount()).isEqualTo(3);
+        assertThat(result.getShotList()).isEqualTo("1. Close-up portrait with autumn leaves\n2. Walking cross street wide shot");
+        assertThat(result.getPropsNeeded()).isEqualTo("Vintage film camera, dried flower bouquet");
+        assertThat(result.getParticipantCount()).isEqualTo(2);
+    }
+
+    @Test
     void createBooking_withNullPriceFrom_shouldSnapshotZero() {
         photographerProfile.setPriceFrom(null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));

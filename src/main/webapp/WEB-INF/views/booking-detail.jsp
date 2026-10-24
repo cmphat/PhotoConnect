@@ -286,6 +286,76 @@
                             </div>
                         </div>
                     </c:if>
+
+                    <!-- Structured Shoot Brief Card (Phase 7) -->
+                    <c:if test="${not empty booking.conceptDescription or not empty booking.moodboardUrl or not empty booking.backupLocation or not empty booking.shotList or not empty booking.propsNeeded or not empty booking.outfitCount or not empty booking.participantCount}">
+                        <div class="col-12" style="margin-top: 1rem;">
+                            <div style="background: rgba(37, 99, 235, 0.03); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--radius-sm, 8px); padding: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(37, 99, 235, 0.12); padding-bottom: 0.75rem;">
+                                    <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="bi bi-camera"></i> Shoot Brief &amp; Creative Vision
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <c:if test="${not empty booking.outfitCount}">
+                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} set đồ / outfits</span>
+                                        </c:if>
+                                        <c:if test="${not empty booking.participantCount}">
+                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} người / participants</span>
+                                        </c:if>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <c:if test="${not empty booking.conceptDescription}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Concept &amp; Creative Idea</div>
+                                            <div style="font-size: 0.95rem; color: var(--text); line-height: 1.6;">
+                                                <c:out value="${booking.conceptDescription}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.moodboardUrl}">
+                                        <div class="col-12 col-md-6">
+                                            <div class="spec-item-label">Moodboard / Visual References</div>
+                                            <div>
+                                                <a href="<c:out value='${booking.moodboardUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.75rem;">
+                                                    <i class="bi bi-link-45deg me-1"></i> Xem Moodboard / Reference Link &nearr;
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.backupLocation}">
+                                        <div class="col-12 col-md-6">
+                                            <div class="spec-item-label">Backup Location (Rain / Weather)</div>
+                                            <div style="font-size: 0.95rem; color: var(--text);">
+                                                <c:out value="${booking.backupLocation}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.shotList}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Shot List &amp; Key Poses</div>
+                                            <div style="font-size: 0.92rem; color: var(--text); line-height: 1.5; background: var(--surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--border);">
+                                                <c:out value="${booking.shotList}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.propsNeeded}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Props &amp; Accessories</div>
+                                            <div style="font-size: 0.92rem; color: var(--muted); line-height: 1.5;">
+                                                <c:out value="${booking.propsNeeded}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </div>
+                    </c:if>
                 </div>
 
                 <!-- ── Deposit Information Section ────────────────────────── -->
@@ -524,10 +594,67 @@
                     </div>
                 </c:if>
 
+                <!-- ── Trust & Safety / Report Issue (Phase 14) ── -->
+                <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="font-size: 0.85rem; color: var(--muted);">
+                        <i class="bi bi-shield-check me-1"></i> Gặp sự cố hoặc tranh chấp? Đội ngũ hỗ trợ PhotoConnect luôn sẵn sàng can thiệp bảo vệ quyền lợi của bạn.
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-open-report-modal" data-bs-toggle="modal" data-bs-target="#reportIssueModal">
+                        <i class="bi bi-flag me-1"></i> Báo cáo sự cố / Report Dispute
+                    </button>
+                </div>
+
             </div>
 
         </div>
     </main>
+
+    <!-- Report Issue Modal (Phase 14) -->
+    <div class="modal fade" id="reportIssueModal" tabindex="-1" aria-labelledby="reportIssueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold" id="reportIssueModalLabel">
+                        <i class="bi bi-flag-fill text-danger me-2"></i> Báo cáo sự cố / Report Dispute
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="${pageContext.request.contextPath}/bookings/${booking.id}/report" method="post">
+                    <%@ include file="fragments/csrf-input.jsp" %>
+                    <div class="modal-body p-4">
+                        <p class="text-muted small mb-3">
+                            Nếu đối tác có hành vi thiếu chuyên nghiệp, vắng mặt không lý do hoặc vi phạm chính sách PhotoConnect, vui lòng chia sẻ thông tin để chúng tôi can thiệp xử lý.
+                        </p>
+
+                        <div class="mb-3">
+                            <label for="reportCategory" class="form-label fw-semibold small">Loại vi phạm / Violation Category *</label>
+                            <select id="reportCategory" name="category" class="form-select form-select-sm" required>
+                                <option value="">-- Chọn danh mục vi phạm --</option>
+                                <option value="UNPROFESSIONAL_BEHAVIOR">Hành vi thiếu chuyên nghiệp (Unprofessional Behavior)</option>
+                                <option value="NO_SHOW">Vắng mặt không báo trước (No-Show)</option>
+                                <option value="HARASSMENT">Quấy rối hoặc ngôn từ thô lỗ (Harassment)</option>
+                                <option value="SCAM_OR_FRAUD">Lừa đảo hoặc gian lận thanh toán (Scam or Fraud)</option>
+                                <option value="COPYRIGHT_INFRINGEMENT">Vi phạm bản quyền hình ảnh (Copyright Infringement)</option>
+                                <option value="OTHER">Lý do khác (Other)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reportDetails" class="form-label fw-semibold small">Mô tả chi tiết sự việc / Description *</label>
+                            <textarea id="reportDetails" name="details" rows="4" maxlength="1500" class="form-control form-control-sm"
+                                      placeholder="Mô tả cụ thể thời gian, diễn biến sự việc, bằng chứng hoặc thiệt hại phát sinh..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-danger btn-sm" id="btn-submit-report">
+                            <i class="bi bi-send me-1"></i> Gửi báo cáo / Submit Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Editorial Footer -->
     <footer class="pc-footer">

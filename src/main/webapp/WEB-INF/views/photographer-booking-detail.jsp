@@ -262,6 +262,76 @@
                             </div>
                         </div>
                     </c:if>
+
+                    <!-- Structured Shoot Brief Card (Phase 7) -->
+                    <c:if test="${not empty booking.conceptDescription or not empty booking.moodboardUrl or not empty booking.backupLocation or not empty booking.shotList or not empty booking.propsNeeded or not empty booking.outfitCount or not empty booking.participantCount}">
+                        <div style="grid-column: span 2; margin-top: 1rem;">
+                            <div style="background: rgba(37, 99, 235, 0.03); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--radius-sm, 8px); padding: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(37, 99, 235, 0.12); padding-bottom: 0.75rem;">
+                                    <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="bi bi-camera"></i> Shoot Brief &amp; Creative Vision
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <c:if test="${not empty booking.outfitCount}">
+                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} set đồ / outfits</span>
+                                        </c:if>
+                                        <c:if test="${not empty booking.participantCount}">
+                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} người / participants</span>
+                                        </c:if>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <c:if test="${not empty booking.conceptDescription}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Concept &amp; Creative Idea</div>
+                                            <div style="font-size: 0.95rem; color: var(--text); line-height: 1.6;">
+                                                <c:out value="${booking.conceptDescription}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.moodboardUrl}">
+                                        <div class="col-12 col-md-6">
+                                            <div class="spec-item-label">Moodboard / Visual References</div>
+                                            <div>
+                                                <a href="<c:out value='${booking.moodboardUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.75rem;">
+                                                    <i class="bi bi-link-45deg me-1"></i> Xem Moodboard / Reference Link &nearr;
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.backupLocation}">
+                                        <div class="col-12 col-md-6">
+                                            <div class="spec-item-label">Backup Location (Rain / Weather)</div>
+                                            <div style="font-size: 0.95rem; color: var(--text);">
+                                                <c:out value="${booking.backupLocation}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.shotList}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Shot List &amp; Key Poses</div>
+                                            <div style="font-size: 0.92rem; color: var(--text); line-height: 1.5; background: var(--surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--border);">
+                                                <c:out value="${booking.shotList}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty booking.propsNeeded}">
+                                        <div class="col-12">
+                                            <div class="spec-item-label">Props &amp; Accessories</div>
+                                            <div style="font-size: 0.92rem; color: var(--muted); line-height: 1.5;">
+                                                <c:out value="${booking.propsNeeded}"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </div>
+                    </c:if>
                 </div>
 
                 <!-- ── Photographer Action Bar ────────────────────────────── -->

@@ -15,10 +15,19 @@
             <div class="pc-page-header pc-stack-mobile">
                 <div>
                     <span class="section-index">Administration</span>
-                    <h1 class="editorial-title">Review Moderation</h1>
+                    <h1 class="editorial-title">Trust &amp; Safety Moderation</h1>
                 </div>
                 <div class="pc-page-meta">
-                    Total Reviews: ${allCount}
+                    <div class="btn-group" role="group">
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reviews"
+                           class="btn btn-sm ${activeTabSection != 'reports' ? 'btn-primary' : 'btn-outline-secondary'}">
+                            Reviews (${allCount})
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reports"
+                           class="btn btn-sm ${activeTabSection == 'reports' ? 'btn-primary' : 'btn-outline-secondary'}">
+                            Violation Reports (${pendingReportsCount})
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -34,30 +43,152 @@
                 </div>
             </c:if>
 
-            <!-- Status Tabs -->
-            <div class="status-tabs">
-                <a href="${pageContext.request.contextPath}/admin/reviews?status=ALL"
-                   class="status-tab ${activeStatus == 'ALL' ? 'active' : ''}">
-                    All Reviews (${allCount})
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/reviews?status=VISIBLE"
-                   class="status-tab ${activeStatus == 'VISIBLE' ? 'active' : ''}">
-                    Visible (${visibleCount})
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/reviews?status=HIDDEN"
-                   class="status-tab ${activeStatus == 'HIDDEN' ? 'active' : ''}">
-                    Hidden (${hiddenCount})
-                </a>
-            </div>
-
             <c:choose>
-                <c:when test="${empty reviews}">
-                    <div class="pc-empty-state">
-                        <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No reviews found</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 0;">No reviews match the selected filter criteria.</p>
+                <c:when test="${activeTabSection == 'reports'}">
+                    <!-- Reports Status Filter Tabs -->
+                    <div class="status-tabs mb-4">
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reports&reportStatus=ALL"
+                           class="status-tab ${activeReportStatus == 'ALL' ? 'active' : ''}">
+                            All Reports
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reports&reportStatus=PENDING"
+                           class="status-tab ${activeReportStatus == 'PENDING' ? 'active' : ''}">
+                            Pending Review (${pendingReportsCount})
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reports&reportStatus=RESOLVED"
+                           class="status-tab ${activeReportStatus == 'RESOLVED' ? 'active' : ''}">
+                            Resolved
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?tab=reports&reportStatus=DISMISSED"
+                           class="status-tab ${activeReportStatus == 'DISMISSED' ? 'active' : ''}">
+                            Dismissed
+                        </a>
                     </div>
+
+                    <c:choose>
+                        <c:when test="${empty reports}">
+                            <div class="pc-empty-state">
+                                <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No violation reports</h3>
+                                <p style="color: var(--text-muted); margin-bottom: 0;">No dispute reports match the selected criteria.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="admin-table-shell" tabindex="0" aria-label="Reports table">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Category</th>
+                                            <th>Reporter</th>
+                                            <th>Reported User</th>
+                                            <th>Booking</th>
+                                            <th>Violation Details</th>
+                                            <th>Status</th>
+                                            <th>Submitted</th>
+                                            <th style="text-align: right;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="rep" items="${reports}">
+                                            <tr>
+                                                <td style="color: var(--text-muted);">#<c:out value="${rep.id()}"/></td>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark"><c:out value="${rep.categoryDisplayName()}"/></span>
+                                                </td>
+                                                <td>
+                                                    <div style="font-weight: 500;"><c:out value="${rep.reporterName()}"/></div>
+                                                    <div style="color: var(--text-muted); font-size: 0.8rem;"><c:out value="${rep.reporterEmail()}"/></div>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${not empty rep.reportedUserName()}">
+                                                            <div style="font-weight: 500;"><c:out value="${rep.reportedUserName()}"/></div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span style="color: var(--text-muted); font-style: italic;">Unspecified</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <c:if test="${not empty rep.bookingId()}">
+                                                        <a href="${pageContext.request.contextPath}/bookings/${rep.bookingId()}" target="_blank" class="text-decoration-none">
+                                                            #<c:out value="${rep.bookingId()}"/>
+                                                        </a>
+                                                    </c:if>
+                                                </td>
+                                                <td style="max-width: 250px;">
+                                                    <div style="font-size: 0.88rem; line-height: 1.4;"><c:out value="${rep.details()}"/></div>
+                                                    <c:if test="${not empty rep.adminNotes()}">
+                                                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; font-style: italic;">
+                                                            Admin: <c:out value="${rep.adminNotes()}"/>
+                                                        </div>
+                                                    </c:if>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${rep.status() == 'PENDING'}">
+                                                            <span class="badge bg-danger">PENDING</span>
+                                                        </c:when>
+                                                        <c:when test="${rep.status() == 'RESOLVED'}">
+                                                            <span class="badge bg-success">RESOLVED</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge bg-secondary">DISMISSED</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td style="font-size: 0.82rem; color: var(--text-muted);">
+                                                    <c:out value="${rep.createdAt()}"/>
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    <c:if test="${rep.status() == 'PENDING'}">
+                                                        <form method="post" action="${pageContext.request.contextPath}/admin/reviews/reports/${rep.id()}/resolve" style="display: inline;">
+                                                            <%@ include file="fragments/csrf-input.jsp" %>
+                                                            <button type="submit" class="btn btn-success btn-sm me-1" onclick="return confirm('Mark report #${rep.id()} as RESOLVED?');">
+                                                                Resolve
+                                                            </button>
+                                                        </form>
+                                                        <form method="post" action="${pageContext.request.contextPath}/admin/reviews/reports/${rep.id()}/dismiss" style="display: inline;">
+                                                            <%@ include file="fragments/csrf-input.jsp" %>
+                                                            <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Dismiss report #${rep.id()}?');">
+                                                                Dismiss
+                                                            </button>
+                                                        </form>
+                                                    </c:if>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </c:when>
                 <c:otherwise>
+                    <!-- Reviews Status Tabs -->
+                    <div class="status-tabs">
+                        <a href="${pageContext.request.contextPath}/admin/reviews?status=ALL"
+                           class="status-tab ${activeStatus == 'ALL' ? 'active' : ''}">
+                            All Reviews (${allCount})
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?status=VISIBLE"
+                           class="status-tab ${activeStatus == 'VISIBLE' ? 'active' : ''}">
+                            Visible (${visibleCount})
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/reviews?status=HIDDEN"
+                           class="status-tab ${activeStatus == 'HIDDEN' ? 'active' : ''}">
+                            Hidden (${hiddenCount})
+                        </a>
+                    </div>
+
+                    <c:choose>
+                        <c:when test="${empty reviews}">
+                            <div class="pc-empty-state">
+                                <h3 class="editorial-heading" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No reviews found</h3>
+                                <p style="color: var(--text-muted); margin-bottom: 0;">No reviews match the selected filter criteria.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
                     <div class="admin-table-shell" tabindex="0" aria-label="Reviews table">
                         <table class="admin-table">
                             <thead>

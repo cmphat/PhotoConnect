@@ -35,6 +35,7 @@ public class BookingController {
     private final com.photoconnect.service.ReviewService reviewService;
     private final com.photoconnect.service.ServicePackageService servicePackageService;
     private final com.photoconnect.service.RescheduleService rescheduleService;
+    private final com.photoconnect.service.ReportService reportService;
 
     private String requireCustomer(HttpSession session) {
         return com.photoconnect.util.SessionSecurityUtils.requireRole(session, UserRole.CUSTOMER);
@@ -44,7 +45,7 @@ public class BookingController {
                              PublicPhotographerService publicPhotographerService,
                              com.photoconnect.service.DepositService depositService,
                              com.photoconnect.service.ReviewService reviewService) {
-        this(bookingService, publicPhotographerService, depositService, reviewService, null, null);
+        this(bookingService, publicPhotographerService, depositService, reviewService, null, null, null);
     }
 
     public BookingController(BookingService bookingService,
@@ -52,7 +53,16 @@ public class BookingController {
                              com.photoconnect.service.DepositService depositService,
                              com.photoconnect.service.ReviewService reviewService,
                              com.photoconnect.service.ServicePackageService servicePackageService) {
-        this(bookingService, publicPhotographerService, depositService, reviewService, servicePackageService, null);
+        this(bookingService, publicPhotographerService, depositService, reviewService, servicePackageService, null, null);
+    }
+
+    public BookingController(BookingService bookingService,
+                             PublicPhotographerService publicPhotographerService,
+                             com.photoconnect.service.DepositService depositService,
+                             com.photoconnect.service.ReviewService reviewService,
+                             com.photoconnect.service.ServicePackageService servicePackageService,
+                             com.photoconnect.service.RescheduleService rescheduleService) {
+        this(bookingService, publicPhotographerService, depositService, reviewService, servicePackageService, rescheduleService, null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -61,13 +71,15 @@ public class BookingController {
                              com.photoconnect.service.DepositService depositService,
                              com.photoconnect.service.ReviewService reviewService,
                              @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.ServicePackageService servicePackageService,
-                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.RescheduleService rescheduleService) {
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.RescheduleService rescheduleService,
+                             @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.service.ReportService reportService) {
         this.bookingService = bookingService;
         this.publicPhotographerService = publicPhotographerService;
         this.depositService = depositService;
         this.reviewService = reviewService;
         this.servicePackageService = servicePackageService;
         this.rescheduleService = rescheduleService;
+        this.reportService = reportService;
     }
 
     /**
@@ -341,6 +353,39 @@ public class BookingController {
         try {
             rescheduleService.cancelReschedule(requestId, userId);
             redirectAttributes.addFlashAttribute("successMessage", "Reschedule proposal withdrawn.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        return "redirect:/bookings/" + bookingId;
+    }
+
+    /**
+     * Submit a trust & safety / dispute report for a booking.
+     */
+    @PostMapping("/bookings/{id}/report")
+    public String submitBookingReport(@PathVariable("id") Long bookingId,
+                                      @RequestParam("category") com.photoconnect.entity.ReportCategory category,
+                                      @RequestParam("details") String details,
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttributes) {
+        Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        if (reportService == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Hệ thống báo cáo sự cố hiện đang bảo trì.");
+            return "redirect:/bookings/" + bookingId;
+        }
+
+        try {
+            com.photoconnect.dto.CreateReportRequest request = new com.photoconnect.dto.CreateReportRequest(
+                    category, details, bookingId, null
+            );
+            reportService.submitReport(userId, request);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Báo cáo sự cố của bạn đã được gửi tới Ban quản trị. Chúng tôi sẽ xử lý và liên hệ trong vòng 24 giờ.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
