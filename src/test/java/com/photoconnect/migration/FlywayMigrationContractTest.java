@@ -77,7 +77,7 @@ class FlywayMigrationContractTest {
         String properties = Files.readString(ROOT.resolve("src/main/resources/application.properties"));
 
         assertThat(properties)
-                .contains("spring.flyway.baseline-on-migrate=true")
+                .contains("spring.flyway.baseline-on-migrate=${FLYWAY_BASELINE_ON_MIGRATE:false}")
                 .contains("spring.flyway.baseline-version=0")
                 .contains("spring.flyway.locations=classpath:db/migration")
                 .contains("spring.flyway.clean-disabled=true")
