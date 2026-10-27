@@ -92,10 +92,13 @@
                         <c:if test="${not empty packages}">
                             <div class="form-group" style="margin-bottom: 1.5rem;">
                                 <label for="packageId" class="form-label">Select Service Package</label>
-                                <select id="packageId" name="packageId" class="form-input" style="padding: 0.65rem 0.85rem;">
-                                    <option value="">-- Custom Shoot (Photographer Base Rate) --</option>
+                                <select id="packageId" name="packageId" class="form-input" style="padding: 0.65rem 0.85rem;" required>
+                                    <option value="">-- Select an active package --</option>
                                     <c:forEach var="pkg" items="${packages}">
-                                        <option value="${pkg.id}" ${bookingRequest.packageId == pkg.id ? 'selected' : ''}>
+                                        <option value="${pkg.id}"
+                                                data-included-travel-km="${pkg.includedTravelKm}"
+                                                data-night-rate="${pkg.nightSurchargeRate}"
+                                                ${bookingRequest.packageId == pkg.id ? 'selected' : ''}>
                                             <c:out value="${pkg.name}"/> · <c:out value="${pkg.formattedPrice}"/> (<c:out value="${pkg.formattedDuration}"/>, <c:out value="${pkg.editedPhotoCount}"/> photos)
                                         </option>
                                     </c:forEach>
@@ -175,11 +178,117 @@
                                       maxlength="1000"
                                       placeholder="Share shoot concept, special requests, etc..."
                                       class="form-input"><c:out value='${bookingRequest.notes}'/></textarea>
-                            <spring:bind path="bookingRequest.notes">
-                                <c:if test="${status.error}">
-                                    <div class="field-error"><c:out value="${status.errorMessage}"/></div>
-                                </c:if>
-                            </spring:bind>
+                        <!-- V6 Surcharges & Extras Configuration -->
+                        <div class="card mb-4 border" style="background: var(--surface); border-color: rgba(37,99,235,0.2);">
+                            <div class="card-header bg-transparent py-3 border-bottom" style="border-color: rgba(37,99,235,0.15);">
+                                <h3 class="h6 fw-bold mb-0 text-dark">
+                                    <i class="bi bi-sliders me-1 text-primary"></i> Phụ phí & Gói dịch vụ bổ sung / Surcharges & Extras
+                                </h3>
+                                <small class="text-muted">Tùy chỉnh khoảng cách di chuyển, khung giờ chụp đêm và các tùy chọn bổ sung</small>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="travelDistanceKm" class="form-label fw-semibold" style="font-size: 0.88rem;">
+                                            Khoảng cách di chuyển (km)
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="number" id="travelDistanceKm" name="travelDistanceKm" min="0" max="500"
+                                                   class="form-input" placeholder="0" value="<c:out value='${bookingRequest.travelDistanceKm != null ? bookingRequest.travelDistanceKm : 0}'/>">
+                                            <span class="input-group-text bg-light">km</span>
+                                        </div>
+                                        <div class="form-text" style="font-size: 0.78rem; color: #2563eb;">
+                                            <i class="bi bi-info-circle me-1"></i> Mức phí được lấy từ gói đã chọn và được xác minh lại trên máy chủ.
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 d-flex align-items-center">
+                                        <div class="form-check mt-3">
+                                            <input class="form-check-input" type="checkbox" id="nightShoot" name="nightShoot" value="true"
+                                                   ${bookingRequest.nightShoot ? 'checked' : ''}>
+                                            <label class="form-check-label fw-semibold" for="nightShoot" style="font-size: 0.88rem;">
+                                                Chụp đêm / Thiếu sáng (theo mức của gói đã chọn)
+                                            </label>
+                                            <div class="form-text" style="font-size: 0.78rem;">
+                                                Áp dụng khi chụp từ 18:00 đến 06:00 sáng hoặc yêu cầu đèn chụp đêm chuyên dụng.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        <label for="extraHours" class="form-label fw-semibold" style="font-size: 0.85rem;">
+                                            Thêm giờ chụp (+200.000đ/giờ)
+                                        </label>
+                                        <input type="number" id="extraHours" name="extraHours" min="0" max="10"
+                                               class="form-input" placeholder="0" value="<c:out value='${bookingRequest.extraHours != null ? bookingRequest.extraHours : 0}'/>">
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="extraPhotos" class="form-label fw-semibold" style="font-size: 0.85rem;">
+                                            Thêm ảnh sửa (+50.000đ/ảnh)
+                                        </label>
+                                        <input type="number" id="extraPhotos" name="extraPhotos" min="0" max="100"
+                                               class="form-input" placeholder="0" value="<c:out value='${bookingRequest.extraPhotos != null ? bookingRequest.extraPhotos : 0}'/>">
+                                    </div>
+                                    <div class="col-12 col-md-4 d-flex align-items-center">
+                                        <div class="form-check mt-3">
+                                            <input class="form-check-input" type="checkbox" id="additionalPhotographer" name="additionalPhotographer" value="true"
+                                                   ${bookingRequest.additionalPhotographer ? 'checked' : ''}>
+                                            <label class="form-check-label fw-semibold" for="additionalPhotographer" style="font-size: 0.85rem;">
+                                                Thợ chụp phụ / Trợ lý (+500.000đ)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- V6 Authoritative Live Price Breakdown Card -->
+                        <div class="card mb-4 border" style="background: #f8fafc; border-color: #cbd5e1;">
+                            <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center">
+                                <h3 class="h6 fw-bold mb-0 text-dark">
+                                    <i class="bi bi-receipt me-1 text-primary"></i> Chi tiết giá & Đặt cọc 30% / Price Breakdown
+                                </h3>
+                                <span class="badge bg-primary">Xác thực hệ thống</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between py-1" style="font-size: 0.9rem;">
+                                    <span class="text-muted">Giá gói chụp cơ bản (Base Package):</span>
+                                    <strong id="displayBasePrice">0 VND</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1" id="rowNightFee" style="font-size: 0.9rem; display: none;">
+                                    <span class="text-muted">Phụ phí chụp đêm (+20%):</span>
+                                    <span id="displayNightFee" class="text-primary">+0 VND</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1" id="rowTravelFee" style="font-size: 0.9rem; display: none;">
+                                    <span class="text-muted">Phụ phí di chuyển (> 30 km):</span>
+                                    <span id="displayTravelFee" class="text-primary">+0 VND</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1" id="rowExtrasFee" style="font-size: 0.9rem; display: none;">
+                                    <span class="text-muted">Tùy chọn bổ sung (Giờ/Ảnh/Trợ lý):</span>
+                                    <span id="displayExtrasFee" class="text-primary">+0 VND</span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between py-1" style="font-size: 1.05rem;">
+                                    <span class="fw-bold text-dark">Tổng cộng chi phí (Total Agreed):</span>
+                                    <strong id="displayTotalPrice" class="text-dark">0 VND</strong>
+                                </div>
+                                <div class="p-3 my-2 rounded" style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-primary" style="font-size: 1rem;">
+                                            <i class="bi bi-shield-check me-1"></i> Tiền đặt cọc bắt buộc (30% Deposit):
+                                        </span>
+                                        <span class="badge bg-primary fs-6 px-3 py-2" id="displayDepositAmount">0 VND</span>
+                                    </div>
+                                    <small class="text-muted d-block" style="font-size: 0.78rem;">
+                                        Thanh toán qua quét mã VietQR sau khi nhiếp ảnh gia chấp nhận lịch. Tiền được giữ bảo đảm an toàn.
+                                    </small>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 text-muted" style="font-size: 0.88rem;">
+                                    <span>Còn lại thanh toán sau buổi chụp (70% Balance):</span>
+                                    <strong id="displayRemainingBalance">0 VND</strong>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Structured Shoot Brief (Phase 7) -->
@@ -359,6 +468,84 @@
                 checkAvailability();
             }
         }
+
+        // V6 Authoritative Pricing Preview
+        const packageSelect = document.getElementById('packageId');
+        const travelInput = document.getElementById('travelDistanceKm');
+        const nightInput = document.getElementById('nightShoot');
+        const extraHoursInput = document.getElementById('extraHours');
+        const extraPhotosInput = document.getElementById('extraPhotos');
+        const addPhotographerInput = document.getElementById('additionalPhotographer');
+
+        function formatVnd(val) {
+            return new Intl.NumberFormat('vi-VN').format(val || 0) + ' VND';
+        }
+
+        function updatePriceCalculation() {
+            const pkgId = packageSelect ? packageSelect.value : '';
+            if (!pkgId) {
+                return;
+            }
+            const tTime = timeInput ? timeInput.value : '';
+            const tDist = travelInput ? travelInput.value : '0';
+            const nShoot = nightInput ? nightInput.checked : false;
+            const eHours = extraHoursInput ? extraHoursInput.value : '0';
+            const ePhotos = extraPhotosInput ? extraPhotosInput.value : '0';
+            const aPhoto = addPhotographerInput ? addPhotographerInput.checked : false;
+
+            const url = '${pageContext.request.contextPath}/api/pricing/calculate?photographerId=' + encodeURIComponent(photographerId)
+                + '&packageId=' + encodeURIComponent(pkgId)
+                + (tTime ? '&bookingTime=' + encodeURIComponent(tTime) : '')
+                + '&travelDistanceKm=' + encodeURIComponent(tDist)
+                + '&nightShoot=' + encodeURIComponent(nShoot)
+                + '&extraHours=' + encodeURIComponent(eHours)
+                + '&extraPhotos=' + encodeURIComponent(ePhotos)
+                + '&additionalPhotographer=' + encodeURIComponent(aPhoto);
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('displayBasePrice').textContent = formatVnd(data.basePrice);
+
+                    const rowNight = document.getElementById('rowNightFee');
+                    if (data.nightSurcharge > 0) {
+                        rowNight.style.display = 'flex';
+                        document.getElementById('displayNightFee').textContent = '+' + formatVnd(data.nightSurcharge);
+                    } else {
+                        rowNight.style.display = 'none';
+                    }
+
+                    const rowTravel = document.getElementById('rowTravelFee');
+                    if (data.travelSurcharge > 0) {
+                        rowTravel.style.display = 'flex';
+                        document.getElementById('displayTravelFee').textContent = '+' + formatVnd(data.travelSurcharge);
+                    } else {
+                        rowTravel.style.display = 'none';
+                    }
+
+                    const rowExtras = document.getElementById('rowExtrasFee');
+                    if (data.extrasFee > 0) {
+                        rowExtras.style.display = 'flex';
+                        document.getElementById('displayExtrasFee').textContent = '+' + formatVnd(data.extrasFee);
+                    } else {
+                        rowExtras.style.display = 'none';
+                    }
+
+                    document.getElementById('displayTotalPrice').textContent = formatVnd(data.totalPrice);
+                    document.getElementById('displayDepositAmount').textContent = formatVnd(data.depositAmount);
+                    document.getElementById('displayRemainingBalance').textContent = formatVnd(data.remainingBalance);
+                })
+                .catch(err => console.debug('Pricing preview error', err));
+        }
+
+        [packageSelect, timeInput, travelInput, nightInput, extraHoursInput, extraPhotosInput, addPhotographerInput].forEach(el => {
+            if (el) {
+                el.addEventListener('change', updatePriceCalculation);
+                el.addEventListener('input', updatePriceCalculation);
+            }
+        });
+
+        updatePriceCalculation();
     });
     </script>
 

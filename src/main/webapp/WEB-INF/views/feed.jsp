@@ -468,7 +468,15 @@
                     <c:when test="${empty posts}">
                         <div class="pc-empty-state text-center p-5 bg-surface border rounded-4">
                             <h3 style="font-weight: 800;">No works found in this category</h3>
-                                        <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
+                            <p class="text-muted">Explore our photographers directory to discover creative portfolios.</p>
+                            <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary mt-3">Explore Photographers</a>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="post" items="${posts}">
+                            <article class="feed-post-card" id="post-<c:out value='${post.imageId}'/>">
+                                <div class="post-header-bar">
+                                    <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
                                          <c:choose>
                                              <c:when test="${not empty post.photographerAvatarUrl}">
                                                  <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="<c:out value='${post.photographerName}'/>" class="post-author-avatar">

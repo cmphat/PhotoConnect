@@ -1,0 +1,13 @@
+@startuml STATE-02
+!include ../theme.puml
+title STATE-02 — Phê duyệt Nhiếp ảnh gia
+[*] --> PENDING : submit profile
+PENDING --> APPROVED : admin/manager approve
+PENDING --> REJECTED : admin/manager reject
+REJECTED --> PENDING : applicant reapply
+APPROVED --> SUSPENDED : admin/manager suspend
+SUSPENDED --> APPROVED : admin/manager reinstate
+APPROVED --> [*]
+SUSPENDED --> [*]
+@enduml
+

@@ -1,0 +1,60 @@
+@startuml ERD-02
+!include ../theme.puml
+title ERD-02 — Danh tính và hồ sơ người dùng
+hide methods
+entity users {
+  * id : bigint <<PK>>
+  --
+  email : varchar <<UQ>>
+  password : varchar
+  full_name : varchar
+  username : varchar
+  avatar_url : varchar
+  role : varchar
+  status : varchar
+  created_at : datetime2
+}
+entity photographer_profiles {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK,UQ>>
+  display_name : varchar
+  city : varchar
+  specialties : varchar
+  verification_status : varchar
+  average_rating : float
+  reviewed_by_admin_id : bigint <<scalar>>
+}
+entity external_auth_identities {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK>>
+  provider : varchar
+  provider_subject : varchar
+  created_at : datetime2
+}
+entity email_verification_tokens {
+  * id : bigint <<PK>>
+  email : varchar
+  token_hash : varchar
+  purpose : varchar
+  target_value : varchar
+  attempt_count : int
+  max_attempts : int
+  expires_at : datetime2
+  used_at : datetime2
+}
+entity saved_photographers {
+  * id : bigint <<PK>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+  created_at : datetime2
+}
+users ||--o| photographer_profiles
+users ||--o{ external_auth_identities
+users ||--o{ saved_photographers : customer
+photographer_profiles ||--o{ saved_photographers
+note right of photographer_profiles
+  reviewed_by_admin_id là scalar trong JPA;
+  migration không khai báo FK, nên không vẽ quan hệ.
+end note
+@enduml
+

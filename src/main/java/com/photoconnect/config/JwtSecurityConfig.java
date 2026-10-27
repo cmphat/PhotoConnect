@@ -77,7 +77,8 @@ public class JwtSecurityConfig {
             String path = JwtAuthenticationFilter.applicationPath(request);
             return !safeMethods.contains(request.getMethod())
                     && !path.equals("/ws") && !path.startsWith("/ws/")
-                    && !path.equals("/ws-raw") && !path.startsWith("/ws-raw/");
+                    && !path.equals("/ws-raw") && !path.startsWith("/ws-raw/")
+                    && !path.startsWith("/api/webhooks/");
         });
         filter.setAccessDeniedHandler((request, response, exception) -> {
             String path = JwtAuthenticationFilter.applicationPath(request);

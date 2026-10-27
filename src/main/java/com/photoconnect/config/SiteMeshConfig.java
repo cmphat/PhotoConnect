@@ -21,6 +21,7 @@ public class SiteMeshConfig {
     public static final String DECORATOR_PREFIX = "/WEB-INF/decorators/";
     public static final String DEFAULT_DECORATOR = "default.jsp";
     public static final String ADMIN_DECORATOR = "admin.jsp";
+    public static final String MANAGER_DECORATOR = "manager.jsp";
 
     public static void configureSiteMesh(SiteMeshFilterBuilder builder) {
         builder.setDecoratorPrefix(DECORATOR_PREFIX)
@@ -30,6 +31,7 @@ public class SiteMeshConfig {
                .addExcludedPath("/error")
                .addExcludedPath("/error/*")
                .addDecoratorPath("/admin/*", ADMIN_DECORATOR)
+               .addDecoratorPath("/manager/*", MANAGER_DECORATOR)
                .addDecoratorPath("/*", DEFAULT_DECORATOR);
     }
 

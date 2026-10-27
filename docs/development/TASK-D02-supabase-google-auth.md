@@ -1,4 +1,6 @@
-# TASK-D02 — Supabase Auth + Google OAuth Integration
+# TASK-D02 — Supabase Auth + Google OAuth Integration (lịch sử, đã thay thế)
+
+> Tài liệu này mô tả implementation trước V6 và không còn là hướng dẫn runtime. Xem `docs/PHOTOCONNECT_GOOGLE_OAUTH_SETUP.md` cho native Spring Security OAuth2/OIDC hiện tại.
 
 ## Status
 

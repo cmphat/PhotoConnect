@@ -2,7 +2,9 @@ package com.photoconnect.controller;
 
 import com.photoconnect.dto.RegisterRequest;
 import com.photoconnect.exception.EmailAlreadyExistsException;
+import com.photoconnect.exception.EmailDeliveryException;
 import com.photoconnect.exception.PasswordMismatchException;
+import com.photoconnect.entity.User;
 import com.photoconnect.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -47,13 +49,19 @@ public class RegisterController {
         }
 
         try {
-            userService.registerUser(registerRequest);
-            return "redirect:/register?success";
+            User registeredUser = userService.registerUser(registerRequest);
+            session.setAttribute(EmailVerificationController.PENDING_REGISTRATION_EMAIL_SESSION_KEY,
+                    registeredUser.getEmail());
+            return "redirect:/verify-otp?sent=true";
         } catch (PasswordMismatchException e) {
             model.addAttribute("passwordError", e.getMessage());
             return "register";
         } catch (EmailAlreadyExistsException e) {
             model.addAttribute("emailError", e.getMessage());
+            return "register";
+        } catch (EmailDeliveryException e) {
+            model.addAttribute("emailError",
+                    "Không thể gửi email xác thực lúc này. Vui lòng thử lại sau.");
             return "register";
         }
     }

@@ -143,6 +143,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.equals("/admin") || path.startsWith("/admin/")) {
             return UserRole.ADMIN;
         }
+        if (path.equals("/manager") || path.startsWith("/manager/")) {
+            return UserRole.MANAGER;
+        }
         if (path.equals("/customer") || path.startsWith("/customer/")) {
             return UserRole.CUSTOMER;
         }
@@ -159,13 +162,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     static boolean requiresAnyAuthenticatedUser(String path) {
-        return path.equals("/auth/google/link")
-                || path.equals("/bookings") || path.startsWith("/bookings/")
+        return path.equals("/bookings") || path.startsWith("/bookings/")
                 || path.equals("/api/bookings") || path.startsWith("/api/bookings/")
                 || path.equals("/profile/me")
                 || path.equals("/profile/edit")
                 || path.equals("/profile/avatar")
                 || path.equals("/profile/avatar/remove")
+                || path.equals("/support") || path.startsWith("/support/")
                 || path.startsWith("/api/me/")
                 || path.equals("/ws") || path.startsWith("/ws/")
                 || path.equals("/ws-raw") || path.startsWith("/ws-raw/");

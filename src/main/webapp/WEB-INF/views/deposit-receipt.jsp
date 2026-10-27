@@ -29,7 +29,7 @@
             <section class="receipt-section">
                 <h2>Transaction</h2>
                 <dl class="receipt-grid">
-                    <div><dt>Payment method</dt><dd><c:choose><c:when test="${not empty deposit.paymentMethod}"><c:out value="${deposit.paymentMethod.displayName}" /></c:when><c:otherwise>Demo payment (legacy)</c:otherwise></c:choose></dd></div>
+                    <div><dt>Payment method</dt><dd><c:choose><c:when test="${not empty deposit.providerName}"><c:out value="${deposit.providerName}" /> VietQR</c:when><c:when test="${not empty deposit.paymentMethod}"><c:out value="${deposit.paymentMethod.displayName}" /></c:when><c:otherwise>VietQR Deposit</c:otherwise></c:choose></dd></div>
                     <div><dt>Payment timestamp</dt><dd><c:choose><c:when test="${not empty deposit.paidAt}"><c:out value="${fn:substring(deposit.paidAt, 0, 16)}" /></c:when><c:otherwise>Recorded</c:otherwise></c:choose></dd></div>
                     <div><dt>Customer</dt><dd><c:out value="${booking.customerName}" /></dd></div>
                     <div><dt>Photographer</dt><dd><c:out value="${booking.photographerName}" /></dd></div>
@@ -41,6 +41,7 @@
                 <dl class="receipt-grid">
                     <div><dt>Booking ID</dt><dd>#<c:out value="${booking.id}" /></dd></div>
                     <div><dt>Session title</dt><dd><c:out value="${booking.sessionTitle}" /></dd></div>
+                    <div><dt>Photography Package</dt><dd><c:out value="${not empty booking.packageName ? booking.packageName : booking.sessionTitle}" /></dd></div>
                     <div><dt>Session date</dt><dd><c:out value="${booking.bookingDate}" /></dd></div>
                     <div><dt>Session time</dt><dd><c:out value="${booking.bookingTime}" /></dd></div>
                 </dl>
@@ -55,8 +56,16 @@
             </section>
 
             <footer class="receipt-footer">
-                <strong>Demo transaction — no real money was transferred.</strong>
-                <span>This receipt documents a PhotoConnect local demonstration only.</span>
+                <c:choose>
+                    <c:when test="${deposit.paymentMode == 'REAL'}">
+                        <strong>Official VietQR Confirmation.</strong>
+                        <span>Deposit received and validated by PhotoConnect Platform via bank webhook.</span>
+                    </c:when>
+                    <c:otherwise>
+                        <strong>Demo transaction — no real money was transferred.</strong>
+                        <span>This receipt documents a PhotoConnect local demonstration only.</span>
+                    </c:otherwise>
+                </c:choose>
             </footer>
         </article>
         <div class="receipt-links">

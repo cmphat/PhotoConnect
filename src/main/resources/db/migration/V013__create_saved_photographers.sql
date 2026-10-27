@@ -22,7 +22,7 @@ BEGIN
         CONSTRAINT FK_saved_photographers_customer FOREIGN KEY (customer_id)
             REFERENCES dbo.users(id) ON DELETE CASCADE,
         CONSTRAINT FK_saved_photographers_profile FOREIGN KEY (photographer_profile_id)
-            REFERENCES dbo.photographer_profiles(id) ON DELETE CASCADE,
+            REFERENCES dbo.photographer_profiles(id) ON DELETE NO ACTION,
         CONSTRAINT UQ_saved_photographers_customer_profile UNIQUE (customer_id, photographer_profile_id)
     );
 

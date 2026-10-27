@@ -49,4 +49,32 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
               AND d.status = com.photoconnect.entity.DepositStatus.PAID
             """)
     java.math.BigDecimal calculateConfirmedDepositsForPhotographer(@Param("profileId") Long profileId);
+
+    @Query("""
+            SELECT d FROM Deposit d
+            JOIN FETCH d.booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE d.paymentReference = :paymentReference
+            """)
+    Optional<Deposit> findByPaymentReferenceWithDetails(@Param("paymentReference") String paymentReference);
+
+    Optional<Deposit> findByPaymentReference(String paymentReference);
+
+    @Query("""
+            SELECT d FROM Deposit d
+            JOIN FETCH d.booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE d.providerOrderCode = :providerOrderCode
+            """)
+    Optional<Deposit> findByProviderOrderCodeWithDetails(@Param("providerOrderCode") Long providerOrderCode);
+
+    Optional<Deposit> findByProviderOrderCode(Long providerOrderCode);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT d FROM Deposit d WHERE d.id = :depositId")
+    Optional<Deposit> findByIdForUpdate(@Param("depositId") Long depositId);
 }

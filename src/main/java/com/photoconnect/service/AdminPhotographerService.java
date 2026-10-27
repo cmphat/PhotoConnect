@@ -31,6 +31,8 @@ public interface AdminPhotographerService {
 
     PhotographerProfile reject(Long profileId, Long adminId, String rejectionReason, String adminNotes);
 
+    PhotographerProfile suspend(Long profileId, Long adminId, String suspensionReason, String adminNotes);
+
     /**
      * Returns all photographer profiles with associated User fetched.
      */

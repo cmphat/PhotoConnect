@@ -12,5 +12,6 @@
 
     <!-- Decorator Mappings (relative to decorator-prefix) -->
     <mapping path="/admin/*" decorator="admin.jsp"/>
+    <mapping path="/manager/*" decorator="manager.jsp"/>
     <mapping path="/*" decorator="default.jsp"/>
 </sitemesh>

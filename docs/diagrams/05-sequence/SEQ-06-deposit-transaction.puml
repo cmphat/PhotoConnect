@@ -1,0 +1,30 @@
+@startuml SEQ-06
+!include ../theme.puml
+title SEQ-06 — Giao dịch đặt cọc mô phỏng
+actor Customer
+participant DepositController
+participant DepositServiceImpl
+participant DepositRepository
+participant BookingStateMachineServiceImpl
+participant BookingRepository
+participant BookingHistoryRepository
+database "SQL Server" as DB
+Customer -> DepositController : POST /bookings/{id}/deposit/process
+DepositController -> DepositServiceImpl : processDeposit(id,userId,DEMO_*)
+group @Transactional
+  DepositServiceImpl -> DepositRepository : lock/load one deposit
+  DepositRepository -> DB
+  DepositServiceImpl -> DepositRepository : PROCESSING -> PAID
+  DepositServiceImpl -> BookingStateMachineServiceImpl : transition -> CONFIRMED
+  BookingStateMachineServiceImpl -> DepositRepository : verify PAID invariant
+  BookingStateMachineServiceImpl -> BookingRepository : save CONFIRMED
+  BookingStateMachineServiceImpl -> BookingHistoryRepository : audit
+end
+alt all succeeds
+  DepositController --> Customer : receipt/success
+else exception
+  DB --> DepositServiceImpl : rollback transaction
+  DepositController --> Customer : failure; booking unconfirmed
+end
+@enduml
+

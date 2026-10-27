@@ -49,6 +49,24 @@ public class Deposit {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Column(name = "provider_order_code")
+    private Long providerOrderCode;
+
+    @Column(name = "provider_name", length = 50)
+    private String providerName;
+
+    @Column(name = "provider_transaction_id", length = 100)
+    private String providerTransactionId;
+
+    @Column(name = "qr_code_url", columnDefinition = "NVARCHAR(MAX)")
+    private String qrCodeUrl;
+
+    @Column(name = "checkout_url", length = 1000)
+    private String checkoutUrl;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -142,6 +160,54 @@ public class Deposit {
 
     public void setPaidAt(LocalDateTime paidAt) {
         this.paidAt = paidAt;
+    }
+
+    public Long getProviderOrderCode() {
+        return providerOrderCode;
+    }
+
+    public void setProviderOrderCode(Long providerOrderCode) {
+        this.providerOrderCode = providerOrderCode;
+    }
+
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderTransactionId() {
+        return providerTransactionId;
+    }
+
+    public void setProviderTransactionId(String providerTransactionId) {
+        this.providerTransactionId = providerTransactionId;
+    }
+
+    public String getQrCodeUrl() {
+        return qrCodeUrl;
+    }
+
+    public void setQrCodeUrl(String qrCodeUrl) {
+        this.qrCodeUrl = qrCodeUrl;
+    }
+
+    public String getCheckoutUrl() {
+        return checkoutUrl;
+    }
+
+    public void setCheckoutUrl(String checkoutUrl) {
+        this.checkoutUrl = checkoutUrl;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public LocalDateTime getCreatedAt() {

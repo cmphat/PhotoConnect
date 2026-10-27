@@ -45,6 +45,9 @@ class ReportServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private OperationalAuditService auditService;
+
     @InjectMocks
     private ReportServiceImpl reportService;
 
@@ -199,10 +202,15 @@ class ReportServiceTest {
 
     @Test
     void resolveReport_asAdmin_updatesStatusAndNotes() {
+        User admin = new User();
+        admin.setId(999L);
+        admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         UserReport rep = new UserReport(customer, photographerUser, booking, ReportCategory.NO_SHOW, "Details");
         rep.setId(5L);
         rep.setStatus(ReportStatus.PENDING);
 
+        when(userRepository.findById(999L)).thenReturn(Optional.of(admin));
         when(userReportRepository.findByIdWithDetails(5L)).thenReturn(Optional.of(rep));
         when(userReportRepository.save(any(UserReport.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -213,6 +221,35 @@ class ReportServiceTest {
         assertThat(result.adminNotes()).isEqualTo("Confirmed with studio log, deposit refunded.");
         assertThat(result.resolvedByAdminId()).isEqualTo(999L);
         assertThat(result.resolvedAt()).isNotNull();
+        verify(auditService).record(999L, "REPORT_RESOLVED", "UserReport", 5L,
+                com.photoconnect.entity.AuditOutcome.SUCCESS, "Administrator completed report moderation");
+    }
+
+    @Test
+    void resolveReport_asManagerThroughLegacyAdminService_isDenied() {
+        User manager = new User();
+        manager.setId(77L);
+        manager.setRole(UserRole.MANAGER);
+        manager.setStatus(UserStatus.ACTIVE);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(manager));
+
+        assertThatThrownBy(() -> reportService.resolveReport(5L, 77L, "bypass", ReportStatus.RESOLVED))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Administrator");
+        verify(userReportRepository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void resolveReport_rejectsArbitraryTargetStatus() {
+        User admin = new User();
+        admin.setId(999L);
+        admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
+        when(userRepository.findById(999L)).thenReturn(Optional.of(admin));
+
+        assertThatThrownBy(() -> reportService.resolveReport(5L, 999L, "bypass", ReportStatus.PENDING))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("RESOLVED or DISMISSED");
     }
 
     @Test

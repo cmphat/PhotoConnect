@@ -30,8 +30,18 @@ class FlywayMigrationContractTest {
                     .toList();
 
             assertThat(migrationScripts)
-                    .as("Must contain all 18 migration scripts")
-                    .hasSize(18);
+                    .as("Must retain the complete migration history through V034")
+                    .hasSizeGreaterThanOrEqualTo(26)
+                    .extracting(path -> path.getFileName().toString())
+                    .contains("V034__configure_package_pricing_and_payment_order_integrity.sql");
+
+            long distinctVersions = migrationScripts.stream()
+                    .map(path -> path.getFileName().toString().substring(0, 4))
+                    .distinct()
+                    .count();
+            assertThat(distinctVersions)
+                    .as("Every Flyway migration version must be unique")
+                    .isEqualTo(migrationScripts.size());
 
             for (Path script : migrationScripts) {
                 String fileName = script.getFileName().toString();
@@ -75,7 +85,7 @@ class FlywayMigrationContractTest {
     }
 
     @Test
-    @DisplayName("Latest migrations V022 through V026 define expected PhotoConnect V5 feature tables and columns")
+    @DisplayName("Latest migrations V022 through V030 define expected PhotoConnect feature tables and constraints")
     void recentMigrations_defineExpectedV5Schema() throws IOException {
         // V022: Email OTP tokens
         String v022 = Files.readString(MIGRATIONS.resolve("V022__create_email_verification_tokens.sql"));
@@ -96,5 +106,78 @@ class FlywayMigrationContractTest {
         // V026: Photographer CRM notes
         String v026 = Files.readString(MIGRATIONS.resolve("V026__add_photographer_notes_to_bookings.sql"));
         assertThat(v026).contains("photographer_notes");
+
+        // V027: Manager operations & audit logs
+        String v027 = Files.readString(MIGRATIONS.resolve("V027__add_manager_operations.sql"));
+        assertThat(v027)
+                .contains("operational_audit_logs")
+                .contains("support_tickets")
+                .contains("support_ticket_messages")
+                .contains("assigned_manager_id")
+                .contains("investigation_notes")
+                .contains("FK_saved_photographers_profile");
+
+        // V028: forward-only reconciliation for Booking optimistic locking
+        String v028 = Files.readString(MIGRATIONS.resolve("V028__add_booking_optimistic_lock_version.sql"));
+        assertThat(v028)
+                .contains("ALTER TABLE dbo.bookings ADD version BIGINT NULL")
+                .contains("sp_executesql N'UPDATE dbo.bookings SET version = 0 WHERE version IS NULL;")
+                .contains("sp_executesql N'ALTER TABLE dbo.bookings ALTER COLUMN version BIGINT NOT NULL;")
+                .contains("DF_bookings_version");
+
+        // V029: pending accounts must be persisted before OTP verification.
+        String v029 = Files.readString(MIGRATIONS.resolve("V029__allow_pending_user_verification_status.sql"));
+        assertThat(v029)
+                .contains("c.name = 'status'")
+                .contains("DROP CONSTRAINT")
+                .contains("CONSTRAINT CK_users_status")
+                .contains("'PENDING_VERIFICATION'");
+
+        // V030: native OIDC identity mapping must reject duplicate provider links per user.
+        String v030 = Files.readString(MIGRATIONS.resolve("V030__harden_external_identity_uniqueness.sql"));
+        assertThat(v030)
+                .contains("UQ_external_auth_user_provider")
+                .contains("UNIQUE (user_id, provider)")
+                .contains("THROW 51031");
+    }
+
+    @Test
+    @DisplayName("Migration configuration validates checksums without automatically repairing schema history")
+    void migrationStartup_doesNotHideChecksumDrift() throws IOException {
+        String v013 = Files.readString(MIGRATIONS.resolve("V013__create_saved_photographers.sql"));
+        assertThat(v013)
+                .as("V013 FK_saved_photographers_profile must use ON DELETE NO ACTION to prevent SQL Server Error 1785 on fresh install")
+                .contains("REFERENCES dbo.photographer_profiles(id) ON DELETE NO ACTION");
+
+        String v027 = Files.readString(MIGRATIONS.resolve("V027__add_manager_operations.sql"));
+        assertThat(v027)
+                .as("V027 must provide idempotent constraint alignment for existing databases")
+                .contains("ALTER TABLE dbo.saved_photographers DROP CONSTRAINT FK_saved_photographers_profile")
+                .contains("REFERENCES dbo.photographer_profiles(id) ON DELETE NO ACTION");
+
+        Path flywayConfig = ROOT.resolve("src/main/java/com/photoconnect/config/FlywayConfig.java");
+        assertThat(Files.exists(flywayConfig))
+                .as("No custom startup strategy may hide checksum mismatches with flyway.repair()")
+                .isFalse();
+
+        Path mainJava = ROOT.resolve("src/main/java");
+        try (var files = Files.walk(mainJava)) {
+            List<Path> repairCallers = files
+                    .filter(path -> path.toString().endsWith(".java"))
+                    .filter(path -> {
+                        try {
+                            return Files.readString(path).contains("flyway.repair(");
+                        } catch (IOException exception) {
+                            throw new java.io.UncheckedIOException(exception);
+                        }
+                    })
+                    .toList();
+            assertThat(repairCallers)
+                    .as("Application startup must fail explicitly on migration checksum drift")
+                    .isEmpty();
+        }
+
+        String properties = Files.readString(ROOT.resolve("src/main/resources/application.properties"));
+        assertThat(properties).contains("spring.flyway.validate-on-migrate=true");
     }
 }

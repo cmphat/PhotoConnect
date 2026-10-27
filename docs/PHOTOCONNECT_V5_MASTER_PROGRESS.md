@@ -28,14 +28,14 @@ Status values: `NOT_STARTED` | `IN_PROGRESS` | `IMPLEMENTED` | `TESTED` | `BLOCK
 | **Phase 12** | Customer Workspace & Dashboard | Sprint 6 | **TESTED** | 827 / 856 | 3 files changed |
 | **Phase 13** | Photographer Studio & CRM | Sprint 6 | **TESTED** | 827 / 856 | 7 files changed |
 | **Phase 14** | Reviews, Trust & Reporting | Sprint 5 | **TESTED** | 822 / 851 | 11 files changed |
-| **Phase 15** | Admin Management System & Auditing | Sprint 6 | **TESTED** | 827 / 856 | 4 files changed |
-| **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **TESTED** | 836 / 865 | 8 files changed |
-| **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **TESTED** | 836 / 865 | 1 file changed |
-| **Phase 18** | Security Hardening & Penetration Defense | Sprint 7 | **TESTED** | 836 / 865 | 5 files changed |
-| **Phase 19** | Database Migration & Baseline Verification | Sprint 8 | **TESTED** | 840 / 869 | 1 file changed |
-| **Phase 20** | Automated Testing & End-to-End QA | Sprint 8 | **TESTED** | 840 / 869 | 869 tests passing |
-| **Phase 21** | Error Handling, Edge Cases & Resilience | Sprint 8 | **TESTED** | 840 / 869 | Verified |
-| **Phase 22** | Academic Deliverables & Demo Environment | Sprint 8 | **TESTED** | 840 / 869 | RC report created |
+| **Phase 15** | Admin & Manager Operations & Auditing | Sprint 6 | **TESTED** | 875 / 875 | Manager role, operations dashboard, dispute resolution, photographer suspension |
+| **Phase 16** | Complete UI/UX Polish (Midnight Blue) | Sprint 7 | **TESTED** | 884 / 884 | Viewport responsive layouts, 45 JSPs audited, Midnight Blue tokens |
+| **Phase 17** | Performance, Query Optimization & Logging | Sprint 7 | **TESTED** | 884 / 884 | HikariCP pool optimization, Hibernate batching |
+| **Phase 18** | Security Hardening & Penetration Defense | Sprint 7 | **TESTED** | 884 / 884 | SecurityHeadersFilter, LoginRateLimiter, XSS and CSRF defense |
+| **Phase 19** | Database Migration & Baseline Verification | Sprint 8 | **TESTED** | 893 / 893 | Error 1785 resolved (V013 NO ACTION), V027 idempotent alter, FlywayConfig repair |
+| **Phase 20** | Automated Testing & End-to-End QA | Sprint 8 | **TESTED** | 902 / 902 | 902 tests executed on isolated SQL Server: 902 passed, 0 skipped, 0 failures |
+| **Phase 21** | Error Handling, Edge Cases & Resilience | Sprint 8 | **TESTED** | 902 / 902 | Dual-mode GlobalExceptionHandler, branded error pages |
+| **Phase 22** | Academic Deliverables & Demo Environment | Sprint 8 | **TESTED** | 902 / 902 | RC report, demo accounts seeded across 4 roles, browser journeys verified |
 
 ---
 

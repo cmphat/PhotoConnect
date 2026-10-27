@@ -35,12 +35,13 @@ public class BookingServiceImpl implements BookingService {
     private final BookingStateMachineService bookingStateMachineService;
     private final DepositRepository depositRepository;
     private final RescheduleRequestRepository rescheduleRequestRepository;
+    private final PricingService pricingService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserRepository userRepository,
                               PhotographerProfileRepository photographerProfileRepository,
                               ScheduleService scheduleService) {
-        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, null, null, null, null, null);
+        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, null, null, null, null, null, null);
     }
 
     public BookingServiceImpl(BookingRepository bookingRepository,
@@ -48,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
                               PhotographerProfileRepository photographerProfileRepository,
                               ScheduleService scheduleService,
                               com.photoconnect.repository.ServicePackageRepository servicePackageRepository) {
-        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, servicePackageRepository, null, null, null, null);
+        this(bookingRepository, userRepository, photographerProfileRepository, scheduleService, servicePackageRepository, null, null, null, null, null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -60,7 +61,8 @@ public class BookingServiceImpl implements BookingService {
                               @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService,
                               @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService,
                               @org.springframework.beans.factory.annotation.Autowired(required = false) DepositRepository depositRepository,
-                              @org.springframework.beans.factory.annotation.Autowired(required = false) RescheduleRequestRepository rescheduleRequestRepository) {
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) RescheduleRequestRepository rescheduleRequestRepository,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) PricingService pricingService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.photographerProfileRepository = photographerProfileRepository;
@@ -70,6 +72,7 @@ public class BookingServiceImpl implements BookingService {
         this.bookingStateMachineService = bookingStateMachineService;
         this.depositRepository = depositRepository;
         this.rescheduleRequestRepository = rescheduleRequestRepository;
+        this.pricingService = pricingService != null ? pricingService : new PricingServiceImpl();
     }
 
     @Override
@@ -135,27 +138,30 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // 4. Price & Package Snapshot
-        BigDecimal agreedPrice = profile.getPriceFrom() != null ? profile.getPriceFrom() : BigDecimal.ZERO;
-        com.photoconnect.entity.ServicePackage selectedPackage = null;
-        String packageName = "Custom Session";
-        int durationMinutes = 120;
-        Integer editedPhotoCount = null;
-        Integer deliveryDays = null;
-
-        if (request.getPackageId() != null && servicePackageRepository != null) {
-            com.photoconnect.entity.ServicePackage pkg = servicePackageRepository
+        if (request.getPackageId() == null || servicePackageRepository == null) {
+            throw new InvalidBookingException("An active service package is required.");
+        }
+        com.photoconnect.entity.ServicePackage selectedPackage = servicePackageRepository
                     .findByIdAndPhotographerProfileId(request.getPackageId(), profile.getId())
                     .orElseThrow(() -> new InvalidBookingException("Selected service package not found or does not belong to this photographer."));
-            if (!pkg.isActive()) {
-                throw new InvalidBookingException("Selected service package is currently inactive.");
-            }
-            selectedPackage = pkg;
-            packageName = pkg.getName();
-            agreedPrice = pkg.getPrice();
-            durationMinutes = pkg.getDurationMinutes();
-            editedPhotoCount = pkg.getEditedPhotoCount();
-            deliveryDays = pkg.getDeliveryDays();
+        if (!selectedPackage.isActive()) {
+            throw new InvalidBookingException("Selected service package is currently inactive.");
         }
+        String packageName = selectedPackage.getName();
+        int durationMinutes = selectedPackage.getDurationMinutes();
+        Integer editedPhotoCount = selectedPackage.getEditedPhotoCount();
+        Integer deliveryDays = selectedPackage.getDeliveryDays();
+
+        // Authoritative Pricing Calculation
+        com.photoconnect.dto.PriceBreakdownDto pricing = pricingService.calculatePricing(
+                selectedPackage,
+                request.getBookingTime(),
+                request.getNightShoot(),
+                request.getTravelDistanceKm(),
+                request.getExtraHours(),
+                request.getExtraPhotos(),
+                request.getAdditionalPhotographer()
+        );
 
         // 5. Check Availability & Slot Conflict
         java.time.LocalTime requestedTime = request.getBookingTime() != null ? request.getBookingTime() : java.time.LocalTime.of(9, 0);
@@ -190,7 +196,17 @@ public class BookingServiceImpl implements BookingService {
         booking.setShotList(request.getShotList() != null ? request.getShotList().trim() : null);
         booking.setPropsNeeded(request.getPropsNeeded() != null ? request.getPropsNeeded().trim() : null);
         booking.setParticipantCount(request.getParticipantCount());
-        booking.setAgreedPrice(agreedPrice);
+
+        // Save authoritative price snapshot
+        booking.setBasePrice(pricing.getBasePrice());
+        booking.setNightSurcharge(pricing.getNightSurcharge());
+        booking.setTravelDistanceKm(pricing.getTravelDistanceKm());
+        booking.setTravelSurcharge(pricing.getTravelSurcharge());
+        booking.setExtrasFee(pricing.getExtrasFee());
+        booking.setExtraHours(pricing.getExtraHours());
+        booking.setExtraPhotos(pricing.getExtraPhotos());
+        booking.setAdditionalPhotographer(pricing.isAdditionalPhotographer());
+        booking.setAgreedPrice(pricing.getTotalPrice());
         booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);

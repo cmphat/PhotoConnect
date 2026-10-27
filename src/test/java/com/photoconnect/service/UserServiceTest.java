@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
+@SpringBootTest(properties = "photoconnect.mail.capture-mode=true")
 @EnabledIfEnvironmentVariable(named = "DB_USERNAME", matches = ".+")
 public class UserServiceTest {
 
@@ -34,9 +34,18 @@ public class UserServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.photoconnect.repository.EmailVerificationTokenRepository emailVerificationTokenRepository;
+
+    @Autowired
+    private com.photoconnect.repository.SavedPhotographerRepository savedPhotographerRepository;
+
+    @org.junit.jupiter.api.BeforeEach
     @AfterEach
     public void cleanup() {
+        emailVerificationTokenRepository.deleteAll();
         // Must delete child records first to avoid FK constraint violation
+        savedPhotographerRepository.deleteAll();
         photographerProfileRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -61,7 +70,7 @@ public class UserServiceTest {
         assertThat(createdUser.getFullName()).isEqualTo("John Doe");
         assertThat(createdUser.getEmail()).isEqualTo("john.doe@example.com");
         assertThat(createdUser.getRole()).isEqualTo(UserRole.CUSTOMER);
-        assertThat(createdUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(createdUser.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
         
         // Verify BCrypt hashing
         assertThat(createdUser.getPassword()).isNotEqualTo("password123");
@@ -75,9 +84,11 @@ public class UserServiceTest {
 
     @Test
     public void testDuplicateEmail() {
-        // Arrange
+        // Arrange: first user registered and activated
         RegisterRequest firstRequest = new RegisterRequest("Alice", "test@example.com", null, "pass1234", "pass1234");
-        userService.registerUser(firstRequest);
+        User firstUser = userService.registerUser(firstRequest);
+        firstUser.setStatus(UserStatus.ACTIVE);
+        userRepository.save(firstUser);
 
         RegisterRequest duplicateRequest = new RegisterRequest("Bob", "TEST@example.com", null, "pass5678", "pass5678");
 

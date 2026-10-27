@@ -91,4 +91,28 @@ public class AdminUserController {
 
         return "redirect:/admin/users";
     }
+
+    @PostMapping("/{id}/manager-role")
+    public String updateManagerRole(@PathVariable Long id,
+                                    @RequestParam("action") String action,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        String redirect = AdminSecurityUtils.requireAdmin(session);
+        if (redirect != null) return redirect;
+        Long currentAdminId = (Long) session.getAttribute("userId");
+        try {
+            if ("GRANT".equalsIgnoreCase(action)) {
+                adminUserService.grantManagerRole(id, currentAdminId);
+                redirectAttributes.addFlashAttribute("successMessage", "Manager access granted. Existing tokens with the old role are rejected immediately.");
+            } else if ("REVOKE".equalsIgnoreCase(action)) {
+                adminUserService.revokeManagerRole(id, currentAdminId);
+                redirectAttributes.addFlashAttribute("successMessage", "Manager access revoked. Existing Manager tokens are no longer accepted.");
+            } else {
+                throw new IllegalArgumentException("Unsupported role action.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
 }

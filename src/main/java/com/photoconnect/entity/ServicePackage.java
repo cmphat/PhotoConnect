@@ -54,6 +54,24 @@ public class ServicePackage {
     @Column(nullable = false)
     private boolean active = true;
 
+    @Column(name = "night_surcharge_rate", nullable = false, precision = 5, scale = 4)
+    private BigDecimal nightSurchargeRate = new BigDecimal("0.2000");
+
+    @Column(name = "included_travel_km", nullable = false)
+    private Integer includedTravelKm = 30;
+
+    @Column(name = "excess_travel_rate", nullable = false, precision = 18, scale = 2)
+    private BigDecimal excessTravelRate = new BigDecimal("15000");
+
+    @Column(name = "additional_hour_fee", nullable = false, precision = 18, scale = 2)
+    private BigDecimal additionalHourFee = new BigDecimal("200000");
+
+    @Column(name = "extra_edited_photo_fee", nullable = false, precision = 18, scale = 2)
+    private BigDecimal extraEditedPhotoFee = new BigDecimal("50000");
+
+    @Column(name = "assistant_fee", nullable = false, precision = 18, scale = 2)
+    private BigDecimal assistantFee = new BigDecimal("500000");
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -165,6 +183,19 @@ public class ServicePackage {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    public BigDecimal getNightSurchargeRate() { return nightSurchargeRate; }
+    public void setNightSurchargeRate(BigDecimal value) { this.nightSurchargeRate = value; }
+    public Integer getIncludedTravelKm() { return includedTravelKm; }
+    public void setIncludedTravelKm(Integer value) { this.includedTravelKm = value; }
+    public BigDecimal getExcessTravelRate() { return excessTravelRate; }
+    public void setExcessTravelRate(BigDecimal value) { this.excessTravelRate = value; }
+    public BigDecimal getAdditionalHourFee() { return additionalHourFee; }
+    public void setAdditionalHourFee(BigDecimal value) { this.additionalHourFee = value; }
+    public BigDecimal getExtraEditedPhotoFee() { return extraEditedPhotoFee; }
+    public void setExtraEditedPhotoFee(BigDecimal value) { this.extraEditedPhotoFee = value; }
+    public BigDecimal getAssistantFee() { return assistantFee; }
+    public void setAssistantFee(BigDecimal value) { this.assistantFee = value; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

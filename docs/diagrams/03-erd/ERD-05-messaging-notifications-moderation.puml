@@ -1,0 +1,95 @@
+@startuml ERD-05
+!include ../theme.puml
+title ERD-05 — Tin nhắn, thông báo và kiểm duyệt
+hide methods
+entity users {
+  * id : bigint <<PK>>
+}
+entity bookings {
+  * id : bigint <<PK>>
+}
+entity messages {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  sender_id : bigint <<FK>>
+  receiver_id : bigint <<FK>>
+  content : varchar(2000)
+  is_read : bit
+  sent_at : datetime2
+}
+entity notifications {
+  * id : bigint <<PK>>
+  recipient_id : bigint <<FK>>
+  type : varchar
+  title : varchar
+  message : varchar
+  reference_id : bigint
+  target_url : varchar
+  read_at : datetime2
+}
+entity user_reports {
+  * id : bigint <<PK>>
+  reporter_id : bigint <<FK>>
+  reported_user_id : bigint <<FK,nullable>>
+  booking_id : bigint <<FK,nullable>>
+  category : varchar
+  status : varchar
+  assigned_manager_id : bigint <<FK,nullable>>
+  investigation_notes : nvarchar(1500)
+  resolution_reason : nvarchar(1000)
+  resolved_by_admin_id : bigint <<scalar>>
+}
+entity support_tickets {
+  * id : bigint <<PK>>
+  requester_id : bigint <<FK>>
+  assigned_manager_id : bigint <<FK,nullable>>
+  category : varchar
+  subject : nvarchar(200)
+  description : nvarchar(2000)
+  status : varchar
+  resolved_at : datetime2
+}
+entity support_ticket_messages {
+  * id : bigint <<PK>>
+  ticket_id : bigint <<FK>>
+  author_id : bigint <<FK>>
+  message : nvarchar(2000)
+  created_at : datetime2
+}
+entity operational_audit_logs {
+  * id : bigint <<PK>>
+  actor_id : bigint <<FK>>
+  actor_role : varchar
+  action : varchar
+  target_type : varchar
+  target_id : varchar
+  outcome : varchar
+  summary : nvarchar(1000)
+  created_at : datetime2
+}
+entity reviews {
+  * id : bigint <<PK>>
+  status : varchar
+}
+bookings ||--o{ messages
+users ||--o{ messages : sender
+users ||--o{ messages : receiver
+users ||--o{ notifications
+users ||--o{ user_reports : reporter
+users |o--o{ user_reports : reported_user
+bookings |o--o{ user_reports
+users |o--o{ user_reports : assigned_manager
+users ||--o{ support_tickets : requester
+users |o--o{ support_tickets : assigned_manager
+support_tickets ||--o{ support_ticket_messages
+users ||--o{ support_ticket_messages : author
+users ||--o{ operational_audit_logs : actor
+note right of user_reports
+  resolved_by_admin_id không có FK trong migration.
+  assigned_manager_id có FK từ V027.
+end note
+note right of operational_audit_logs
+  Chỉ có đường đọc cho Manager/Admin;
+  không có endpoint sửa hoặc xóa.
+end note
+@enduml

@@ -135,13 +135,27 @@
                 <c:if test="${param.oauth == 'expired'}">
                     <div class="alert alert-warning pc-alert" role="alert">Phiên đăng nhập Google đã hết hạn. Vui lòng thử lại.</div>
                 </c:if>
+                <c:if test="${param.oauth == 'cancelled'}">
+                    <div class="alert alert-info pc-alert" role="alert">Bạn đã hủy đăng nhập bằng Google.</div>
+                </c:if>
+                <c:if test="${param.oauth == 'unlinked-email'}">
+                    <div class="alert alert-warning pc-alert" role="alert">Email Google này đã thuộc một tài khoản PhotoConnect chưa liên kết. Vui lòng đăng nhập bằng mật khẩu; hệ thống không tự động hợp nhất tài khoản.</div>
+                </c:if>
+                <c:if test="${param.oauth == 'account-disabled'}">
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Tài khoản PhotoConnect đã bị khóa hoặc không hoạt động. Vui lòng liên hệ hỗ trợ.</div>
+                </c:if>
+                <c:if test="${param.oauth == 'invalid-identity' || param.oauth == 'identity-conflict' || param.oauth == 'error'}">
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng nhập bằng email.</div>
+                </c:if>
 
-                <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/auth/google">
-                    Continue with Google
-                </a>
-                <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
-                    <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc dùng email</span><span class="border-top flex-grow-1"></span>
-                </div>
+                <c:if test="${googleOAuthEnabled}">
+                    <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/oauth2/authorization/google">
+                        Đăng nhập bằng Google
+                    </a>
+                    <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
+                        <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc dùng email</span><span class="border-top flex-grow-1"></span>
+                    </div>
+                </c:if>
 
                 <form:form action="${pageContext.request.contextPath}/login" method="post" modelAttribute="loginRequest">
                     <%@ include file="fragments/csrf-input.jsp" %>

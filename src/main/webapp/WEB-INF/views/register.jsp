@@ -122,12 +122,14 @@
                     </div>
                 </c:if>
 
-                <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/auth/google">
-                    Continue with Google
-                </a>
-                <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
-                    <span class="border-top flex-grow-1"></span><span class="text-muted small">or register with email</span><span class="border-top flex-grow-1"></span>
-                </div>
+                <c:if test="${googleOAuthEnabled}">
+                    <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/oauth2/authorization/google">
+                        Đăng ký bằng Google
+                    </a>
+                    <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
+                        <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc đăng ký bằng email</span><span class="border-top flex-grow-1"></span>
+                    </div>
+                </c:if>
 
                 <form:form action="${pageContext.request.contextPath}/register" method="post" modelAttribute="registerRequest">
                     <%@ include file="fragments/csrf-input.jsp" %>

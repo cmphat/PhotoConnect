@@ -1,0 +1,26 @@
+@startuml UC-05
+!include ../theme.puml
+title UC-05 — Quản lý vận hành
+left to right direction
+actor "Manager" as Manager
+rectangle "PhotoConnect /manager" {
+  usecase "Xem dashboard vận hành" as Dashboard
+  usecase "Duyệt hồ sơ nhiếp ảnh gia" as Approvals
+  usecase "Điều tra và kết luận báo cáo" as Reports
+  usecase "Xem metadata booking" as BookingView
+  usecase "Giải quyết booking DISPUTED" as Disputes
+  usecase "Nhận và xử lý support ticket" as Support
+  usecase "Xem nhật ký vận hành" as Audit
+}
+Manager --> Dashboard
+Manager --> Approvals
+Manager --> Reports
+Manager --> BookingView
+Manager --> Disputes
+Manager --> Support
+Manager --> Audit
+note bottom
+  Manager không được cấp vai trò, truy cập /admin,
+  xem ảnh delivery riêng tư hoặc chat không liên quan.
+end note
+@enduml

@@ -6,4 +6,5 @@
     <a href="${pageContext.request.contextPath}/admin/photographers" class="admin-subnav-link <c:if test="${activeTab == 'photographers'}">active</c:if>">Photographers</a>
     <a href="${pageContext.request.contextPath}/admin/bookings" class="admin-subnav-link <c:if test="${activeTab == 'bookings'}">active</c:if>">Bookings</a>
     <a href="${pageContext.request.contextPath}/admin/reviews" class="admin-subnav-link <c:if test="${activeTab == 'reviews'}">active</c:if>">Reviews</a>
+    <a href="${pageContext.request.contextPath}/admin/audit" class="admin-subnav-link <c:if test="${activeTab == 'audit'}">active</c:if>">Operational Audit</a>
 </nav>

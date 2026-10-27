@@ -27,6 +27,9 @@ class AdminUserServiceTest {
     @BeforeEach
     void setUp() {
         adminUserService = new AdminUserServiceImpl(userRepository);
+        User admin = new User("admin@example.com", "hash", "Admin", null, UserRole.ADMIN, UserStatus.ACTIVE);
+        admin.setId(99L);
+        lenient().when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
     }
 
     @Test
@@ -93,5 +96,29 @@ class AdminUserServiceTest {
 
         assertThrows(IllegalArgumentException.class, () ->
                 adminUserService.updateUserStatus(5L, null, 99L));
+    }
+
+    @Test
+    void grantAndRevokeManagerRole_enforcesEligibleTransition() {
+        User customer = new User("candidate@example.com", "hash", "Candidate", null, UserRole.CUSTOMER, UserStatus.ACTIVE);
+        customer.setId(5L);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(customer));
+        when(userRepository.save(customer)).thenReturn(customer);
+
+        User manager = adminUserService.grantManagerRole(5L, 99L);
+        assertEquals(UserRole.MANAGER, manager.getRole());
+
+        User customerAgain = adminUserService.revokeManagerRole(5L, 99L);
+        assertEquals(UserRole.CUSTOMER, customerAgain.getRole());
+    }
+
+    @Test
+    void managerCannotAppointAnotherManager() {
+        User manager = new User("manager@example.com", "hash", "Manager", null, UserRole.MANAGER, UserStatus.ACTIVE);
+        manager.setId(77L);
+        when(userRepository.findById(77L)).thenReturn(Optional.of(manager));
+
+        assertThrows(IllegalStateException.class, () -> adminUserService.grantManagerRole(5L, 77L));
+        verify(userRepository, never()).save(any());
     }
 }

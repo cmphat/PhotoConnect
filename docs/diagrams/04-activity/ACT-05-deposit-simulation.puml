@@ -1,0 +1,25 @@
+@startuml ACT-05
+!include ../theme.puml
+title ACT-05 — Đặt cọc mô phỏng
+start
+:Customer mở checkout;
+:Tải booking và deposit;
+if (Customer sở hữu booking\nvà trạng thái đủ điều kiện?) then (có)
+  :Chọn DEMO_QR hoặc DEMO_CARD;
+  :Deposit PENDING -> PROCESSING;
+  if (Kết quả mô phỏng thành công?) then (có)
+    :Deposit -> PAID;
+    :Ghi paymentReference/paidAt;
+    :Booking DEPOSIT_PENDING -> CONFIRMED;
+    :Ghi history + gửi notification;
+    :Hiển thị receipt;
+  else (không)
+    :Deposit -> FAILED hoặc CANCELLED;
+    :Booking chưa được CONFIRMED;
+  endif
+else (không)
+  :403 hoặc lỗi trạng thái;
+endif
+stop
+@enduml
+

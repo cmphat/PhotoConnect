@@ -52,6 +52,6 @@ Do not merge, tag, or publish a release until the human review completes. Screen
 - [x] TASK-C03: authenticated customer workspace/dashboard aggregation and navigation
 - [x] TASK-C04: authenticated photographer Studio with scoped requests, shoots, deposit awareness, profile/portfolio/availability health, and navigation
 - [x] TASK-D01: authoritative signed JWT cookie authentication, active-account/role revalidation, centralized request identity, CSRF protection, and secure session/WebSocket compatibility
-- [x] TASK-D02: server-controlled Supabase Google OAuth with PKCE/state, safe SQL Server identity mapping/linking, local onboarding, and existing JWT issuance (live provider QA pending)
+- [x] TASK-D02: native Spring Security Google OAuth2/OIDC, safe SQL Server subject mapping, CUSTOMER-only creation, and existing JWT issuance (live provider QA pending)
 
-Human browser QA for TASK-C03, TASK-C04, and TASK-D01 remains pending. TASK-D02 automated implementation is complete, while live Google/Supabase configuration and browser verification remain pending. Visual V2, production-payment, notification, and ERD work is not marked complete here.
+Human browser QA for TASK-C03, TASK-C04, and TASK-D01 remains pending. TASK-D02 automated implementation is complete, while live Google configuration and browser verification remain pending. Visual V2, production-payment, notification, and ERD work is not marked complete here.

@@ -13,9 +13,17 @@ import java.util.List;
 public class AdminPhotographerServiceImpl implements AdminPhotographerService {
 
     private final PhotographerProfileRepository photographerProfileRepository;
+    private final OperationalAuditService auditService;
 
     public AdminPhotographerServiceImpl(PhotographerProfileRepository photographerProfileRepository) {
+        this(photographerProfileRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AdminPhotographerServiceImpl(PhotographerProfileRepository photographerProfileRepository,
+                                        @org.springframework.beans.factory.annotation.Autowired(required = false) OperationalAuditService auditService) {
         this.photographerProfileRepository = photographerProfileRepository;
+        this.auditService = auditService;
     }
 
     /**
@@ -75,7 +83,12 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
         if (adminNotes != null && !adminNotes.isBlank()) {
             profile.setAdminNotes(adminNotes.trim());
         }
-        return photographerProfileRepository.save(profile);
+        PhotographerProfile saved = photographerProfileRepository.save(profile);
+        if (auditService != null && adminId != null) {
+            auditService.record(adminId, "PHOTOGRAPHER_APPROVE", "PhotographerProfile", profileId,
+                    com.photoconnect.entity.AuditOutcome.SUCCESS, "Approved eligible photographer application");
+        }
+        return saved;
     }
 
     @Override
@@ -105,7 +118,41 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
         if (adminNotes != null && !adminNotes.isBlank()) {
             profile.setAdminNotes(adminNotes.trim());
         }
-        return photographerProfileRepository.save(profile);
+        PhotographerProfile saved = photographerProfileRepository.save(profile);
+        if (auditService != null && adminId != null) {
+            auditService.record(adminId, "PHOTOGRAPHER_REJECT", "PhotographerProfile", profileId,
+                    com.photoconnect.entity.AuditOutcome.SUCCESS, "Rejected photographer application: " + rejectionReason);
+        }
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public PhotographerProfile suspend(Long profileId, Long adminId, String suspensionReason, String adminNotes) {
+        PhotographerProfile profile = photographerProfileRepository.findById(profileId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Photographer application not found with id: " + profileId));
+
+        if (profile.getVerificationStatus() != PhotographerVerificationStatus.APPROVED) {
+            throw new InvalidStatusTransitionException(
+                    "Cannot suspend photographer with status: " + profile.getVerificationStatus() + ". Only APPROVED photographers can be suspended.");
+        }
+
+        profile.setVerificationStatus(PhotographerVerificationStatus.SUSPENDED);
+        profile.setReviewedAt(java.time.LocalDateTime.now());
+        profile.setReviewedByAdminId(adminId);
+        if (suspensionReason != null && !suspensionReason.isBlank()) {
+            profile.setRejectionReason(suspensionReason.trim());
+        }
+        if (adminNotes != null && !adminNotes.isBlank()) {
+            profile.setAdminNotes(adminNotes.trim());
+        }
+        PhotographerProfile saved = photographerProfileRepository.save(profile);
+        if (auditService != null && adminId != null) {
+            auditService.record(adminId, "PHOTOGRAPHER_SUSPEND", "PhotographerProfile", profileId,
+                    com.photoconnect.entity.AuditOutcome.SUCCESS, "Suspended photographer profile: " + suspensionReason);
+        }
+        return saved;
     }
 
     @Override

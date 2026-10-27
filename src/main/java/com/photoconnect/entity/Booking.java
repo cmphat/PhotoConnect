@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,6 +30,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version = 0L;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -71,6 +76,30 @@ public class Booking {
 
     @Column(name = "agreed_price", nullable = false, precision = 18, scale = 2)
     private BigDecimal agreedPrice;
+
+    @Column(name = "base_price", precision = 18, scale = 2)
+    private BigDecimal basePrice;
+
+    @Column(name = "night_surcharge", precision = 18, scale = 2)
+    private BigDecimal nightSurcharge = BigDecimal.ZERO;
+
+    @Column(name = "travel_distance_km")
+    private Integer travelDistanceKm = 0;
+
+    @Column(name = "travel_surcharge", precision = 18, scale = 2)
+    private BigDecimal travelSurcharge = BigDecimal.ZERO;
+
+    @Column(name = "extras_fee", precision = 18, scale = 2)
+    private BigDecimal extrasFee = BigDecimal.ZERO;
+
+    @Column(name = "extra_hours")
+    private Integer extraHours = 0;
+
+    @Column(name = "extra_photos")
+    private Integer extraPhotos = 0;
+
+    @Column(name = "additional_photographer")
+    private Boolean additionalPhotographer = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
@@ -363,5 +392,69 @@ public class Booking {
 
     public void setParticipantCount(Integer participantCount) {
         this.participantCount = participantCount;
+    }
+
+    public BigDecimal getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public BigDecimal getNightSurcharge() {
+        return nightSurcharge;
+    }
+
+    public void setNightSurcharge(BigDecimal nightSurcharge) {
+        this.nightSurcharge = nightSurcharge;
+    }
+
+    public Integer getTravelDistanceKm() {
+        return travelDistanceKm;
+    }
+
+    public void setTravelDistanceKm(Integer travelDistanceKm) {
+        this.travelDistanceKm = travelDistanceKm;
+    }
+
+    public BigDecimal getTravelSurcharge() {
+        return travelSurcharge;
+    }
+
+    public void setTravelSurcharge(BigDecimal travelSurcharge) {
+        this.travelSurcharge = travelSurcharge;
+    }
+
+    public BigDecimal getExtrasFee() {
+        return extrasFee;
+    }
+
+    public void setExtrasFee(BigDecimal extrasFee) {
+        this.extrasFee = extrasFee;
+    }
+
+    public Integer getExtraHours() {
+        return extraHours;
+    }
+
+    public void setExtraHours(Integer extraHours) {
+        this.extraHours = extraHours;
+    }
+
+    public Integer getExtraPhotos() {
+        return extraPhotos;
+    }
+
+    public void setExtraPhotos(Integer extraPhotos) {
+        this.extraPhotos = extraPhotos;
+    }
+
+    public Boolean getAdditionalPhotographer() {
+        return additionalPhotographer;
+    }
+
+    public void setAdditionalPhotographer(Boolean additionalPhotographer) {
+        this.additionalPhotographer = additionalPhotographer;
     }
 }

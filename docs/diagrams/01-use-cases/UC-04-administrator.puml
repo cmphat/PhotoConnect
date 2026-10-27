@@ -1,0 +1,35 @@
+@startuml UC-04
+!include ../theme.puml
+title UC-04 — Bảng điều khiển Quản trị viên
+left to right direction
+actor "Quản trị viên" as Admin
+rectangle PhotoConnect {
+  usecase "Quản lý trạng thái tài khoản" as Users
+  usecase "Xem hồ sơ ứng tuyển" as Applications
+  usecase "Duyệt / từ chối nhiếp ảnh gia" as Approve
+  usecase "Giám sát booking" as Bookings
+  usecase "Xem thông tin đặt cọc" as Deposits
+  usecase "Xem báo cáo người dùng" as Reports
+  usecase "Giải quyết tranh chấp hợp lệ" as Disputes
+  usecase "Ẩn / hiện đánh giá" as Reviews
+  usecase "Kiểm tra lịch sử booking" as Audit
+  usecase "Xem dashboard thống kê" as Analytics
+}
+Admin --> Users
+Admin --> Applications
+Admin --> Approve
+Admin --> Bookings
+Admin --> Deposits
+Admin --> Reports
+Admin --> Disputes
+Admin --> Reviews
+Admin --> Audit
+Admin --> Analytics
+Approve ..> Applications : <<include>>
+Disputes ..> Reports : <<include>>
+Audit ..> Bookings : <<extend>>
+note right of Deposits
+  Chỉ giám sát dữ liệu đặt cọc mô phỏng;
+  không có cổng thanh toán thật.
+end note
+@enduml

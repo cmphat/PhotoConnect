@@ -1,0 +1,32 @@
+@startuml ACT-09
+!include ../theme.puml
+title ACT-09 — Kiểm duyệt của Admin
+start
+:Admin đăng nhập;
+:Mở dashboard kiểm duyệt;
+if (Loại tác vụ?) then (hồ sơ)
+  :Xem PhotographerProfile PENDING;
+  if (Duyệt?) then (có)
+    :APPROVED;
+  else (không)
+    :REJECTED + reason;
+  endif
+elseif (đánh giá)
+  :Xem Review;
+  :VISIBLE <-> HIDDEN;
+elseif (báo cáo)
+  :Xem UserReport + booking liên quan;
+  if (Resolution hợp lệ?) then (có)
+    :RESOLVED hoặc DISMISSED;
+    if (Booking DISPUTED?) then (có)
+      :DISPUTED -> COMPLETED hoặc CANCELLED;
+    endif
+  else (không)
+    :Từ chối trạng thái không hợp lệ;
+  endif
+else (tài khoản)
+  :Cập nhật UserStatus;
+endif
+:Lưu thông tin moderation tương ứng;
+stop
+@enduml

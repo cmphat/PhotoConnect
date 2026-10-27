@@ -1,0 +1,44 @@
+@startuml UC-02
+!include ../theme.puml
+title UC-02 — Không gian Khách hàng
+left to right direction
+actor "Khách hàng" as Customer
+actor Cloudinary
+rectangle PhotoConnect {
+  usecase "Quản lý hồ sơ / bảo mật" as Profile
+  usecase "Lưu nhiếp ảnh gia" as Save
+  usecase "Chọn gói dịch vụ" as Package
+  usecase "Kiểm tra lịch trống" as Availability
+  usecase "Tạo booking" as Create
+  usecase "Theo dõi trạng thái / lịch sử" as Track
+  usecase "Đặt cọc mô phỏng" as Pay
+  usecase "Chat với nhiếp ảnh gia" as Chat
+  usecase "Yêu cầu đổi lịch" as Reschedule
+  usecase "Hủy booking hợp lệ" as Cancel
+  usecase "Xem album ảnh riêng tư" as Album
+  usecase "Yêu cầu chỉnh sửa" as Revision
+  usecase "Xác nhận giao ảnh" as Confirm
+  usecase "Gửi đánh giá" as Review
+  usecase "Báo cáo tranh chấp" as Report
+  usecase "Quản lý thông báo" as Notifications
+}
+Customer --> Profile
+Customer --> Save
+Customer --> Package
+Customer --> Create
+Customer --> Track
+Customer --> Pay
+Customer --> Chat
+Customer --> Reschedule
+Customer --> Cancel
+Customer --> Album
+Customer --> Revision
+Customer --> Confirm
+Customer --> Review
+Customer --> Report
+Customer --> Notifications
+Create ..> Availability : <<include>>
+Create ..> Package : <<include>>
+Album --> Cloudinary : URL ký ngắn hạn
+@enduml
+

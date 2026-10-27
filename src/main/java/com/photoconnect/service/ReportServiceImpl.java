@@ -8,6 +8,7 @@ import com.photoconnect.entity.ReportStatus;
 import com.photoconnect.entity.User;
 import com.photoconnect.entity.UserReport;
 import com.photoconnect.entity.UserStatus;
+import com.photoconnect.entity.AuditOutcome;
 import com.photoconnect.exception.InvalidBookingException;
 import com.photoconnect.exception.UnauthorizedException;
 import com.photoconnect.repository.BookingRepository;
@@ -33,16 +34,19 @@ public class ReportServiceImpl implements ReportService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+    private final OperationalAuditService auditService;
 
     @Autowired
     public ReportServiceImpl(UserReportRepository userReportRepository,
                              UserRepository userRepository,
                              BookingRepository bookingRepository,
-                             @Autowired(required = false) NotificationService notificationService) {
+                             @Autowired(required = false) NotificationService notificationService,
+                             @Autowired(required = false) OperationalAuditService auditService) {
         this.userReportRepository = userReportRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.notificationService = notificationService;
+        this.auditService = auditService;
     }
 
     @Override
@@ -141,16 +145,32 @@ public class ReportServiceImpl implements ReportService {
             throw new IllegalArgumentException("Report ID is required.");
         }
 
-        UserReport report = userReportRepository.findByIdWithDetails(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("Report not found with ID: " + reportId));
+        User actor = userRepository.findById(adminUserId)
+                .orElseThrow(() -> new UnauthorizedException("Moderation actor not found."));
+        if (actor.getStatus() != UserStatus.ACTIVE || actor.getRole() != com.photoconnect.entity.UserRole.ADMIN) {
+            throw new UnauthorizedException("Administrator report moderation permission is required.");
+        }
 
         ReportStatus targetStatus = resolution != null ? resolution : ReportStatus.RESOLVED;
+        if (targetStatus != ReportStatus.RESOLVED && targetStatus != ReportStatus.DISMISSED) {
+            throw new IllegalArgumentException("Reports may only be RESOLVED or DISMISSED through this operation.");
+        }
+
+        UserReport report = userReportRepository.findByIdWithDetails(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report not found with ID: " + reportId));
+        if (report.getStatus() != ReportStatus.PENDING && report.getStatus() != ReportStatus.INVESTIGATING) {
+            throw new IllegalStateException("Only pending or investigating reports can be resolved.");
+        }
         report.setStatus(targetStatus);
         report.setAdminNotes(adminNotes != null ? adminNotes.trim() : null);
         report.setResolvedByAdminId(adminUserId);
         report.setResolvedAt(LocalDateTime.now());
 
         UserReport saved = userReportRepository.save(report);
+        if (auditService != null) {
+            auditService.record(adminUserId, "REPORT_" + targetStatus.name(), "UserReport", reportId,
+                    AuditOutcome.SUCCESS, "Administrator completed report moderation");
+        }
         log.info("Report #{} marked as {} by admin #{}", reportId, targetStatus, adminUserId);
 
         return ReportDto.fromEntity(saved);

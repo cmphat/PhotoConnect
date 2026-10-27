@@ -47,8 +47,8 @@ class JwtCsrfFilterTest {
     }
 
     @Test
-    void googleOnboardingPostRequiresCsrfToken() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/google/onboarding");
+    void passwordLoginPostStillRequiresCsrfToken() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/login");
         MockHttpServletResponse response = new MockHttpServletResponse();
         csrfFilter().doFilter(request, response, new MockFilterChain());
         assertEquals(403, response.getStatus());

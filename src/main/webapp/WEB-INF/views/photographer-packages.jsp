@@ -288,6 +288,12 @@
                                     data-duration="<c:out value='${pkg.durationMinutes}'/>"
                                     data-photos="<c:out value='${pkg.editedPhotoCount}'/>"
                                     data-delivery="<c:out value='${pkg.deliveryDays}'/>"
+                                    data-night-rate="<c:out value='${pkg.nightSurchargeRate}'/>"
+                                    data-included-travel="<c:out value='${pkg.includedTravelKm}'/>"
+                                    data-excess-travel-rate="<c:out value='${pkg.excessTravelRate}'/>"
+                                    data-additional-hour-fee="<c:out value='${pkg.additionalHourFee}'/>"
+                                    data-extra-photo-fee="<c:out value='${pkg.extraEditedPhotoFee}'/>"
+                                    data-assistant-fee="<c:out value='${pkg.assistantFee}'/>"
                                     data-desc="<c:out value='${pkg.description}'/>">
                                 Edit
                             </button>
@@ -374,6 +380,17 @@
                 <textarea id="pkgDesc" name="description" maxlength="1000" placeholder="Describe the shoot location scope, outfits, equipment, or any specific details included..."></textarea>
             </div>
 
+            <div class="modal-grid-3">
+                <div class="modal-field"><label for="pkgNightRate">Night surcharge rate</label><input type="number" id="pkgNightRate" name="nightSurchargeRate" required min="0" max="5" step="0.01" value="0.20"></div>
+                <div class="modal-field"><label for="pkgIncludedTravel">Included travel (km)</label><input type="number" id="pkgIncludedTravel" name="includedTravelKm" required min="0" max="10000" value="30"></div>
+                <div class="modal-field"><label for="pkgTravelRate">Excess travel (VND/km)</label><input type="number" id="pkgTravelRate" name="excessTravelRate" required min="0" step="1000" value="15000"></div>
+            </div>
+            <div class="modal-grid-3">
+                <div class="modal-field"><label for="pkgHourFee">Additional hour (VND)</label><input type="number" id="pkgHourFee" name="additionalHourFee" required min="0" step="1000" value="200000"></div>
+                <div class="modal-field"><label for="pkgPhotoFee">Extra edited photo (VND)</label><input type="number" id="pkgPhotoFee" name="extraEditedPhotoFee" required min="0" step="1000" value="50000"></div>
+                <div class="modal-field"><label for="pkgAssistantFee">Assistant / second photographer (VND)</label><input type="number" id="pkgAssistantFee" name="assistantFee" required min="0" step="1000" value="500000"></div>
+            </div>
+
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" class="btn btn-outline-secondary" id="cancelModalBtn">Cancel</button>
                 <button type="submit" class="pc-btn-primary" id="savePkgBtn">Save Package</button>
@@ -398,6 +415,12 @@
         const photosInput = document.getElementById('pkgPhotos');
         const deliveryInput = document.getElementById('pkgDelivery');
         const descInput = document.getElementById('pkgDesc');
+        const nightRateInput = document.getElementById('pkgNightRate');
+        const includedTravelInput = document.getElementById('pkgIncludedTravel');
+        const travelRateInput = document.getElementById('pkgTravelRate');
+        const hourFeeInput = document.getElementById('pkgHourFee');
+        const photoFeeInput = document.getElementById('pkgPhotoFee');
+        const assistantFeeInput = document.getElementById('pkgAssistantFee');
 
         window.openPackageModal = function() {
             modalTitle.textContent = 'Create Service Package';
@@ -427,6 +450,12 @@
                 photosInput.value = btn.dataset.photos || '25';
                 deliveryInput.value = btn.dataset.delivery || '7';
                 descInput.value = btn.dataset.desc || '';
+                nightRateInput.value = btn.dataset.nightRate || '0.20';
+                includedTravelInput.value = btn.dataset.includedTravel || '30';
+                travelRateInput.value = btn.dataset.excessTravelRate || '15000';
+                hourFeeInput.value = btn.dataset.additionalHourFee || '200000';
+                photoFeeInput.value = btn.dataset.extraPhotoFee || '50000';
+                assistantFeeInput.value = btn.dataset.assistantFee || '500000';
 
                 modal.classList.add('is-open');
             });

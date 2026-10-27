@@ -1,0 +1,51 @@
+@startuml UC-00
+!include ../theme.puml
+title UC-00 — Tổng quan hệ thống PhotoConnect
+left to right direction
+actor Khách as Guest
+actor "Khách hàng" as Customer
+actor "Nhiếp ảnh gia" as Photographer
+actor "Quản lý vận hành" as Manager
+actor "Quản trị viên" as Admin
+actor "Google OpenID Connect" as OAuth
+actor "SMTP provider" as SMTP
+actor Cloudinary
+Customer --|> Guest
+Photographer --|> Customer
+rectangle PhotoConnect {
+  usecase "Khám phá nhiếp ảnh gia\nvà gói dịch vụ" as Discover
+  usecase "Đăng ký / đăng nhập /\nxác minh email" as Auth
+  usecase "Quản lý hồ sơ" as Profile
+  usecase "Đặt lịch và quản lý booking" as Booking
+  usecase "Thanh toán đặt cọc mô phỏng" as Deposit
+  usecase "Chat và nhận thông báo" as Comms
+  usecase "Nhận / giao ảnh riêng tư" as Delivery
+  usecase "Đánh giá và báo cáo" as Trust
+  usecase "Quản lý studio, lịch,\ngói và portfolio" as Studio
+  usecase "Kiểm duyệt và giám sát" as Moderation
+  usecase "Xử lý hỗ trợ, báo cáo\nvà tranh chấp" as Operations
+  usecase "Quản trị vai trò đặc quyền" as PrivilegedRoles
+}
+Guest --> Discover
+Guest --> Auth
+Customer --> Profile
+Customer --> Booking
+Customer --> Deposit
+Customer --> Comms
+Customer --> Delivery
+Customer --> Trust
+Photographer --> Studio
+Photographer --> Booking
+Photographer --> Comms
+Photographer --> Delivery
+Manager --> Moderation
+Manager --> Operations
+Admin --> Moderation
+Admin --> PrivilegedRoles
+Auth --> OAuth : OAuth tùy chọn
+Auth --> SMTP : gửi OTP qua email
+Profile --> Cloudinary : avatar
+Studio --> Cloudinary : portfolio
+Delivery --> Cloudinary : authenticated media
+@enduml
+

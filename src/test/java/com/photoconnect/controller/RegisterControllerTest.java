@@ -2,7 +2,9 @@ package com.photoconnect.controller;
 
 import com.photoconnect.dto.RegisterRequest;
 import com.photoconnect.exception.EmailAlreadyExistsException;
+import com.photoconnect.exception.EmailDeliveryException;
 import com.photoconnect.exception.PasswordMismatchException;
+import com.photoconnect.entity.User;
 import com.photoconnect.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,13 +38,18 @@ public class RegisterControllerTest {
 
     @Test
     public void testProcessRegistration_Valid() throws Exception {
+        User registeredUser = new User();
+        registeredUser.setEmail("john.doe@example.com");
+        Mockito.when(userService.registerUser(any(RegisterRequest.class))).thenReturn(registeredUser);
+
         mockMvc.perform(post("/register")
                         .param("fullName", "John Doe")
                         .param("email", "john.doe@example.com")
                         .param("password", "password123")
                         .param("confirmPassword", "password123"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/register?success"));
+                .andExpect(redirectedUrl("/verify-otp?sent=true"))
+                .andExpect(request().sessionAttribute("pendingRegistrationEmail", "john.doe@example.com"));
 
         Mockito.verify(userService, Mockito.times(1)).registerUser(any(RegisterRequest.class));
     }
@@ -89,6 +96,22 @@ public class RegisterControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeExists("emailError"));
+    }
+
+    @Test
+    public void testProcessRegistration_EmailDeliveryFailureIsSafe() throws Exception {
+        Mockito.when(userService.registerUser(any(RegisterRequest.class)))
+                .thenThrow(new EmailDeliveryException("SMTP transport detail"));
+
+        mockMvc.perform(post("/register")
+                        .param("fullName", "John Doe")
+                        .param("email", "john@example.com")
+                        .param("password", "password123")
+                        .param("confirmPassword", "password123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("register"))
+                .andExpect(model().attribute("emailError",
+                        "Không thể gửi email xác thực lúc này. Vui lòng thử lại sau."));
     }
 
     @Test

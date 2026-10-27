@@ -1,0 +1,22 @@
+@startuml SEQ-11
+!include ../theme.puml
+title SEQ-11 — Phân phối thông báo
+participant "Business Service" as Business
+participant NotificationServiceImpl
+participant NotificationRepository
+participant SimpMessagingTemplate
+database "SQL Server" as DB
+actor "Recipient browser" as Browser
+Business -> NotificationServiceImpl : send(recipient,type,title,message,...)
+NotificationServiceImpl -> NotificationRepository : save unread notification
+NotificationRepository -> DB
+NotificationServiceImpl ->> SimpMessagingTemplate : convertAndSendToUser
+SimpMessagingTemplate -->> Browser : /user/queue/notifications
+Browser -> NotificationServiceImpl : GET /api/notifications
+NotificationServiceImpl -> NotificationRepository : findByRecipient
+NotificationRepository -> DB
+NotificationServiceImpl --> Browser : persisted inbox
+Browser -> NotificationServiceImpl : POST read/read-all
+NotificationServiceImpl -> NotificationRepository : ownership-scoped update
+@enduml
+

@@ -1,0 +1,30 @@
+@startuml SEQ-05
+!include ../theme.puml
+title SEQ-05 — Chấp nhận Booking với kiểm tra collision
+actor Photographer
+participant PhotographerBookingController
+participant BookingServiceImpl
+participant BookingRepository
+participant PhotographerProfileRepository
+participant ScheduleServiceImpl
+participant BookingStateMachineServiceImpl
+participant BookingHistoryRepository
+database "SQL Server" as DB
+Photographer -> PhotographerBookingController : POST /photographer/bookings/{id}/accept
+PhotographerBookingController -> BookingServiceImpl : acceptBooking(id,userId)
+BookingServiceImpl -> BookingRepository : load assigned booking
+BookingRepository -> DB : SELECT
+BookingServiceImpl -> BookingServiceImpl : assigned photographer check
+BookingServiceImpl -> PhotographerProfileRepository : findByIdWithLock(profileId)
+PhotographerProfileRepository -> DB : PESSIMISTIC_WRITE profile lock
+BookingServiceImpl -> ScheduleServiceImpl : validate collision again
+ScheduleServiceImpl -> BookingRepository : overlap query
+alt no conflict
+  BookingServiceImpl -> BookingStateMachineServiceImpl : transition PENDING->ACCEPTED
+  BookingStateMachineServiceImpl -> BookingHistoryRepository : audit
+  PhotographerBookingController --> Photographer : accepted
+else collision
+  PhotographerBookingController --> Photographer : reject operation / keep PENDING
+end
+@enduml
+

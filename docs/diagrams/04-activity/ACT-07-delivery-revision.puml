@@ -1,0 +1,29 @@
+@startuml ACT-07
+!include ../theme.puml
+title ACT-07 — Giao ảnh và yêu cầu chỉnh sửa
+start
+:Photographer mở album DRAFT;
+:Chọn file ảnh;
+:Kiểm tra binary/MIME/kích thước;
+if (File hợp lệ?) then (có)
+  :Upload Cloudinary type=authenticated;
+  :Lưu DeliveredPhoto;
+  :Giao album -> DELIVERED;
+  :Booking -> DELIVERED;
+  :Customer nhận notification;
+  :Customer xem bằng signed URL 300s;
+  if (Customer chấp nhận?) then (có)
+    :Album -> ACCEPTED;
+    :Booking -> COMPLETED;
+  else (yêu cầu sửa)
+    :Album -> REVISION_REQUESTED;
+    :Booking -> POST_PROCESSING;
+    :Photographer sửa/thêm/xóa ảnh;
+    :Giao lại -> DELIVERED;
+  endif
+else (không)
+  :Từ chối upload;
+endif
+stop
+@enduml
+

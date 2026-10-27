@@ -494,6 +494,23 @@ class DeliveryServiceTest {
     }
 
     @Test
+    @DisplayName("Manager cannot access private delivery photographs by role")
+    void getAuthorizedDownloadUrl_ManagerBlocked() {
+        User manager = new User();
+        manager.setId(77L);
+        manager.setRole(UserRole.MANAGER);
+        manager.setStatus(UserStatus.ACTIVE);
+        when(bookingRepository.findByIdWithDetails(500L)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(77L)).thenReturn(Optional.of(manager));
+
+        assertThatThrownBy(() -> deliveryService.getAuthorizedDownloadUrl(500L, 101L, 77L))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("not authorized");
+
+        verifyNoInteractions(deliveryAlbumRepository, deliveredPhotoRepository, cloudinaryStorageService);
+    }
+
+    @Test
     @DisplayName("Safe Migration: migratePhotoToAuthenticated updates URL only after Cloudinary confirms rename")
     void migratePhotoToAuthenticated_Success() {
         DeliveryAlbum album = new DeliveryAlbum(booking);

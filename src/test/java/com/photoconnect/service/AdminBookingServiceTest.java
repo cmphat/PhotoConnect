@@ -106,6 +106,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         User customer = new User();
@@ -133,7 +134,8 @@ class AdminBookingServiceTest {
         assertEquals(DepositStatus.REFUNDED, deposit.getStatus());
         verify(bookingRepository).save(booking);
         verify(depositRepository).save(deposit);
-        verify(bookingHistoryRepository).save(any(BookingHistory.class));
+        verify(bookingStateMachineService).transition(eq(100L), eq(BookingStatus.CANCELLED), eq(99L), contains("Refund"));
+        verify(bookingHistoryRepository, never()).save(any(BookingHistory.class));
         verify(notificationService).sendNotification(eq(10L), eq(NotificationType.BOOKING_CANCELLED), anyString(), anyString(), eq(100L), anyString());
         verify(notificationService).sendNotification(eq(20L), eq(NotificationType.BOOKING_CANCELLED), anyString(), anyString(), eq(100L), anyString());
     }
@@ -143,6 +145,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         User customer = new User();
@@ -168,9 +171,10 @@ class AdminBookingServiceTest {
 
         assertEquals(BookingStatus.COMPLETED, booking.getStatus());
         assertEquals(DepositStatus.PAID, deposit.getStatus());
-        verify(bookingRepository).save(booking);
+        verify(bookingStateMachineService).transition(eq(100L), eq(BookingStatus.COMPLETED), eq(99L), contains("Paid"));
+        verify(bookingRepository, never()).save(booking);
         verify(depositRepository).save(deposit);
-        verify(bookingHistoryRepository).save(any(BookingHistory.class));
+        verify(bookingHistoryRepository, never()).save(any(BookingHistory.class));
         verify(notificationService).sendNotification(eq(10L), eq(NotificationType.DELIVERY_CONFIRMED), anyString(), anyString(), eq(100L), anyString());
         verify(notificationService).sendNotification(eq(20L), eq(NotificationType.DELIVERY_CONFIRMED), anyString(), anyString(), eq(100L), anyString());
     }
@@ -187,10 +191,33 @@ class AdminBookingServiceTest {
     }
 
     @Test
+    void resolveDispute_managerWithPermission_canResolveDisputedBooking() {
+        User manager = new User();
+        manager.setId(88L);
+        manager.setRole(UserRole.MANAGER);
+        manager.setStatus(UserStatus.ACTIVE);
+        when(userRepository.findById(88L)).thenReturn(Optional.of(manager));
+
+        Booking booking = new Booking();
+        booking.setId(108L);
+        booking.setStatus(BookingStatus.DISPUTED);
+        booking.setCustomer(new User());
+        booking.setPhotographerProfile(new PhotographerProfile());
+        when(bookingRepository.findByIdWithDetails(108L)).thenReturn(Optional.of(booking));
+
+        adminBookingService.resolveDispute(108L, "PAY_PHOTOGRAPHER", "Evidence reviewed", 88L);
+
+        assertEquals(BookingStatus.COMPLETED, booking.getStatus());
+        verify(bookingStateMachineService).transition(eq(108L), eq(BookingStatus.COMPLETED), eq(88L), contains("Paid"));
+        verify(bookingHistoryRepository, never()).save(any(BookingHistory.class));
+    }
+
+    @Test
     void resolveDispute_whenBookingInConfirmedStatus_throwsInvalidBookingExceptionWithConflictErrorCode() {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         Booking booking = new Booking();
@@ -211,6 +238,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         Booking booking = new Booking();
@@ -231,6 +259,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         Booking booking = new Booking();
@@ -251,6 +280,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         Booking booking = new Booking();
@@ -271,6 +301,7 @@ class AdminBookingServiceTest {
         User admin = new User();
         admin.setId(99L);
         admin.setRole(UserRole.ADMIN);
+        admin.setStatus(UserStatus.ACTIVE);
         when(userRepository.findById(99L)).thenReturn(Optional.of(admin));
 
         Booking booking = new Booking();

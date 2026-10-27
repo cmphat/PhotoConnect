@@ -1,0 +1,23 @@
+@startuml SITE-05
+!include ../theme.puml
+title SITE-05 — Sitemap Manager Workspace
+rectangle "/manager/dashboard" as Dashboard
+rectangle "/manager/photographers" as Photographers
+rectangle "/manager/reports" as Reports
+rectangle "/manager/bookings" as Bookings
+rectangle "/manager/support" as Support
+rectangle "/manager/audit" as Audit
+Dashboard --> Photographers
+Dashboard --> Reports
+Dashboard --> Bookings
+Dashboard --> Support
+Dashboard --> Audit
+Photographers --> Photographers : detail + approve/reject
+Reports --> Reports : detail + investigate + resolve
+Bookings --> Bookings : metadata + resolve dispute
+Support --> Support : assign + reply + resolve
+note bottom
+  Dedicated SiteMesh Manager layout; queues are paginated.
+  No link or route grants /admin access.
+end note
+@enduml

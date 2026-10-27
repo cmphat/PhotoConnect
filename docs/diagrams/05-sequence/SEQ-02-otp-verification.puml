@@ -1,0 +1,31 @@
+@startuml SEQ-02
+!include ../theme.puml
+title SEQ-02 — Xác minh email OTP
+actor Browser
+participant EmailVerificationController
+participant EmailOtpServiceImpl
+participant EmailVerificationTokenRepository
+participant EmailServiceImpl
+participant "SMTP / local capture" as Mail <<external>>
+database "SQL Server" as DB
+Browser -> EmailVerificationController : POST /resend-otp
+EmailVerificationController -> EmailOtpServiceImpl : generateOtp(email,REGISTRATION,IP)
+EmailOtpServiceImpl -> EmailVerificationTokenRepository : count/latest token
+EmailVerificationTokenRepository -> DB
+EmailOtpServiceImpl -> EmailOtpServiceImpl : SecureRandom + BCrypt hash
+EmailOtpServiceImpl -> EmailVerificationTokenRepository : save(hash, expiry, attempts)
+EmailOtpServiceImpl -> EmailServiceImpl : sendVerificationEmail
+EmailServiceImpl -> Mail : gửi email đồng bộ
+Browser -> EmailVerificationController : POST /verify-otp
+EmailVerificationController -> EmailOtpServiceImpl : verifyOtp
+EmailOtpServiceImpl -> EmailVerificationTokenRepository : latest unused
+EmailOtpServiceImpl -> EmailOtpServiceImpl : expiry/attempts/PasswordEncoder.matches
+alt valid
+  EmailOtpServiceImpl -> EmailVerificationTokenRepository : set usedAt
+  EmailVerificationController --> Browser : activate + redirect
+else invalid
+  EmailOtpServiceImpl -> EmailVerificationTokenRepository : increment attempt
+  EmailVerificationController --> Browser : error
+end
+@enduml
+

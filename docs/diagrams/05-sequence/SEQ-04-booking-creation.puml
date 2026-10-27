@@ -1,0 +1,29 @@
+@startuml SEQ-04
+!include ../theme.puml
+title SEQ-04 — Tạo Booking
+actor Customer
+participant BookingController
+participant BookingServiceImpl
+participant ScheduleServiceImpl
+participant ServicePackageRepository
+participant BookingRepository
+participant BookingHistoryRepository
+participant NotificationServiceImpl
+database "SQL Server" as DB
+Customer -> BookingController : POST /photographers/{id}/book
+BookingController -> BookingServiceImpl : createBooking(customerId, request)
+BookingServiceImpl -> ServicePackageRepository : package active + owner
+BookingServiceImpl -> ScheduleServiceImpl : validateSlot(profile,date,time,duration)
+ScheduleServiceImpl -> BookingRepository : overlapping time-reserving bookings
+BookingRepository -> DB
+alt available
+  BookingServiceImpl -> BookingServiceImpl : snapshot package fields
+  BookingServiceImpl -> BookingRepository : save PENDING
+  BookingServiceImpl -> BookingHistoryRepository : save initial history
+  BookingServiceImpl -> NotificationServiceImpl : notify photographer
+  BookingController --> Customer : redirect /bookings/{id}/success
+else unavailable/invalid
+  BookingController --> Customer : validation error
+end
+@enduml
+

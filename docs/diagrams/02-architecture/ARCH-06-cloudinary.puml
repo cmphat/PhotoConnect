@@ -1,0 +1,28 @@
+@startuml ARCH-06
+!include ../theme.puml
+title ARCH-06 — Lưu trữ media Cloudinary
+actor Guest
+actor "Booking participant" as Participant
+component "Portfolio/UserProfile controllers" as PublicControllers
+component "Delivery controllers" as DeliveryControllers
+component "ImageValidationUtils" as Validation
+component "CloudinaryServiceImpl" as Service
+cloud Cloudinary
+Guest -> PublicControllers : xem avatar/portfolio
+PublicControllers -> Service : public upload/delete
+Service -> Validation : MIME + signature + dimensions/size
+Service -> Cloudinary : image upload (public)
+Cloudinary --> Guest : public delivery URL
+Participant -> DeliveryControllers : upload/download/preview
+DeliveryControllers -> DeliveryControllers : booking ownership
+DeliveryControllers -> Validation
+DeliveryControllers -> Service : authenticated upload
+Service -> Cloudinary : type=authenticated
+Service -> Cloudinary : signed URL, TTL 300s
+Cloudinary --> Participant : authorized media response
+note bottom of Cloudinary
+  Legacy public delivery assets remain a migration risk;
+  signed URL wrapping does not make a public asset private.
+end note
+@enduml
+

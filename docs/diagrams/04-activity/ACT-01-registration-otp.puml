@@ -1,0 +1,32 @@
+@startuml ACT-01
+!include ../theme.puml
+title ACT-01 — Đăng ký và xác minh OTP
+start
+:Nhập thông tin đăng ký;
+if (Dữ liệu/email hợp lệ?) then (có)
+  :Tạo tài khoản PENDING_VERIFICATION;
+  :Sinh OTP 6 số, lưu BCrypt hash;
+  if (Rate limit/cooldown cho phép?) then (có)
+    :Gửi SMTP hoặc local capture;
+    :Người dùng nhập OTP;
+    if (Đúng, chưa hết hạn, còn lượt?) then (có)
+      :Consume token (usedAt);
+      :Kích hoạt tài khoản ACTIVE;
+      stop
+    else (không)
+      :Tăng attempt hoặc báo hết hạn;
+      if (Có thể gửi lại?) then (có)
+        :Yêu cầu OTP mới;
+      else (không)
+        :Từ chối tạm thời;
+      endif
+    endif
+  else (không)
+    :Báo cooldown/rate limit;
+  endif
+else (không)
+  :Hiển thị lỗi validation;
+endif
+stop
+@enduml
+

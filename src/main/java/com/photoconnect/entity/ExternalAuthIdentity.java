@@ -7,8 +7,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "external_auth_identities",
-        uniqueConstraints = @UniqueConstraint(name = "UQ_external_auth_provider_subject",
-                columnNames = {"provider", "provider_subject"}))
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UQ_external_auth_provider_subject",
+                        columnNames = {"provider", "provider_subject"}),
+                @UniqueConstraint(name = "UQ_external_auth_user_provider",
+                        columnNames = {"user_id", "provider"})
+        })
 public class ExternalAuthIdentity {
 
     @Id

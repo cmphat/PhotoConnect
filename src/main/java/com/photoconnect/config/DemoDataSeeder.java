@@ -70,6 +70,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         String passwordHash = passwordEncoder.encode(demoPassword);
         createAccountIfAbsent("admin" + EMAIL_DOMAIN, "Demo Administrator", UserRole.ADMIN, passwordHash);
+        createAccountIfAbsent("manager" + EMAIL_DOMAIN, "Demo Operations Manager", UserRole.MANAGER, passwordHash);
         createAccountIfAbsent("customer" + EMAIL_DOMAIN, "Demo Customer", UserRole.CUSTOMER, passwordHash);
 
         for (int index = 0; index < PHOTOGRAPHERS.size(); index++) {

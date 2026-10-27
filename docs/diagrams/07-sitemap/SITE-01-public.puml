@@ -1,0 +1,28 @@
+@startuml SITE-01
+!include ../theme.puml
+title SITE-01 — Sitemap công khai
+rectangle "/ — Trang chủ\nindex.jsp" as Home
+rectangle "/photographers\nphotographers.jsp" as Market
+rectangle "/photographers/{id}\nphotographer-detail.jsp" as Detail
+rectangle "/photographers/{id}/packages/compare\nJSON comparison endpoint" as Compare
+rectangle "/profile/{idOrUsername} hoặc /users/{id}\nuser-profile.jsp" as PublicProfile
+rectangle "/feed\nfeed.jsp" as Feed
+rectangle "/register\nregister.jsp" as Register
+rectangle "/verify-otp\nverify-otp.jsp" as OTP
+rectangle "/login\nlogin.jsp" as Login
+rectangle "/forgot-password\nforgot-password.jsp" as Forgot
+rectangle "/reset-password\nreset-password.jsp" as Reset
+rectangle "/oauth2/authorization/google\nSpring Security redirect" as Google
+Home --> Market
+Home --> Feed
+Home --> Login
+Home --> Register
+Market --> Detail
+Detail --> Compare
+Detail --> PublicProfile
+Register --> OTP
+Login --> Forgot
+Forgot --> Reset
+Login --> Google
+@enduml
+

@@ -1,0 +1,21 @@
+@startuml ACT-08
+!include ../theme.puml
+title ACT-08 — Gửi đánh giá
+start
+:Customer mở /bookings/{id}/review;
+:Kiểm tra ownership và booking COMPLETED;
+if (Đủ điều kiện và chưa review?) then (có)
+  :Nhập rating 1..5 và comment;
+  if (Validation hợp lệ?) then (có)
+    :Tạo Review VISIBLE;
+    :Tính lại averageRating/reviewCount;
+    :Thông báo photographer;
+  else (không)
+    :Hiển thị lỗi validation;
+  endif
+else (không)
+  :403 / lỗi duplicate/trạng thái;
+endif
+stop
+@enduml
+

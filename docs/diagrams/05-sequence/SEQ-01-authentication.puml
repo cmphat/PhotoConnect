@@ -1,0 +1,26 @@
+@startuml SEQ-01
+!include ../theme.puml
+title SEQ-01 — Xác thực
+actor Browser
+participant LoginController
+participant AuthServiceImpl
+participant UserRepository
+participant PasswordEncoder
+participant JwtService
+database "SQL Server" as DB
+Browser -> LoginController : POST /login
+LoginController -> AuthServiceImpl : authenticate(email,password)
+AuthServiceImpl -> UserRepository : findByEmail
+UserRepository -> DB : SELECT users
+DB --> UserRepository
+UserRepository --> AuthServiceImpl
+AuthServiceImpl -> PasswordEncoder : matches
+alt ACTIVE và mật khẩu đúng
+  AuthServiceImpl -> JwtService : generateToken(user)
+  JwtService --> LoginController : JWT
+  LoginController --> Browser : HttpOnly cookie + redirect
+else sai/không active
+  LoginController --> Browser : lỗi đăng nhập
+end
+@enduml
+

@@ -1,0 +1,22 @@
+@startuml SEQ-03
+!include ../theme.puml
+title SEQ-03 — Tìm kiếm Nhiếp ảnh gia
+actor Browser
+participant PublicPhotographerController
+participant PublicPhotographerServiceImpl
+participant PhotographerProfileRepository
+participant ServicePackageRepository
+database "SQL Server" as DB
+Browser -> PublicPhotographerController : GET /photographers?keyword&city&specialty
+PublicPhotographerController -> PublicPhotographerServiceImpl : search(...)
+PublicPhotographerServiceImpl -> PhotographerProfileRepository : approved profiles + filters
+PhotographerProfileRepository -> DB : SELECT
+DB --> PhotographerProfileRepository
+PublicPhotographerServiceImpl --> PublicPhotographerController : paged DTOs
+PublicPhotographerController --> Browser : photographer/list.jsp
+Browser -> PublicPhotographerController : GET /photographers/{id}
+PublicPhotographerController -> ServicePackageRepository : find active packages
+ServicePackageRepository -> DB
+PublicPhotographerController --> Browser : photographer/detail.jsp
+@enduml
+

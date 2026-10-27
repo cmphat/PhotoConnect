@@ -1,0 +1,27 @@
+@startuml SEQ-12
+!include ../theme.puml
+title SEQ-12 — Admin giải quyết tranh chấp
+actor Admin
+participant AdminBookingController
+participant AdminBookingServiceImpl
+participant BookingRepository
+participant BookingStateMachineServiceImpl
+participant BookingHistoryRepository
+participant NotificationServiceImpl
+database "SQL Server" as DB
+Admin -> AdminBookingController : POST /admin/bookings/{id}/resolve-dispute
+AdminBookingController -> AdminBookingServiceImpl : resolveDispute(id,adminId,resolution,reason)
+AdminBookingServiceImpl -> BookingRepository : load booking
+BookingRepository -> DB
+AdminBookingServiceImpl -> AdminBookingServiceImpl : require DISPUTED + allowed resolution
+alt COMPLETE
+  AdminBookingServiceImpl -> BookingStateMachineServiceImpl : DISPUTED -> COMPLETED
+else CANCEL
+  AdminBookingServiceImpl -> BookingStateMachineServiceImpl : DISPUTED -> CANCELLED
+else invalid
+  AdminBookingServiceImpl --> Admin : reject
+end
+BookingStateMachineServiceImpl -> BookingHistoryRepository : append audit
+AdminBookingServiceImpl -> NotificationServiceImpl : notify participants
+AdminBookingController --> Admin : result
+@enduml

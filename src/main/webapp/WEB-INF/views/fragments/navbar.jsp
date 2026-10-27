@@ -39,6 +39,13 @@
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/packages">Packages</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/schedule">Availability</a>
                     </c:when>
+                    <c:when test="${sessionScope.userRole == 'MANAGER'}">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/dashboard">Tổng quan</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/photographers?status=PENDING">Hồ sơ</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/reports">Báo cáo</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/bookings?status=DISPUTED">Tranh chấp</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/support">Hỗ trợ</a>
+                    </c:when>
                     <c:otherwise>
                         <a class="nav-link" href="${pageContext.request.contextPath}/customer/dashboard">Dashboard</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
@@ -90,7 +97,9 @@
                 <a class="nav-link nav-account-link" href="${pageContext.request.contextPath}/profile/me">
                     Profile
                 </a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/auth/google/link">Link Google</a>
+                <c:if test="${sessionScope.userRole == 'CUSTOMER' || sessionScope.userRole == 'PHOTOGRAPHER'}">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/support">Support</a>
+                </c:if>
                 <form action="${pageContext.request.contextPath}/logout" method="post" class="nav-form">
                     <%@ include file="csrf-input.jsp" %>
                     <button type="submit" class="nav-link nav-action">Sign Out</button>

@@ -1,0 +1,28 @@
+@startuml SITE-03
+!include ../theme.puml
+title SITE-03 — Sitemap Photographer Studio
+rectangle "/photographer/dashboard\nphotographer-dashboard.jsp" as Dashboard
+rectangle "/become-photographer\nphotographer-onboarding.jsp" as Onboard
+rectangle "/become-photographer/status\nphotographer-onboarding-status.jsp" as Status
+rectangle "/photographer/profile[/edit]\nphotographer-profile-edit.jsp" as Profile
+rectangle "/photographer/portfolio\nphotographer-portfolio.jsp" as Portfolio
+rectangle "/photographer/packages\nphotographer-packages.jsp" as Packages
+rectangle "/photographer/schedule\nphotographer-schedule.jsp" as Schedule
+rectangle "/photographer/bookings\nphotographer-bookings.jsp" as Bookings
+rectangle "/photographer/bookings/{id}\nphotographer-booking-detail.jsp" as Detail
+rectangle "/photographer/bookings/{id}/delivery\nphotographer-delivery.jsp" as Delivery
+rectangle "/bookings/{id}/chat\nchat.jsp" as Chat
+rectangle "/photographer/analytics\nphotographer-analytics.jsp" as Analytics
+Dashboard --> Profile
+Dashboard --> Portfolio
+Dashboard --> Packages
+Dashboard --> Schedule
+Dashboard --> Bookings
+Dashboard --> Analytics
+Onboard --> Status
+Status --> Dashboard : approved
+Bookings --> Detail
+Detail --> Delivery
+Detail --> Chat
+@enduml
+

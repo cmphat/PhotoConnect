@@ -1,0 +1,26 @@
+@startuml ACT-03
+!include ../theme.puml
+title ACT-03 — Tìm Nhiếp ảnh gia và chọn gói
+start
+:Mở /photographers;
+:Nhập từ khóa/bộ lọc;
+:PublicPhotographerService tìm kiếm;
+if (Có kết quả?) then (có)
+  :Xem hồ sơ, rating, portfolio;
+  :Xem các ServicePackage active;
+  if (Muốn so sánh?) then (có)
+    :Chọn package IDs;
+    :Gọi /photographers/{id}/packages/compare;
+  endif
+  :Chọn nhiếp ảnh gia và gói;
+  if (Đã đăng nhập CUSTOMER?) then (có)
+    :Mở biểu mẫu booking;
+  else (không)
+    :Chuyển tới đăng nhập;
+  endif
+else (không)
+  :Hiển thị trạng thái không có kết quả;
+endif
+stop
+@enduml
+

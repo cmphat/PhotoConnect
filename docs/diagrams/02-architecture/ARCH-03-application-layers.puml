@@ -1,0 +1,38 @@
+@startuml ARCH-03
+!include ../theme.puml
+title ARCH-03 — Các lớp ứng dụng
+package "Presentation" {
+  [JSP/JSTL]
+  [MVC Controllers]
+  [REST Controllers]
+  [STOMP Controllers]
+}
+package "Application / Domain" {
+  [DTO + validation]
+  [Business Services]
+  [BookingStateMachineService]
+  [Security ownership checks]
+}
+package "Infrastructure" {
+  [Spring Data Repositories]
+  [CloudinaryService]
+  [EmailService]
+  [GoogleAuthClient]
+  [SimpMessagingTemplate]
+}
+database "SQL Server" as DB
+[JSP/JSTL] --> [MVC Controllers]
+[MVC Controllers] --> [DTO + validation]
+[REST Controllers] --> [Business Services]
+[STOMP Controllers] --> [Business Services]
+[DTO + validation] --> [Business Services]
+[Business Services] --> [BookingStateMachineService]
+[Business Services] --> [Security ownership checks]
+[Business Services] --> [Spring Data Repositories]
+[Business Services] --> [CloudinaryService]
+[Business Services] --> [EmailService]
+[Business Services] --> [GoogleAuthClient]
+[Business Services] --> [SimpMessagingTemplate]
+[Spring Data Repositories] --> DB
+@enduml
+

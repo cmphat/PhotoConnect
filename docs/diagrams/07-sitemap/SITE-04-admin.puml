@@ -1,0 +1,25 @@
+@startuml SITE-04
+!include ../theme.puml
+title SITE-04 — Sitemap Admin Console
+rectangle "/admin hoặc /admin/dashboard\nadmin-dashboard.jsp" as Dashboard
+rectangle "/admin/users\nadmin-users.jsp" as Users
+rectangle "/admin/photographers\nadmin-photographer-list.jsp" as Photographers
+rectangle "/admin/photographers/{id}\nadmin-photographer-detail.jsp" as PhotographerDetail
+rectangle "/admin/bookings\nadmin-bookings.jsp" as Bookings
+rectangle "/admin/bookings/{id}\nadmin-booking-detail.jsp" as BookingDetail
+rectangle "/admin/reviews\nadmin-reviews.jsp" as Reviews
+rectangle "/admin/audit\nadmin-audit.jsp" as Audit
+Dashboard --> Users
+Dashboard --> Photographers
+Dashboard --> Bookings
+Dashboard --> Reviews
+Dashboard --> Audit
+Users --> Users : cấp / thu hồi MANAGER
+Photographers --> PhotographerDetail
+Bookings --> BookingDetail
+Reviews --> Reviews : hide/unhide review\nresolve/dismiss report
+note bottom
+  ADMIN giữ độc quyền cấp/thu hồi MANAGER.
+  Nhật ký vận hành chỉ đọc.
+end note
+@enduml

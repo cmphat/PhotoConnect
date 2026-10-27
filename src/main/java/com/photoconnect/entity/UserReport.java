@@ -53,6 +53,16 @@ public class UserReport {
     @Column(name = "resolved_by_admin_id")
     private Long resolvedByAdminId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_manager_id")
+    private User assignedManager;
+
+    @Column(name = "investigation_notes", length = 1500)
+    private String investigationNotes;
+
+    @Column(name = "resolution_reason", length = 1000)
+    private String resolutionReason;
+
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
@@ -158,6 +168,30 @@ public class UserReport {
 
     public void setResolvedByAdminId(Long resolvedByAdminId) {
         this.resolvedByAdminId = resolvedByAdminId;
+    }
+
+    public User getAssignedManager() {
+        return assignedManager;
+    }
+
+    public void setAssignedManager(User assignedManager) {
+        this.assignedManager = assignedManager;
+    }
+
+    public String getInvestigationNotes() {
+        return investigationNotes;
+    }
+
+    public void setInvestigationNotes(String investigationNotes) {
+        this.investigationNotes = investigationNotes;
+    }
+
+    public String getResolutionReason() {
+        return resolutionReason;
+    }
+
+    public void setResolutionReason(String resolutionReason) {
+        this.resolutionReason = resolutionReason;
     }
 
     public LocalDateTime getResolvedAt() {

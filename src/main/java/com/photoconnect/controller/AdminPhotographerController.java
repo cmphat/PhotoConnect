@@ -125,4 +125,27 @@ public class AdminPhotographerController {
         }
         return "redirect:/admin/photographers/" + id;
     }
+
+    // ── POST /admin/photographers/{id}/suspend ───────────────────────────
+    @PostMapping("/{id}/suspend")
+    public String suspendPhotographer(@PathVariable Long id,
+                                      @org.springframework.web.bind.annotation.RequestParam("suspensionReason") String suspensionReason,
+                                      @org.springframework.web.bind.annotation.RequestParam(value = "adminNotes", required = false) String adminNotes,
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttributes) {
+        String redirect = AdminSecurityUtils.requireAdmin(session);
+        if (redirect != null) return redirect;
+
+        Long adminId = (Long) session.getAttribute("userId");
+        try {
+            adminPhotographerService.suspend(id, adminId, suspensionReason, adminNotes);
+            redirectAttributes.addFlashAttribute("successMessage", "Photographer suspended successfully.");
+        } catch (InvalidStatusTransitionException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Photographer not found.");
+        }
+        return "redirect:/admin/photographers/" + id;
+    }
 }
+

@@ -28,7 +28,7 @@ class DemoDataSeederTest {
     @Mock PasswordEncoder passwordEncoder;
 
     @Test
-    void firstRunCreatesTwoRoleAccountsAndFifteenApprovedPhotographers() {
+    void firstRunCreatesThreeRoleAccountsAndFifteenApprovedPhotographers() {
         AtomicLong ids = new AtomicLong(1);
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(passwordEncoder.encode("PhotoConnectDemo!2026")).thenReturn("bcrypt-hash");
@@ -41,7 +41,7 @@ class DemoDataSeederTest {
         new DemoDataSeeder(userRepository, photographerProfileRepository, passwordEncoder,
                 "PhotoConnectDemo!2026").run();
 
-        verify(userRepository, times(17)).save(any(User.class));
+        verify(userRepository, times(18)).save(any(User.class));
         verify(photographerProfileRepository, times(15)).save(any(PhotographerProfile.class));
     }
 

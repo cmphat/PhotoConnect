@@ -1,0 +1,29 @@
+@startuml ACT-10
+!include ../theme.puml
+title ACT-10 — Quy trình Manager vận hành
+start
+:JWT filter xác minh chữ ký,
+trạng thái ACTIVE và vai trò MANAGER;
+if (Quyền theo tài nguyên hợp lệ?) then (có)
+  fork
+    :Duyệt hồ sơ PENDING;
+    :Ghi reviewer, thời gian, lý do;
+  fork again
+    :Nhận UserReport PENDING;
+    :Chuyển INVESTIGATING;
+    :RESOLVED hoặc DISMISSED;
+  fork again
+    :Nhận support ticket OPEN;
+    :Phản hồi và RESOLVED;
+  fork again
+    :Xác minh booking DISPUTED;
+    :State machine chuyển COMPLETED/CANCELLED;
+    :Cập nhật deposit mô phỏng cùng transaction;
+  end fork
+  :Gửi notification;
+  :Ghi operational_audit_logs;
+else (không)
+  :Từ chối không thay đổi dữ liệu;
+endif
+stop
+@enduml

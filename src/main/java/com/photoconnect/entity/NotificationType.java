@@ -10,7 +10,9 @@ public enum NotificationType {
     NEW_MESSAGE("New Message", "bi-chat-dots", "pc-badge-info"),
     DELIVERY_READY("Delivery Album Ready", "bi-images", "pc-badge-primary"),
     DELIVERY_CONFIRMED("Delivery Accepted", "bi-check2-all", "pc-badge-success"),
-    NEW_REVIEW("New Client Review", "bi-star-fill", "pc-badge-warning");
+    NEW_REVIEW("New Client Review", "bi-star-fill", "pc-badge-warning"),
+    SUPPORT_UPDATE("Support Update", "bi-life-preserver", "pc-badge-info"),
+    MODERATION_UPDATE("Moderation Update", "bi-shield-check", "pc-badge-primary");
 
     private final String displayName;
     private final String iconClass;

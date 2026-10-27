@@ -52,6 +52,12 @@ public class BookingRequest {
 
     private Integer participantCount;
 
+    private Integer travelDistanceKm;
+    private Boolean nightShoot;
+    private Integer extraHours;
+    private Integer extraPhotos;
+    private Boolean additionalPhotographer;
+
     public BookingRequest() {
     }
 
@@ -172,5 +178,45 @@ public class BookingRequest {
 
     public void setParticipantCount(Integer participantCount) {
         this.participantCount = participantCount;
+    }
+
+    public Integer getTravelDistanceKm() {
+        return travelDistanceKm;
+    }
+
+    public void setTravelDistanceKm(Integer travelDistanceKm) {
+        this.travelDistanceKm = travelDistanceKm;
+    }
+
+    public Boolean getNightShoot() {
+        return nightShoot;
+    }
+
+    public void setNightShoot(Boolean nightShoot) {
+        this.nightShoot = nightShoot;
+    }
+
+    public Integer getExtraHours() {
+        return extraHours;
+    }
+
+    public void setExtraHours(Integer extraHours) {
+        this.extraHours = extraHours;
+    }
+
+    public Integer getExtraPhotos() {
+        return extraPhotos;
+    }
+
+    public void setExtraPhotos(Integer extraPhotos) {
+        this.extraPhotos = extraPhotos;
+    }
+
+    public Boolean getAdditionalPhotographer() {
+        return additionalPhotographer;
+    }
+
+    public void setAdditionalPhotographer(Boolean additionalPhotographer) {
+        this.additionalPhotographer = additionalPhotographer;
     }
 }

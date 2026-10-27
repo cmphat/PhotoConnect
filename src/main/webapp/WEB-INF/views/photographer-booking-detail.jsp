@@ -345,6 +345,64 @@
                         </div>
                     </c:if>
 
+                    <!-- V6 Photographer Financial & Deposit Status Card -->
+                    <div style="grid-column: span 2; margin-top: 1.25rem;">
+                        <div style="background: #ffffff; border: 1px solid rgba(37,99,235,0.2); border-radius: var(--radius-sm, 8px); padding: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">
+                                <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="bi bi-wallet2 text-primary"></i> Thông tin tài chính &amp; Đặt cọc 30% / Financial Summary
+                                </div>
+                                <c:choose>
+                                    <c:when test="${booking.status == 'CONFIRMED' or booking.status == 'SHOOTING' or booking.status == 'POST_PROCESSING' or booking.status == 'DELIVERED' or booking.status == 'COMPLETED'}">
+                                        <span class="badge bg-success" style="font-size: 0.8rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Tiền cọc 30% đã xác nhận (Paid)
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-warning text-dark" style="font-size: 0.8rem;">
+                                            <i class="bi bi-clock-history me-1"></i> Chưa xác nhận thanh toán cọc
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+
+                            <div class="row g-3" style="font-size: 0.9rem;">
+                                <div class="col-12 col-md-4">
+                                    <div class="spec-item-label">Tổng giá trị buổi chụp (Agreed Total)</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; color: #0f172a;">
+                                        <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
+                                    </div>
+                                    <c:if test="${booking.basePrice != null}">
+                                        <small class="text-muted d-block" style="font-size: 0.78rem;">
+                                            Gói gốc: <fmt:formatNumber value="${booking.basePrice}" pattern="#,##0"/> VND
+                                            <c:if test="${booking.nightSurcharge > 0}"> · Đêm: +<fmt:formatNumber value="${booking.nightSurcharge}" pattern="#,##0"/></c:if>
+                                            <c:if test="${booking.travelSurcharge > 0}"> · Di chuyển: +<fmt:formatNumber value="${booking.travelSurcharge}" pattern="#,##0"/></c:if>
+                                            <c:if test="${booking.extrasFee > 0}"> · Dịch vụ thêm: +<fmt:formatNumber value="${booking.extrasFee}" pattern="#,##0"/></c:if>
+                                        </small>
+                                    </c:if>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="spec-item-label">Tiền đặt cọc bắt buộc (30% Deposit)</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; color: #2563eb;">
+                                        <fmt:formatNumber value="${booking.agreedPrice * 0.3}" pattern="#,##0" /> VND
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.78rem;">
+                                        Giữ an toàn qua nền tảng PhotoConnect VietQR
+                                    </small>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="spec-item-label">Số tiền còn lại khi hoàn tất (70% Balance)</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; color: #16a34a;">
+                                        <fmt:formatNumber value="${booking.agreedPrice * 0.7}" pattern="#,##0" /> VND
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.78rem;">
+                                        Thu trực tiếp hoặc chuyển khoản sau buổi chụp
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Private Studio CRM Notes (Phase 13) -->
                     <div style="grid-column: span 2; margin-top: 1.25rem;">
                         <div style="background: rgba(15, 23, 42, 0.02); border: 1px solid var(--border); border-radius: var(--radius-sm, 8px); padding: 1.25rem 1.5rem;">

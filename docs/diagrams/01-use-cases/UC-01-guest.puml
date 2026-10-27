@@ -1,0 +1,34 @@
+@startuml UC-01
+!include ../theme.puml
+title UC-01 — Chức năng Khách
+left to right direction
+actor Khách as Guest
+actor "Google OpenID Connect" as OAuth
+actor "SMTP provider" as SMTP
+rectangle PhotoConnect {
+  usecase "Duyệt marketplace" as Browse
+  usecase "Tìm kiếm / lọc\nnhiếp ảnh gia" as Search
+  usecase "Xem hồ sơ công khai" as PublicProfile
+  usecase "Xem portfolio" as Portfolio
+  usecase "Xem và so sánh\ngói dịch vụ" as Packages
+  usecase "Đăng ký" as Register
+  usecase "Xác minh email bằng OTP" as Verify
+  usecase "Đăng nhập" as Login
+  usecase "Đăng nhập Google" as Google
+  usecase "Khôi phục mật khẩu" as Recover
+}
+Guest --> Browse
+Guest --> Search
+Guest --> PublicProfile
+Guest --> Portfolio
+Guest --> Packages
+Guest --> Register
+Guest --> Login
+Guest --> Google
+Guest --> Recover
+Register ..> Verify : <<include>>
+Recover ..> Verify : <<include>>
+Google --> OAuth
+Verify --> SMTP
+@enduml
+

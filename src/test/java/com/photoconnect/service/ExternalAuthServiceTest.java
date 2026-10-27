@@ -9,6 +9,7 @@ import com.photoconnect.repository.ExternalAuthIdentityRepository;
 import com.photoconnect.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -82,6 +83,20 @@ class ExternalAuthServiceTest {
         when(identities.findByProviderAndProviderSubject(any(), any()))
                 .thenReturn(Optional.of(mapping(other, google.subject())));
         assertThrows(ExternalIdentityConflictException.class, () -> service.linkIdentity(3L, google));
+    }
+
+    @Test
+    void concurrentFirstLoginConstraintConflictDoesNotReturnASecondAccount() {
+        when(users.existsByEmail(google.email())).thenReturn(false);
+        when(users.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0); user.setId(20L); return user;
+        });
+        when(identities.saveAndFlush(any(ExternalAuthIdentity.class)))
+                .thenThrow(new DataIntegrityViolationException("concurrent unique constraint"));
+
+        assertThrows(ExternalIdentityConflictException.class, () -> service.createCustomer(google));
+        verify(users, times(1)).save(any(User.class));
+        verify(identities, times(1)).saveAndFlush(any(ExternalAuthIdentity.class));
     }
 
     private User user(Long id, UserRole role, UserStatus status) {

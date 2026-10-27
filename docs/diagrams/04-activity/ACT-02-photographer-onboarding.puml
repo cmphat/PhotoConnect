@@ -1,0 +1,28 @@
+@startuml ACT-02
+!include ../theme.puml
+title ACT-02 — Đăng ký Nhiếp ảnh gia
+start
+:Khách hàng mở /become-photographer;
+:Nhập hồ sơ chuyên nghiệp;
+if (Validation hợp lệ?) then (có)
+  :Lưu PhotographerProfile;
+  :verificationStatus = PENDING;
+  :Admin xem hồ sơ;
+  if (Admin phê duyệt?) then (có)
+    :status = APPROVED;
+    :Gán/duy trì vai trò PHOTOGRAPHER;
+    :Cho phép vào Photographer Studio;
+  else (không)
+    :status = REJECTED;
+    :Lưu rejectionReason/adminNotes;
+    if (Người dùng reapply?) then (có)
+      :Cập nhật hồ sơ;
+      :status = PENDING;
+    endif
+  endif
+else (không)
+  :Hiển thị lỗi biểu mẫu;
+endif
+stop
+@enduml
+

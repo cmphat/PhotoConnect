@@ -1,0 +1,13 @@
+@startuml STATE-05
+!include ../theme.puml
+title STATE-05 — Vòng đời RescheduleRequest
+[*] --> PENDING : participant creates
+PENDING --> ACCEPTED : counterparty accepts + slot valid
+PENDING --> REJECTED : counterparty rejects
+PENDING --> CANCELLED : requester cancels
+PENDING --> CANCELLED : booking cancellation cleanup
+ACCEPTED --> [*]
+REJECTED --> [*]
+CANCELLED --> [*]
+@enduml
+

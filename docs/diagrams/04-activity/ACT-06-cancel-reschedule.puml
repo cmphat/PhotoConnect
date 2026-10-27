@@ -1,0 +1,34 @@
+@startuml ACT-06
+!include ../theme.puml
+title ACT-06 — Hủy và đổi lịch Booking
+start
+:Participant mở booking;
+if (Chọn hủy?) then (có)
+  :Kiểm tra ownership và trạng thái;
+  if (Được phép hủy?) then (có)
+    :Chuyển booking -> CANCELLED;
+    :Lưu reason/cancelledBy/cancelledAt;
+    :Gửi notification;
+  else (không)
+    :Từ chối thao tác;
+  endif
+else (đổi lịch)
+  :Nhập proposedDate/time + reason;
+  :Tạo RescheduleRequest PENDING;
+  :Counterparty xem yêu cầu;
+  if (Chấp nhận?) then (có)
+    :Kiểm tra slot conflict;
+    if (Slot trống?) then (có)
+      :Cập nhật booking date/time;
+      :Request -> ACCEPTED;
+    else (không)
+      :Giữ PENDING / báo conflict;
+    endif
+  else (từ chối/hủy)
+    :Request -> REJECTED hoặc CANCELLED;
+  endif
+  :Gửi notification;
+endif
+stop
+@enduml
+

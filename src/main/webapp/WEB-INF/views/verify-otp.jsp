@@ -134,9 +134,6 @@
                 <!-- OTP Form -->
                 <form action="${pageContext.request.contextPath}/verify-otp" method="post" class="mb-4">
                     <%@ include file="fragments/csrf-input.jsp" %>
-                    <input type="hidden" name="email" value="<c:out value='${email}'/>" />
-                    <input type="hidden" name="purpose" value="<c:out value='${purpose}'/>" />
-
                     <div class="form-group mb-4">
                         <label for="otpCode" class="form-label text-muted small fw-bold">MÃ XÁC THỰC (6 CHỮ SỐ)</label>
                         <input type="text"
@@ -165,8 +162,6 @@
                     <span class="small text-muted">Chưa nhận được mã?</span>
                     <form action="${pageContext.request.contextPath}/resend-otp" method="post" class="d-inline m-0">
                         <%@ include file="fragments/csrf-input.jsp" %>
-                        <input type="hidden" name="email" value="<c:out value='${email}'/>" />
-                        <input type="hidden" name="purpose" value="<c:out value='${purpose}'/>" />
                         <button type="submit" class="btn btn-link p-0 small text-primary text-decoration-none fw-semibold">
                             Gửi lại mã OTP
                         </button>

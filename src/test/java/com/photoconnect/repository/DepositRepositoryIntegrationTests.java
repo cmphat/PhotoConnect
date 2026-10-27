@@ -22,9 +22,12 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.transaction.annotation.Transactional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Transactional
 @EnabledIfEnvironmentVariable(named = "DB_USERNAME", matches = ".+")
 public class DepositRepositoryIntegrationTests {
 
@@ -47,13 +50,15 @@ public class DepositRepositoryIntegrationTests {
 
     @BeforeEach
     void setUp() {
+        cleanupLeftovers();
+
         customerUser = new User();
         customerUser.setEmail("deposit.customer@example.com");
         customerUser.setPassword("pass");
         customerUser.setFullName("Deposit Cust");
         customerUser.setRole(UserRole.CUSTOMER);
         customerUser.setStatus(UserStatus.ACTIVE);
-        userRepository.save(customerUser);
+        customerUser = userRepository.save(customerUser);
 
         photographerUser = new User();
         photographerUser.setEmail("deposit.photog@example.com");
@@ -61,25 +66,26 @@ public class DepositRepositoryIntegrationTests {
         photographerUser.setFullName("Deposit Photog");
         photographerUser.setRole(UserRole.PHOTOGRAPHER);
         photographerUser.setStatus(UserStatus.ACTIVE);
-        userRepository.save(photographerUser);
+        photographerUser = userRepository.save(photographerUser);
 
         photographerProfile = new PhotographerProfile();
         photographerProfile.setUser(photographerUser);
         photographerProfile.setDisplayName("Dep Studio");
         photographerProfile.setVerificationStatus(PhotographerVerificationStatus.APPROVED);
-        photographerProfileRepository.save(photographerProfile);
+        photographerProfile = photographerProfileRepository.save(photographerProfile);
 
         booking = new Booking(customerUser, photographerProfile, LocalDate.now().plusDays(1), LocalTime.NOON, "Loc", null, new BigDecimal("1000.00"));
-        bookingRepository.save(booking);
+        booking = bookingRepository.save(booking);
     }
 
-    @AfterEach
-    void tearDown() {
+    private void cleanupLeftovers() {
         depositRepository.deleteAll();
         bookingRepository.deleteAll();
-        photographerProfileRepository.deleteAll();
-        userRepository.delete(customerUser);
-        userRepository.delete(photographerUser);
+        userRepository.findByEmail("deposit.photog@example.com").ifPresent(u -> {
+            photographerProfileRepository.findByUserId(u.getId()).ifPresent(photographerProfileRepository::delete);
+            userRepository.delete(u);
+        });
+        userRepository.findByEmail("deposit.customer@example.com").ifPresent(userRepository::delete);
     }
 
     @Test

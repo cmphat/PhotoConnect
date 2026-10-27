@@ -1,0 +1,29 @@
+@startuml ARCH-01
+!include ../theme.puml
+title ARCH-01 — Kiến trúc tổng thể
+actor "Web user" as User
+cloud "Google OpenID Connect" as OAuth
+cloud "SMTP provider" as SMTP
+cloud Cloudinary
+node "Spring Boot WAR" {
+  component "JSP/JSTL + Bootstrap\nSiteMesh" as View
+  component "Spring MVC Controllers\n/customer /photographer /manager /admin" as MVC
+  component "Spring Security OAuth2 Client\nJWT + authoritative role revalidation\nCSRF + headers" as Sec
+  component "Services\npermission policy + @Transactional\noperational audit" as Svc
+  component "Spring Data JPA\nRepositories" as Repo
+  component "STOMP/WebSocket" as WS
+}
+database "SQL Server\nFlyway schema" as DB
+User --> Sec : HTTP(S)
+Sec --> MVC
+MVC --> View
+MVC --> Svc
+User <--> WS : SockJS / WebSocket
+WS --> Svc
+Svc --> Repo
+Repo --> DB
+Sec --> OAuth : authorization code + OIDC
+Svc --> SMTP : email
+Svc --> Cloudinary : media API
+@enduml
+

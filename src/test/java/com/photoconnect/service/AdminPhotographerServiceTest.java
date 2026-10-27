@@ -205,4 +205,29 @@ class AdminPhotographerServiceTest {
         assertThat(results).hasSize(2);
         verify(photographerProfileRepository).findAllWithUser();
     }
+
+    // ── Suspend tests ───────────────────────────────────────────────────
+
+    @Test
+    void suspend_approvedProfile_shouldTransitionToSuspended() {
+        when(photographerProfileRepository.findById(2L)).thenReturn(Optional.of(approvedProfile));
+        when(photographerProfileRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        PhotographerProfile result = adminPhotographerService.suspend(2L, 99L, "TOS Violation", "Verified evidence");
+
+        assertThat(result.getVerificationStatus()).isEqualTo(PhotographerVerificationStatus.SUSPENDED);
+        assertThat(result.getRejectionReason()).isEqualTo("TOS Violation");
+        assertThat(result.getAdminNotes()).isEqualTo("Verified evidence");
+        assertThat(result.getReviewedByAdminId()).isEqualTo(99L);
+        verify(photographerProfileRepository).save(approvedProfile);
+    }
+
+    @Test
+    void suspend_pendingProfile_shouldThrowInvalidStatusTransitionException() {
+        when(photographerProfileRepository.findById(1L)).thenReturn(Optional.of(pendingProfile));
+
+        assertThrows(InvalidStatusTransitionException.class,
+                () -> adminPhotographerService.suspend(1L, 99L, "TOS Violation", "Notes"));
+        verify(photographerProfileRepository, never()).save(any());
+    }
 }

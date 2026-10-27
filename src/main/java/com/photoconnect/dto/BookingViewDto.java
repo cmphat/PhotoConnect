@@ -64,6 +64,14 @@ public class BookingViewDto {
         dto.setPropsNeeded(booking.getPropsNeeded());
         dto.setParticipantCount(booking.getParticipantCount());
         dto.setPhotographerNotes(booking.getPhotographerNotes());
+        dto.setBasePrice(booking.getBasePrice() != null ? booking.getBasePrice() : booking.getAgreedPrice());
+        dto.setNightSurcharge(booking.getNightSurcharge() != null ? booking.getNightSurcharge() : BigDecimal.ZERO);
+        dto.setTravelDistanceKm(booking.getTravelDistanceKm() != null ? booking.getTravelDistanceKm() : 0);
+        dto.setTravelSurcharge(booking.getTravelSurcharge() != null ? booking.getTravelSurcharge() : BigDecimal.ZERO);
+        dto.setExtrasFee(booking.getExtrasFee() != null ? booking.getExtrasFee() : BigDecimal.ZERO);
+        dto.setExtraHours(booking.getExtraHours() != null ? booking.getExtraHours() : 0);
+        dto.setExtraPhotos(booking.getExtraPhotos() != null ? booking.getExtraPhotos() : 0);
+        dto.setAdditionalPhotographer(Boolean.TRUE.equals(booking.getAdditionalPhotographer()));
         return dto;
     }
 
@@ -317,5 +325,78 @@ public class BookingViewDto {
 
     public void setPastCompletedShootsWithClient(Long pastCompletedShootsWithClient) {
         this.pastCompletedShootsWithClient = pastCompletedShootsWithClient;
+    }
+
+    private BigDecimal basePrice;
+    private BigDecimal nightSurcharge;
+    private Integer travelDistanceKm;
+    private BigDecimal travelSurcharge;
+    private BigDecimal extrasFee;
+    private Integer extraHours;
+    private Integer extraPhotos;
+    private Boolean additionalPhotographer;
+
+    public BigDecimal getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public BigDecimal getNightSurcharge() {
+        return nightSurcharge;
+    }
+
+    public void setNightSurcharge(BigDecimal nightSurcharge) {
+        this.nightSurcharge = nightSurcharge;
+    }
+
+    public Integer getTravelDistanceKm() {
+        return travelDistanceKm;
+    }
+
+    public void setTravelDistanceKm(Integer travelDistanceKm) {
+        this.travelDistanceKm = travelDistanceKm;
+    }
+
+    public BigDecimal getTravelSurcharge() {
+        return travelSurcharge;
+    }
+
+    public void setTravelSurcharge(BigDecimal travelSurcharge) {
+        this.travelSurcharge = travelSurcharge;
+    }
+
+    public BigDecimal getExtrasFee() {
+        return extrasFee;
+    }
+
+    public void setExtrasFee(BigDecimal extrasFee) {
+        this.extrasFee = extrasFee;
+    }
+
+    public Integer getExtraHours() {
+        return extraHours;
+    }
+
+    public void setExtraHours(Integer extraHours) {
+        this.extraHours = extraHours;
+    }
+
+    public Integer getExtraPhotos() {
+        return extraPhotos;
+    }
+
+    public void setExtraPhotos(Integer extraPhotos) {
+        this.extraPhotos = extraPhotos;
+    }
+
+    public Boolean getAdditionalPhotographer() {
+        return additionalPhotographer;
+    }
+
+    public void setAdditionalPhotographer(Boolean additionalPhotographer) {
+        this.additionalPhotographer = additionalPhotographer;
     }
 }

@@ -18,6 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     long countByRole(UserRole role);
+    long countByRoleAndStatus(UserRole role, UserStatus status);
 
     @Query("""
             SELECT u FROM User u

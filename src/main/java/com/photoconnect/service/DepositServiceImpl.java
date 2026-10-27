@@ -35,6 +35,7 @@ public class DepositServiceImpl implements DepositService {
     private final DepositRepository depositRepository;
     private final BookingRepository bookingRepository;
     private final BookingStateMachineService bookingStateMachineService;
+    private final com.photoconnect.payment.PaymentGatewayFactory paymentGatewayFactory;
 
     @Value("${photoconnect.payment.simulation-enabled:true}")
     private boolean simulationEnabled;
@@ -42,26 +43,28 @@ public class DepositServiceImpl implements DepositService {
     @org.springframework.beans.factory.annotation.Autowired
     public DepositServiceImpl(DepositRepository depositRepository,
                               BookingRepository bookingRepository,
-                              @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService) {
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.payment.PaymentGatewayFactory paymentGatewayFactory) {
         this.depositRepository = depositRepository;
         this.bookingRepository = bookingRepository;
         this.bookingStateMachineService = bookingStateMachineService;
+        this.paymentGatewayFactory = paymentGatewayFactory;
     }
 
     public DepositServiceImpl(DepositRepository depositRepository, BookingRepository bookingRepository) {
-        this(depositRepository, bookingRepository, null);
+        this(depositRepository, bookingRepository, null, null);
     }
 
     @Override
     public BigDecimal calculateDepositAmount(BigDecimal agreedPrice) {
         BigDecimal price = agreedPrice != null ? agreedPrice : BigDecimal.ZERO;
-        return price.multiply(DEPOSIT_RATE).setScale(2, RoundingMode.HALF_UP);
+        return price.multiply(DEPOSIT_RATE).setScale(0, RoundingMode.HALF_UP);
     }
 
     @Override
     @Transactional
     public DepositViewDto getOrCreateDepositForBooking(Long bookingId, Long customerUserId) {
-        requireSimulationEnabled();
+        requireCheckoutEnabled();
         Booking booking = requireOwnedBooking(bookingId, customerUserId);
         Optional<Deposit> existingDeposit = depositRepository.findByBookingIdWithDetails(bookingId);
 
@@ -78,11 +81,23 @@ public class DepositServiceImpl implements DepositService {
                 deposit.setPaymentMethod(null);
                 deposit.setFailureReason(null);
                 deposit.setPaidAt(null);
+                initializeGatewayQr(deposit, booking);
                 return mapToDto(depositRepository.save(deposit));
             }
+            boolean modified = false;
             if (deposit.getPaymentReference() == null || deposit.getPaymentReference().isBlank()) {
                 deposit.setPaymentReference(generateTransactionReference());
-                return mapToDto(depositRepository.save(deposit));
+                modified = true;
+            }
+            if (deposit.getQrCodeUrl() == null || (deposit.getExpiresAt() != null && deposit.getExpiresAt().isBefore(LocalDateTime.now()))) {
+                String previousQr = deposit.getQrCodeUrl();
+                initializeGatewayQr(deposit, booking);
+                if (deposit.getQrCodeUrl() != null && !deposit.getQrCodeUrl().equals(previousQr)) {
+                    modified = true;
+                }
+            }
+            if (modified) {
+                deposit = depositRepository.save(deposit);
             }
             return mapToDto(deposit);
         }
@@ -91,6 +106,7 @@ public class DepositServiceImpl implements DepositService {
         BigDecimal depositAmount = calculateDepositAmount(booking.getAgreedPrice());
         Deposit deposit = new Deposit(booking, depositAmount);
         deposit.setPaymentReference(generateTransactionReference());
+        initializeGatewayQr(deposit, booking);
         return mapToDto(depositRepository.save(deposit));
     }
 
@@ -236,8 +252,45 @@ public class DepositServiceImpl implements DepositService {
     }
 
     private void requireSimulationEnabled() {
-        if (!simulationEnabled) {
+        if (!simulationEnabled || (paymentGatewayFactory != null && paymentGatewayFactory.isRealModeRequested())) {
             throw new IllegalStateException("Demo payment is disabled in this environment.");
+        }
+    }
+
+    private void requireCheckoutEnabled() {
+        boolean realActive = paymentGatewayFactory != null && paymentGatewayFactory.isRealModeActive();
+        if (!simulationEnabled && !realActive) {
+            throw new IllegalStateException("Payment checkout is disabled in this environment.");
+        }
+    }
+
+    private void initializeGatewayQr(Deposit deposit, Booking booking) {
+        if (paymentGatewayFactory != null) {
+            com.photoconnect.payment.PaymentGatewayAdapter adapter = paymentGatewayFactory.getActiveAdapter();
+            if (adapter != null) {
+                long orderCode = Math.abs(System.currentTimeMillis() % 1000000000L);
+                com.photoconnect.payment.PaymentCreationRequest pcr = new com.photoconnect.payment.PaymentCreationRequest(
+                        booking.getId(),
+                        deposit.getId(),
+                        orderCode,
+                        deposit.getAmount(),
+                        deposit.getPaymentReference(),
+                        "Deposit #" + booking.getId(),
+                        "/bookings/" + booking.getId() + "/deposit/result",
+                        "/bookings/" + booking.getId() + "/deposit/checkout",
+                        booking.getCustomer() != null ? booking.getCustomer().getFullName() : "Customer",
+                        booking.getCustomer() != null ? booking.getCustomer().getEmail() : ""
+                );
+                com.photoconnect.payment.PaymentCreationResult res = adapter.createPaymentRequest(pcr);
+                if (res != null && res.isSuccess()) {
+                    deposit.setProviderName(res.getGatewayType().name());
+                    deposit.setProviderOrderCode(res.getProviderOrderCode());
+                    deposit.setQrCodeUrl(res.getQrCodeUrl());
+                    deposit.setCheckoutUrl(res.getCheckoutUrl());
+                    deposit.setExpiresAt(res.getExpiresAt());
+                    deposit.setProviderTransactionId(res.getProviderTransactionId());
+                }
+            }
         }
     }
 
@@ -304,6 +357,13 @@ public class DepositServiceImpl implements DepositService {
         dto.setPaymentMethod(deposit.getPaymentMethod());
         dto.setFailureReason(deposit.getFailureReason());
         dto.setPaidAt(deposit.getPaidAt());
+        dto.setProviderName(deposit.getProviderName());
+        dto.setProviderOrderCode(deposit.getProviderOrderCode());
+        dto.setProviderTransactionId(deposit.getProviderTransactionId());
+        dto.setQrCodeUrl(deposit.getQrCodeUrl());
+        dto.setCheckoutUrl(deposit.getCheckoutUrl());
+        dto.setExpiresAt(deposit.getExpiresAt());
+        dto.setPaymentMode(paymentGatewayFactory != null && paymentGatewayFactory.isRealModeActive() ? "REAL" : "DEMO");
         return dto;
     }
 }

@@ -1,0 +1,29 @@
+@startuml SEQ-09
+!include ../theme.puml
+title SEQ-09 — Truy cập giao ảnh riêng tư
+actor Customer
+participant CustomerDeliveryController
+participant DeliveryServiceImpl
+participant BookingRepository
+participant DeliveredPhotoRepository
+participant CloudinaryServiceImpl
+participant Cloudinary <<external>>
+database "SQL Server" as DB
+Customer -> CustomerDeliveryController : GET /bookings/{id}/delivery
+CustomerDeliveryController -> DeliveryServiceImpl : getCustomerAlbum(id,userId)
+DeliveryServiceImpl -> BookingRepository : load booking
+BookingRepository -> DB
+DeliveryServiceImpl -> DeliveryServiceImpl : assert customer ownership + delivered state
+DeliveryServiceImpl -> DeliveredPhotoRepository : list album photos
+CustomerDeliveryController --> Customer : album metadata (không tin raw URL)
+Customer -> CustomerDeliveryController : GET photo/{photoId}/preview|download
+CustomerDeliveryController -> DeliveryServiceImpl : signed URL request
+DeliveryServiceImpl -> DeliveryServiceImpl : booking/photo ownership
+DeliveryServiceImpl -> CloudinaryServiceImpl : generateAuthenticatedUrl(publicId,300s)
+CloudinaryServiceImpl -> Cloudinary : sign transformation/delivery URL
+Cloudinary --> Customer : media if signature valid
+note bottom
+  Legacy public assets remain directly reachable if their old public URL leaked.
+end note
+@enduml
+

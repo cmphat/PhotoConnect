@@ -18,4 +18,8 @@ public interface AdminUserService {
      * Prevents an administrator from altering their own account status.
      */
     User updateUserStatus(Long userId, UserStatus newStatus, Long currentAdminId);
+
+    User grantManagerRole(Long userId, Long currentAdminId);
+
+    User revokeManagerRole(Long userId, Long currentAdminId);
 }

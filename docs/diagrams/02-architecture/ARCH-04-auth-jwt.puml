@@ -1,0 +1,31 @@
+@startuml ARCH-04
+!include ../theme.puml
+title ARCH-04 — Xác thực JWT và phân quyền
+actor Browser
+component "LoginController" as Login
+component "AuthServiceImpl" as Auth
+component "JwtService" as JWTService
+component "JWT HttpOnly cookie" as Cookie
+component "JwtAuthenticationFilter" as Filter
+component "SecurityConfig" as Config
+component "Controller / service\nownership checks" as Ownership
+database "users" as Users
+Browser -> Login : email + password
+Login -> Auth
+Auth -> Users : tải ACTIVE user
+Auth -> Auth : PasswordEncoder.matches
+Auth -> JWTService : generateToken(user)
+JWTService --> Cookie : signed token
+Cookie --> Browser
+Browser -> Filter : subsequent request
+Filter -> JWTService : validate signature/expiry
+JWTService -> Users : load identity
+Filter -> Config : SecurityContext + route rules
+Config -> Ownership : role-authorized request
+Ownership --> Browser : resource or 403
+note bottom of JWTService
+  Runtime secret bắt buộc từ cấu hình;
+  không mô hình hóa fallback khóa dự đoán.
+end note
+@enduml
+

@@ -139,6 +139,24 @@
                                         <em>Ghi chú nội bộ:</em> <c:out value="${profile.adminNotes}"/>
                                     </div>
                                 </c:if>
+                                <c:if test="${profile.verificationStatus == 'APPROVED'}">
+                                    <div class="p-3 border rounded-3 bg-light mt-4">
+                                        <h3 class="h6 fw-bold mb-2 text-warning">Tạm ngưng hoạt động nhiếp ảnh gia</h3>
+                                        <p class="small text-muted mb-3">Tạm ngưng hiển thị hồ sơ và khả năng nhận booking khi có vi phạm chính sách hoặc sau khi điều tra báo cáo.</p>
+                                        <form action="${pageContext.request.contextPath}/admin/photographers/${profile.id}/suspend" method="post" style="margin: 0;">
+                                            <%@ include file="fragments/csrf-input.jsp" %>
+                                            <div class="mb-2">
+                                                <textarea name="suspensionReason" class="form-control form-control-sm" rows="2" placeholder="Lý do tạm ngưng (bắt buộc)" required></textarea>
+                                            </div>
+                                            <div class="mb-2">
+                                                <input type="text" name="adminNotes" class="form-control form-control-sm" placeholder="Ghi chú nội bộ admin (tùy chọn)">
+                                            </div>
+                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Xác nhận tạm ngưng hoạt động của nhiếp ảnh gia này?')">
+                                                Đình chỉ hoạt động
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
                             </div>
                         </c:if>
                     </div>

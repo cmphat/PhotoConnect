@@ -1,0 +1,29 @@
+@startuml ARCH-02
+!include ../theme.puml
+title ARCH-02 — Vòng đời yêu cầu Spring MVC
+actor Browser
+participant "SecurityFilterChain" as Security
+participant "JwtAuthenticationFilter" as JWT
+participant "Controller" as Controller
+participant "Service" as Service
+participant "Repository" as Repository
+database "SQL Server" as DB
+participant "JSP + SiteMesh" as JSP
+Browser -> Security : HTTP request + JWT cookie + CSRF token
+Security -> JWT : xác thực JWT
+alt hợp lệ và đủ quyền
+  JWT -> Controller : dispatch
+  Controller -> Controller : Bean Validation / ownership guard
+  Controller -> Service : business operation
+  Service -> Repository : JPA operation
+  Repository -> DB : SQL
+  DB --> Repository
+  Repository --> Service
+  Service --> Controller : DTO/entity result
+  Controller -> JSP : model + view name
+  JSP --> Browser : decorated HTML
+else không hợp lệ
+  Security --> Browser : 401 / 403 / redirect
+end
+@enduml
+

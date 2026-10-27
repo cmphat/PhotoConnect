@@ -1,0 +1,62 @@
+@startuml ERD-04
+!include ../theme.puml
+title ERD-04 — Portfolio, giao ảnh và đánh giá
+hide methods
+entity users {
+  * id : bigint <<PK>>
+}
+entity photographer_profiles {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK>>
+}
+entity portfolio_images {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  image_url : varchar
+  public_id : varchar
+  caption : varchar
+  is_cover : bit
+  category : varchar
+}
+entity bookings {
+  * id : bigint <<PK>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+}
+entity delivery_albums {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  status : varchar
+  notes : varchar
+  delivered_at : datetime2
+  accepted_at : datetime2
+}
+entity delivered_photos {
+  * id : bigint <<PK>>
+  album_id : bigint <<FK>>
+  cloudinary_public_id : varchar
+  secure_url : varchar
+  resource_type : varchar
+  file_name : varchar
+  file_size_bytes : bigint
+}
+entity reviews {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+  rating : int
+  comment : varchar
+  status : varchar
+}
+users ||--o| photographer_profiles
+photographer_profiles ||--o{ portfolio_images
+users ||--o{ bookings
+photographer_profiles ||--o{ bookings
+bookings ||--o| delivery_albums
+delivery_albums ||--o{ delivered_photos
+bookings ||--o| reviews
+users ||--o{ reviews
+photographer_profiles ||--o{ reviews
+@enduml
+

@@ -57,6 +57,26 @@ class JwtAuthenticationFilterTest {
         assertEquals(403, filterStatus(UserRole.PHOTOGRAPHER, "/admin/dashboard"));
         assertEquals(200, filterStatus(UserRole.PHOTOGRAPHER, "/photographer/dashboard"));
         assertEquals(200, filterStatus(UserRole.ADMIN, "/admin/dashboard"));
+        assertEquals(403, filterStatus(UserRole.CUSTOMER, "/manager/dashboard"));
+        assertEquals(403, filterStatus(UserRole.PHOTOGRAPHER, "/manager/dashboard"));
+        assertEquals(200, filterStatus(UserRole.MANAGER, "/manager/dashboard"));
+        assertEquals(403, filterStatus(UserRole.MANAGER, "/admin/users"));
+    }
+
+    @Test
+    void revokedManagerTokenIsRejectedAgainstAuthoritativeAccountRole() throws Exception {
+        User issuedAsManager = user(44L, UserRole.MANAGER, UserStatus.ACTIVE);
+        String token = tokenService.createToken(issuedAsManager);
+        User currentAccount = user(44L, UserRole.CUSTOMER, UserStatus.ACTIVE);
+        when(userRepository.findById(44L)).thenReturn(Optional.of(currentAccount));
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/manager/dashboard");
+        request.setCookies(new Cookie(JwtCookieService.COOKIE_NAME, token));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter().doFilter(request, response, new MockFilterChain());
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/login", response.getRedirectedUrl());
     }
 
     @Test
@@ -88,7 +108,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void explicitGoogleLinkRouteRequiresApplicationJwt() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/auth/google/link");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bookings");
         MockHttpServletResponse response = new MockHttpServletResponse();
         filter().doFilter(request, response, new MockFilterChain());
         assertEquals(302, response.getStatus());

@@ -1,0 +1,26 @@
+@startuml SEQ-07
+!include ../theme.puml
+title SEQ-07 — Chat WebSocket
+actor Browser
+participant "STOMP ChannelInterceptor" as Interceptor
+participant ChatWebSocketController
+participant ChatServiceImpl
+participant MessageRepository
+participant SimpMessagingTemplate
+database "SQL Server" as DB
+Browser -> Interceptor : CONNECT JWT principal
+Browser -> Interceptor : SUBSCRIBE booking destination
+Interceptor -> Interceptor : verify booking participant
+alt authorized
+  Browser -> ChatWebSocketController : SEND /app/chat.send
+  ChatWebSocketController -> ChatServiceImpl : sendMessage(booking,sender,content)
+  ChatServiceImpl -> ChatServiceImpl : participant + receiver + length checks
+  ChatServiceImpl -> MessageRepository : save
+  MessageRepository -> DB
+  ChatServiceImpl -> SimpMessagingTemplate : convertAndSend
+  SimpMessagingTemplate -->> Browser : message event
+else unauthorized
+  Interceptor -->> Browser : ERROR / reject
+end
+@enduml
+

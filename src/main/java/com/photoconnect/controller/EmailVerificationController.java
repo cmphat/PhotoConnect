@@ -1,5 +1,6 @@
 package com.photoconnect.controller;
 
+import com.photoconnect.exception.EmailDeliveryException;
 import com.photoconnect.service.UserService;
 import com.photoconnect.util.ClientIpUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,11 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 @Controller
 public class EmailVerificationController {
+
+    public static final String PENDING_REGISTRATION_EMAIL_SESSION_KEY = "pendingRegistrationEmail";
+    private static final String INVALID_VERIFICATION_CONTEXT_MESSAGE =
+            "Phiên xác thực không hợp lệ hoặc đã hết hạn. Vui lòng đăng ký lại.";
 
     private final UserService userService;
 
@@ -24,9 +26,8 @@ public class EmailVerificationController {
 
     @GetMapping("/verify-otp")
     public String showVerifyOtpForm(
-            @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "purpose", defaultValue = "REGISTRATION") String purpose,
             @RequestParam(name = "resent", required = false) String resent,
+            @RequestParam(name = "sent", required = false) String sent,
             HttpSession session,
             Model model) {
 
@@ -34,8 +35,14 @@ public class EmailVerificationController {
             return "redirect:/";
         }
 
-        model.addAttribute("email", email != null ? email.trim() : "");
-        model.addAttribute("purpose", purpose);
+        String email = getPendingRegistrationEmail(session);
+        model.addAttribute("email", email != null ? email : "");
+        model.addAttribute("purpose", "REGISTRATION");
+        if (email == null) {
+            model.addAttribute("errorMessage", INVALID_VERIFICATION_CONTEXT_MESSAGE);
+        } else if ("true".equals(sent)) {
+            model.addAttribute("infoMessage", "Mã xác thực đã được gửi tới email của bạn.");
+        }
         if ("true".equals(resent)) {
             model.addAttribute("infoMessage", "Mã xác thực mới đã được gửi tới email của bạn.");
         }
@@ -45,9 +52,7 @@ public class EmailVerificationController {
 
     @PostMapping("/verify-otp")
     public String processVerifyOtp(
-            @RequestParam("email") String email,
             @RequestParam("otpCode") String otpCode,
-            @RequestParam(name = "purpose", defaultValue = "REGISTRATION") String purpose,
             HttpSession session,
             Model model) {
 
@@ -55,11 +60,18 @@ public class EmailVerificationController {
             return "redirect:/";
         }
 
-        model.addAttribute("email", email);
-        model.addAttribute("purpose", purpose);
+        String email = getPendingRegistrationEmail(session);
+        model.addAttribute("email", email != null ? email : "");
+        model.addAttribute("purpose", "REGISTRATION");
+
+        if (email == null) {
+            model.addAttribute("errorMessage", INVALID_VERIFICATION_CONTEXT_MESSAGE);
+            return "verify-otp";
+        }
 
         try {
             userService.verifyRegistrationOtp(email, otpCode);
+            session.removeAttribute(PENDING_REGISTRATION_EMAIL_SESSION_KEY);
             return "redirect:/login?verified=true";
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
@@ -69,22 +81,38 @@ public class EmailVerificationController {
 
     @PostMapping("/resend-otp")
     public String resendOtp(
-            @RequestParam("email") String email,
-            @RequestParam(name = "purpose", defaultValue = "REGISTRATION") String purpose,
             HttpServletRequest request,
+            HttpSession session,
             Model model) {
 
-        model.addAttribute("email", email);
-        model.addAttribute("purpose", purpose);
+        String email = getPendingRegistrationEmail(session);
+        model.addAttribute("email", email != null ? email : "");
+        model.addAttribute("purpose", "REGISTRATION");
+
+        if (email == null) {
+            model.addAttribute("errorMessage", INVALID_VERIFICATION_CONTEXT_MESSAGE);
+            return "verify-otp";
+        }
 
         try {
             String clientIp = ClientIpUtils.getClientIp(request);
             userService.resendRegistrationOtp(email, clientIp);
-            String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
-            return "redirect:/verify-otp?email=" + encodedEmail + "&purpose=" + purpose + "&resent=true";
+            return "redirect:/verify-otp?resent=true";
+        } catch (EmailDeliveryException e) {
+            model.addAttribute("errorMessage",
+                    "Không thể gửi email xác thực lúc này. Vui lòng thử lại sau.");
+            return "verify-otp";
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "verify-otp";
         }
+    }
+
+    private String getPendingRegistrationEmail(HttpSession session) {
+        Object value = session.getAttribute(PENDING_REGISTRATION_EMAIL_SESSION_KEY);
+        if (!(value instanceof String email) || email.isBlank()) {
+            return null;
+        }
+        return email.trim();
     }
 }

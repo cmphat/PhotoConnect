@@ -57,6 +57,7 @@ public class ServicePackageServiceImpl implements ServicePackageService {
                 request.getEditedPhotoCount(),
                 request.getDeliveryDays()
         );
+        applyPricingSettings(servicePackage, request);
 
         ServicePackage saved = servicePackageRepository.save(servicePackage);
         log.info("Created service package [{}] for photographer profile [{}]", saved.getId(), profile.getId());
@@ -82,6 +83,7 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         servicePackage.setDurationMinutes(request.getDurationMinutes());
         servicePackage.setEditedPhotoCount(request.getEditedPhotoCount());
         servicePackage.setDeliveryDays(request.getDeliveryDays());
+        applyPricingSettings(servicePackage, request);
 
         ServicePackage updated = servicePackageRepository.save(servicePackage);
         log.info("Updated service package [{}] for photographer profile [{}]", updated.getId(), profile.getId());
@@ -180,5 +182,14 @@ public class ServicePackageServiceImpl implements ServicePackageService {
             throw new UnauthorizedException("Only active photographers can manage service packages.");
         }
         return profile;
+    }
+
+    private void applyPricingSettings(ServicePackage servicePackage, ServicePackageRequest request) {
+        servicePackage.setNightSurchargeRate(request.getNightSurchargeRate());
+        servicePackage.setIncludedTravelKm(request.getIncludedTravelKm());
+        servicePackage.setExcessTravelRate(request.getExcessTravelRate());
+        servicePackage.setAdditionalHourFee(request.getAdditionalHourFee());
+        servicePackage.setExtraEditedPhotoFee(request.getExtraEditedPhotoFee());
+        servicePackage.setAssistantFee(request.getAssistantFee());
     }
 }

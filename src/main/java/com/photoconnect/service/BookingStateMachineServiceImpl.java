@@ -201,9 +201,14 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
     }
 
     private void validateActorAuthorization(Booking booking, User actor, BookingStatus targetStatus) {
-        boolean isAdmin = actor.getRole() == UserRole.ADMIN;
-        if (isAdmin) {
-            return; // Admins can execute administrative transitions
+        boolean isOperationalResolver = com.photoconnect.security.RolePermissionPolicy.hasPermission(
+                actor.getRole(), com.photoconnect.security.PlatformPermission.BOOKING_DISPUTE_RESOLVE);
+        if (isOperationalResolver && booking.getStatus() == BookingStatus.DISPUTED
+                && (targetStatus == BookingStatus.COMPLETED || targetStatus == BookingStatus.CANCELLED)) {
+            return;
+        }
+        if (actor.getRole() == UserRole.ADMIN) {
+            return; // Administrators retain broader administrative transition authority
         }
 
         boolean isCustomer = booking.getCustomer() != null && booking.getCustomer().getId().equals(actor.getId());

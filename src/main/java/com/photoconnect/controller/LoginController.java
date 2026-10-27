@@ -79,10 +79,6 @@ public class LoginController {
             session.setAttribute("userRole", user.getRole().name());
             jwtCookieService.issue(httpRequest, httpResponse, user);
 
-            if (session.getAttribute(GoogleAuthController.LINK_EMAIL_KEY) != null) {
-                session.removeAttribute(GoogleAuthController.LINK_EMAIL_KEY);
-                return "redirect:/auth/google/link";
-            }
             return "redirect:/";
         } catch (InvalidCredentialsException | AccountDisabledException e) {
             loginRateLimiter.recordFailure(loginRequest.getEmail(), clientIp);

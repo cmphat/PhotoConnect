@@ -1,0 +1,81 @@
+@startuml ERD-03
+!include ../theme.puml
+title ERD-03 — Booking, lịch và đặt cọc
+hide methods
+entity users {
+  * id : bigint <<PK>>
+}
+entity photographer_profiles {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK>>
+}
+entity service_packages {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  price : decimal
+}
+entity bookings {
+  * id : bigint <<PK>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+  service_package_id : bigint <<FK,nullable>>
+  booking_date : date
+  booking_time : time
+  package_name : varchar <<snapshot>>
+  duration_minutes : int <<snapshot>>
+  edited_photo_count : int <<snapshot>>
+  delivery_days : int <<snapshot>>
+  agreed_price : decimal <<snapshot>>
+  status : varchar
+}
+entity deposits {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  amount : decimal
+  status : varchar
+  payment_reference : varchar
+  payment_method : varchar
+  paid_at : datetime2
+}
+entity booking_history {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  changed_by_user_id : bigint <<FK>>
+  old_status : varchar
+  new_status : varchar
+  changed_at : datetime2
+}
+entity reschedule_requests {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  requested_by_user_id : bigint <<FK>>
+  proposed_date : date
+  proposed_time : time
+  status : varchar
+}
+entity photographer_unavailable_dates {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  unavailable_date : date
+}
+entity calendar_events {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK in migration>>
+  start_at : datetime2
+  end_at : datetime2
+  event_type : varchar
+}
+users ||--o{ bookings : customer
+users ||--o| photographer_profiles
+photographer_profiles ||--o{ service_packages
+photographer_profiles ||--o{ bookings
+service_packages |o--o{ bookings
+bookings ||--o| deposits
+bookings ||--o{ booking_history
+users ||--o{ booking_history
+bookings ||--o{ reschedule_requests
+users ||--o{ reschedule_requests
+photographer_profiles ||--o{ photographer_unavailable_dates
+users ||--o{ calendar_events
+@enduml
+

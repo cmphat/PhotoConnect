@@ -38,3 +38,6 @@ application-secret.properties
 *.env.local
 cloudinary.properties
 secrets.properties
+
+# Per-user PhotoConnect launcher state and DPAPI-encrypted local secrets.
+/.photoconnect-local/

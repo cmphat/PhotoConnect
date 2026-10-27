@@ -87,6 +87,7 @@
                                     <th>Status</th>
                                     <th>Registered</th>
                                     <th>Change Status</th>
+                                    <th>Manager Access</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -141,6 +142,25 @@
                                                         <button type="submit" class="btn btn-secondary btn-sm">Update</button>
                                                     </form>
                                                 </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${u.role == 'CUSTOMER' && u.status == 'ACTIVE'}">
+                                                    <form action="${pageContext.request.contextPath}/admin/users/${u.id}/manager-role" method="post">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
+                                                        <input type="hidden" name="action" value="GRANT" />
+                                                        <button class="btn btn-primary btn-sm" type="submit">Grant Manager</button>
+                                                    </form>
+                                                </c:when>
+                                                <c:when test="${u.role == 'MANAGER'}">
+                                                    <form action="${pageContext.request.contextPath}/admin/users/${u.id}/manager-role" method="post">
+                                                        <%@ include file="fragments/csrf-input.jsp" %>
+                                                        <input type="hidden" name="action" value="REVOKE" />
+                                                        <button class="btn btn-secondary btn-sm" type="submit">Revoke Manager</button>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise><span class="text-muted">Not eligible</span></c:otherwise>
                                             </c:choose>
                                         </td>
                                     </tr>

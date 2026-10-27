@@ -179,6 +179,21 @@ class StompSecurityChannelInterceptorTest {
     }
 
     @Test
+    @DisplayName("SUBSCRIBE: Manager cannot subscribe to another user's private notifications")
+    void subscribe_managerToOtherUserNotification_throwsAccessDenied() {
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", 7L);
+        sessionAttrs.put("userRole", UserRole.MANAGER);
+
+        Message<?> message = createStompMessage(StompCommand.SUBSCRIBE, sessionAttrs,
+                "/topic/user/99/notifications", null);
+
+        assertThatThrownBy(() -> interceptor.preSend(message, messageChannel))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("not authorized to subscribe to another user's notifications");
+    }
+
+    @Test
     @DisplayName("SUBSCRIBE: Admin subscribing to any user's notifications is permitted")
     void subscribe_adminNotification_succeeds() {
         Map<String, Object> sessionAttrs = new HashMap<>();
@@ -219,6 +234,23 @@ class StompSecurityChannelInterceptorTest {
         sessionAttrs.put("userRole", UserRole.CUSTOMER);
 
         when(chatService.getBookingForParticipant(500L, 999L))
+                .thenThrow(new ChatAccessDeniedException("User not authorized"));
+
+        Message<?> message = createStompMessage(StompCommand.SUBSCRIBE, sessionAttrs,
+                "/topic/booking/500/chat", null);
+
+        assertThatThrownBy(() -> interceptor.preSend(message, messageChannel))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("not authorized to subscribe to this booking chat");
+    }
+
+    @Test
+    @DisplayName("SUBSCRIBE: Manager has no blanket access to unrelated booking chat")
+    void subscribe_bookingChat_managerNonParticipant_throwsAccessDenied() {
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", 7L);
+        sessionAttrs.put("userRole", UserRole.MANAGER);
+        when(chatService.getBookingForParticipant(500L, 7L))
                 .thenThrow(new ChatAccessDeniedException("User not authorized"));
 
         Message<?> message = createStompMessage(StompCommand.SUBSCRIBE, sessionAttrs,

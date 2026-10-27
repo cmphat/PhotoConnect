@@ -1,5 +1,6 @@
 package com.photoconnect.service;
 
+import com.photoconnect.exception.EmailDeliveryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -89,12 +90,16 @@ public class EmailServiceImpl implements EmailService {
     private void sendEmailInternal(String toEmail, String subject, String body) {
         JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
 
-        // Local capture mode or unconfigured SMTP
-        if (captureMode || mailSender == null || configuredUsername.isEmpty()) {
+        if (captureMode) {
             capturedEmails.add(new CapturedEmail(toEmail, subject, body, LocalDateTime.now()));
             // CRITICAL SECURITY REQUIREMENT: Never log the OTP or secret body contents
             log.info("Captured email to [{}] with subject [{}]. (Local capture store active)", toEmail, subject);
             return;
+        }
+
+        if (mailSender == null || configuredUsername.isEmpty()) {
+            log.error("SMTP delivery is enabled, but the mail sender or username is not configured");
+            throw new EmailDeliveryException("SMTP delivery is not configured.");
         }
 
         try {
@@ -108,13 +113,13 @@ public class EmailServiceImpl implements EmailService {
             log.info("Successfully sent email via SMTP to [{}] with subject [{}]", toEmail, subject);
         } catch (Exception e) {
             log.error("Failed to deliver email to [{}] via SMTP: {}", toEmail, e.getMessage());
-            throw new RuntimeException("Email delivery failed: " + e.getMessage(), e);
+            throw new EmailDeliveryException("Email delivery failed.", e);
         }
     }
 
     @Override
     public boolean isCaptureMode() {
-        return captureMode || mailSenderProvider.getIfAvailable() == null || configuredUsername.isEmpty();
+        return captureMode;
     }
 
     @Override

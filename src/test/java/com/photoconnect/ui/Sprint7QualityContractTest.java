@@ -78,7 +78,7 @@ class Sprint7QualityContractTest {
     }
 
     @Test
-    @DisplayName("Exactly 42 content JSPs and 1 error page exist, and all action buttons are classed")
+    @DisplayName("Exactly 54 content JSPs and 1 error page exist, and all action buttons are classed")
     void contentPageCountAndButtonClasses_strictlyMaintained() throws IOException {
         Pattern unclassedButton = Pattern.compile("<button(?![^>]*\\bclass=)[^>]*>", Pattern.CASE_INSENSITIVE);
 
@@ -90,8 +90,8 @@ class Sprint7QualityContractTest {
                     .toList();
 
             assertThat(contentPages)
-                    .as("Must maintain exactly 42 content JSPs")
-                    .hasSize(42);
+                    .as("Must maintain exactly 54 content JSPs")
+                    .hasSize(54);
 
             for (Path page : contentPages) {
                 String jsp = Files.readString(page);

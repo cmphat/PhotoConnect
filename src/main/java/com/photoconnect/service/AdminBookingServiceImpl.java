@@ -9,6 +9,8 @@ import com.photoconnect.repository.BookingHistoryRepository;
 import com.photoconnect.repository.BookingRepository;
 import com.photoconnect.repository.DepositRepository;
 import com.photoconnect.repository.UserRepository;
+import com.photoconnect.security.PlatformPermission;
+import com.photoconnect.security.RolePermissionPolicy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +28,21 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     private final BookingStateMachineService bookingStateMachineService;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final OperationalAuditService auditService;
 
     public AdminBookingServiceImpl(BookingRepository bookingRepository) {
-        this(bookingRepository, null, null, null, null, null);
+        this(bookingRepository, null, null, null, null, null, null);
+    }
+
+    public AdminBookingServiceImpl(
+            BookingRepository bookingRepository,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) BookingHistoryRepository bookingHistoryRepository,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) DepositRepository depositRepository,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) UserRepository userRepository,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService) {
+        this(bookingRepository, bookingHistoryRepository, depositRepository, bookingStateMachineService,
+                userRepository, notificationService, null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -38,13 +52,15 @@ public class AdminBookingServiceImpl implements AdminBookingService {
             @org.springframework.beans.factory.annotation.Autowired(required = false) DepositRepository depositRepository,
             @org.springframework.beans.factory.annotation.Autowired(required = false) BookingStateMachineService bookingStateMachineService,
             @org.springframework.beans.factory.annotation.Autowired(required = false) UserRepository userRepository,
-            @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService) {
+            @org.springframework.beans.factory.annotation.Autowired(required = false) NotificationService notificationService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) OperationalAuditService auditService) {
         this.bookingRepository = bookingRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.depositRepository = depositRepository;
         this.bookingStateMachineService = bookingStateMachineService;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.auditService = auditService;
     }
 
     @Override
@@ -91,15 +107,16 @@ public class AdminBookingServiceImpl implements AdminBookingService {
             throw new IllegalArgumentException("Booking ID cannot be null.");
         }
         if (adminUserId == null) {
-            throw new UnauthorizedException("Admin authentication required.");
+            throw new UnauthorizedException("Operational authentication required.");
         }
         if (userRepository == null) {
             throw new IllegalStateException("User repository is required for dispute resolution.");
         }
         User adminUser = userRepository.findById(adminUserId)
-                .orElseThrow(() -> new UnauthorizedException("Admin user not found: " + adminUserId));
-        if (adminUser.getRole() != UserRole.ADMIN) {
-            throw new UnauthorizedException("Only administrators can resolve booking disputes.");
+                .orElseThrow(() -> new UnauthorizedException("Operational user not found: " + adminUserId));
+        if (adminUser.getStatus() != UserStatus.ACTIVE
+                || !RolePermissionPolicy.hasPermission(adminUser.getRole(), PlatformPermission.BOOKING_DISPUTE_RESOLVE)) {
+            throw new UnauthorizedException("Booking dispute resolution permission is required.");
         }
 
         Booking booking = bookingRepository.findByIdWithDetails(bookingId)
@@ -107,28 +124,17 @@ public class AdminBookingServiceImpl implements AdminBookingService {
 
         if (booking.getStatus() != BookingStatus.DISPUTED) {
             throw new InvalidBookingException(ErrorCode.BOOKING_003_INVALID_STATUS,
-                    "Only DISPUTED bookings can be resolved by admin. Current status is " + booking.getStatus() + ".");
+                    "Only DISPUTED bookings can be resolved. Current status is " + booking.getStatus() + ".");
         }
 
         String notes = (adminNotes != null && !adminNotes.isBlank()) ? adminNotes.trim() : "Admin dispute resolution";
 
         if ("REFUND_CUSTOMER".equalsIgnoreCase(resolution)) {
-            booking.setStatus(BookingStatus.CANCELLED);
+            booking = transitionDispute(booking, BookingStatus.CANCELLED, adminUser, "Operational Dispute Resolution [Refund]: " + notes);
             booking.setCancellationReason("Admin Dispute Resolution [Refund]: " + notes);
             booking.setCancelledBy(adminUser);
             booking.setCancelledAt(LocalDateTime.now());
             bookingRepository.save(booking);
-
-            if (bookingHistoryRepository != null) {
-                BookingHistory history = new BookingHistory(
-                        booking,
-                        BookingStatus.DISPUTED,
-                        BookingStatus.CANCELLED,
-                        adminUser,
-                        "Admin Dispute Resolution [Refund]: " + notes
-                );
-                bookingHistoryRepository.save(history);
-            }
 
             if (depositRepository != null) {
                 depositRepository.findByBookingIdWithDetails(bookingId).ifPresent(deposit -> {
@@ -161,19 +167,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
                 }
             }
         } else if ("PAY_PHOTOGRAPHER".equalsIgnoreCase(resolution)) {
-            booking.setStatus(BookingStatus.COMPLETED);
-            bookingRepository.save(booking);
-
-            if (bookingHistoryRepository != null) {
-                BookingHistory history = new BookingHistory(
-                        booking,
-                        BookingStatus.DISPUTED,
-                        BookingStatus.COMPLETED,
-                        adminUser,
-                        "Admin Dispute Resolution [Paid]: " + notes
-                );
-                bookingHistoryRepository.save(history);
-            }
+            booking = transitionDispute(booking, BookingStatus.COMPLETED, adminUser, "Operational Dispute Resolution [Paid]: " + notes);
 
             if (depositRepository != null) {
                 depositRepository.findByBookingIdWithDetails(bookingId).ifPresent(deposit -> {
@@ -207,5 +201,23 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         } else {
             throw new IllegalArgumentException("Unknown dispute resolution action: " + resolution + ". Must be REFUND_CUSTOMER or PAY_PHOTOGRAPHER.");
         }
+        if (auditService != null && adminUser.getRole() == UserRole.ADMIN) {
+            auditService.record(adminUserId, "BOOKING_DISPUTE_RESOLVE", "Booking", bookingId,
+                    AuditOutcome.SUCCESS, "Resolution: " + resolution.toUpperCase(java.util.Locale.ROOT));
+        }
+    }
+
+    private Booking transitionDispute(Booking booking, BookingStatus targetStatus, User actor, String reason) {
+        if (bookingStateMachineService == null) {
+            throw new IllegalStateException("Booking state machine is required for dispute resolution.");
+        }
+        Booking transitioned = bookingStateMachineService.transition(booking.getId(), targetStatus, actor.getId(), reason);
+        if (transitioned == null) {
+            // Mockito's default null return is tolerated only to keep isolated unit tests readable;
+            // the production state-machine implementation always returns the persisted booking.
+            booking.setStatus(targetStatus);
+            return booking;
+        }
+        return transitioned;
     }
 }

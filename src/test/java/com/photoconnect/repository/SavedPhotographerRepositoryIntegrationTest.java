@@ -14,6 +14,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Only executed when DB_USERNAME environment variable is present.
  */
 @SpringBootTest
+@Transactional
 @EnabledIfEnvironmentVariable(named = "DB_USERNAME", matches = ".+")
 class SavedPhotographerRepositoryIntegrationTest {
 
@@ -45,6 +47,8 @@ class SavedPhotographerRepositoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        cleanupLeftovers();
+
         testCustomer = new User();
         testCustomer.setEmail("saved.customer.test@example.com");
         testCustomer.setPassword("hashedpassword123");
@@ -71,20 +75,21 @@ class SavedPhotographerRepositoryIntegrationTest {
         photographerProfileRepository.save(testProfile);
     }
 
-    @AfterEach
-    void tearDown() {
-        if (testCustomer != null && testProfile != null) {
-            savedPhotographerRepository.deleteByCustomerIdAndPhotographerProfileId(testCustomer.getId(), testProfile.getId());
-        }
-        if (testProfile != null && testProfile.getId() != null) {
-            photographerProfileRepository.delete(testProfile);
-        }
-        if (testPhotographerUser != null && testPhotographerUser.getId() != null) {
-            userRepository.delete(testPhotographerUser);
-        }
-        if (testCustomer != null && testCustomer.getId() != null) {
-            userRepository.delete(testCustomer);
-        }
+    private void cleanupLeftovers() {
+        userRepository.findByEmail("saved.customer.test@example.com").ifPresent(customer -> {
+            userRepository.findByEmail("saved.photographer.test@example.com").ifPresent(photog -> {
+                photographerProfileRepository.findByUserId(photog.getId()).ifPresent(profile -> {
+                    savedPhotographerRepository.deleteByCustomerIdAndPhotographerProfileId(customer.getId(), profile.getId());
+                    photographerProfileRepository.delete(profile);
+                });
+                userRepository.delete(photog);
+            });
+            userRepository.delete(customer);
+        });
+        userRepository.findByEmail("saved.photographer.test@example.com").ifPresent(photog -> {
+            photographerProfileRepository.findByUserId(photog.getId()).ifPresent(photographerProfileRepository::delete);
+            userRepository.delete(photog);
+        });
     }
 
     @Test

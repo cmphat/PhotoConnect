@@ -1,0 +1,22 @@
+@startuml STATE-03
+!include ../theme.puml
+title STATE-03 — Vòng đời Email OTP
+[*] --> ISSUED : generateOtp
+state ISSUED {
+  [*] --> ACTIVE
+  ACTIVE --> ACTIVE : sai mã / attemptCount++
+}
+ISSUED --> CONSUMED : đúng mã / usedAt
+ISSUED --> EXPIRED : now > expiresAt (5 phút)
+ISSUED --> LOCKED : attemptCount >= maxAttempts (5)
+ISSUED --> SUPERSEDED : phát hành OTP mới
+CONSUMED --> [*]
+EXPIRED --> [*]
+LOCKED --> [*]
+SUPERSEDED --> [*]
+note bottom
+  CONSUMED/EXPIRED/LOCKED/SUPERSEDED là trạng thái suy ra từ các cột;
+  entity không có enum status riêng.
+end note
+@enduml
+

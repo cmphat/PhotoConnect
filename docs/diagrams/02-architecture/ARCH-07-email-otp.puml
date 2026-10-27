@@ -1,0 +1,26 @@
+@startuml ARCH-07
+!include ../theme.puml
+title ARCH-07 — Email OTP và SMTP
+actor User
+component "Verification / recovery controllers" as Controller
+component "EmailOtpServiceImpl" as OTP
+component "PasswordEncoder" as Hash
+component "EmailServiceImpl" as Email
+database "email_verification_tokens" as DB
+cloud "SMTP provider" as SMTP
+collections "Local capture (dev/test)" as Capture
+User -> Controller : yêu cầu OTP
+Controller -> OTP : generateOtp(email,purpose,IP)
+OTP -> OTP : rate limit email/IP + 60s cooldown
+OTP -> Hash : BCrypt(6-digit SecureRandom code)
+OTP -> DB : lưu hash, expiry 5 phút, maxAttempts=5
+OTP -> Email : gửi mã
+Email -> Capture : capture mode
+Email -> SMTP : SMTP mode / JavaMail
+User -> Controller : nộp OTP
+Controller -> OTP : verifyOtp
+OTP -> DB : latest unused token
+OTP -> Hash : matches
+OTP -> DB : consume usedAt / increment attempts
+@enduml
+

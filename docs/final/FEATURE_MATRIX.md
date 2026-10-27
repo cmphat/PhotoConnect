@@ -8,7 +8,7 @@ Status vocabulary:
 
 | Area | Implemented behavior | Automated status | Manual status |
 |---|---|---|---|
-| Authentication | Register, BCrypt hash, signed 30-minute JWT in HttpOnly SameSite cookie, session rotation, active-account/persisted-role revalidation, centralized request identity, logout expiry; server-controlled Supabase Google PKCE login/linking maps into the same local JWT identity | Pass with mocked Supabase HTTP | D01 checklist and live Google OAuth verification pending |
+| Authentication | Register, BCrypt hash, signed 30-minute JWT in HttpOnly SameSite cookie, session rotation, active-account/persisted-role revalidation, centralized request identity, logout expiry; native Spring Security Google OIDC maps the verified subject into the same local JWT identity | Pass with mocked OIDC identity | D01 checklist and live Google OAuth verification pending |
 | Photographer onboarding | Customer submits one profile; role promotion; `PENDING` verification | Pass | Pending final rehearsal |
 | Admin approval | Pending application list/detail; approve/reject transition | Pass | Earlier admin moderation pass recorded |
 | Marketplace | Public approved/active photographer list and detail | Pass | Primary flow pass recorded |

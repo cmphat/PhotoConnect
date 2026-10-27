@@ -72,6 +72,7 @@ class BookingServiceTest {
     private User photographerUser;
     private PhotographerProfile photographerProfile;
     private BookingRequest validRequest;
+    private com.photoconnect.entity.ServicePackage defaultPackage;
 
     @BeforeEach
     void setUp() {
@@ -105,6 +106,18 @@ class BookingServiceTest {
                 "Nguyen Hue Walking Street, District 1",
                 "Street portrait shoot with natural light."
         );
+        validRequest.setPackageId(50L);
+        defaultPackage = new com.photoconnect.entity.ServicePackage();
+        defaultPackage.setId(50L);
+        defaultPackage.setPhotographerProfile(photographerProfile);
+        defaultPackage.setName("Standard Package");
+        defaultPackage.setPrice(new BigDecimal("2500000.00"));
+        defaultPackage.setDurationMinutes(120);
+        defaultPackage.setEditedPhotoCount(25);
+        defaultPackage.setDeliveryDays(7);
+        defaultPackage.setActive(true);
+        org.mockito.Mockito.lenient().when(servicePackageRepository.findByIdAndPhotographerProfileId(50L, 10L))
+                .thenReturn(Optional.of(defaultPackage));
     }
 
     @Test
@@ -128,7 +141,7 @@ class BookingServiceTest {
         assertThat(result.getBookingTime()).isEqualTo(validRequest.getBookingTime());
         assertThat(result.getLocation()).isEqualTo(validRequest.getLocation());
         assertThat(result.getNotes()).isEqualTo(validRequest.getNotes());
-        // Price snapshot: must equal profile's current priceFrom
+        // Price snapshot: must equal the selected active package, never profile/client fallback.
         assertThat(result.getAgreedPrice()).isEqualByComparingTo(new BigDecimal("2500000.00"));
         assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
 
@@ -202,7 +215,7 @@ class BookingServiceTest {
 
         Booking result = bookingService.createBooking(1L, 10L, validRequest);
 
-        assertThat(result.getAgreedPrice()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.getAgreedPrice()).isEqualByComparingTo("2500000.00");
     }
 
     @Test
@@ -341,7 +354,7 @@ class BookingServiceTest {
         BookingRequest pastTimeRequest = new BookingRequest(
                 10L,
                 LocalDate.now(),
-                LocalTime.now().minusMinutes(1),
+                LocalTime.MIDNIGHT,
                 "Location",
                 null
         );

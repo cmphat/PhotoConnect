@@ -1,0 +1,15 @@
+@startuml STATE-04
+!include ../theme.puml
+title STATE-04 — Vòng đời DeliveryAlbum
+[*] --> DRAFT : create/get album
+DRAFT --> DELIVERED : photographer deliver
+DELIVERED --> ACCEPTED : customer confirm
+DELIVERED --> REVISION_REQUESTED : customer requests revision
+REVISION_REQUESTED --> DELIVERED : photographer redelivers
+ACCEPTED --> [*]
+note right of REVISION_REQUESTED
+  Có thể cập nhật ảnh khi chưa ACCEPTED.
+  Không có revision counter/history riêng.
+end note
+@enduml
+

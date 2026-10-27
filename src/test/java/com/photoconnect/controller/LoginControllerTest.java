@@ -95,20 +95,6 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void passwordLoginAfterDuplicateEmailStartsExplicitGoogleLinkVerification() throws Exception {
-        when(authService.authenticate(any(LoginRequest.class))).thenReturn(validUser);
-
-        mockMvc.perform(post("/login")
-                        .sessionAttr(GoogleAuthController.LINK_EMAIL_KEY, "pending")
-                        .param("email", "test@example.com")
-                        .param("password", "correctpass"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/auth/google/link"))
-                .andExpect(request().sessionAttributeDoesNotExist(GoogleAuthController.LINK_EMAIL_KEY));
-        verify(jwtCookieService).issue(any(), any(), org.mockito.ArgumentMatchers.same(validUser));
-    }
-
-    @Test
     public void photographerLoginIssuesAuthenticationCookie() throws Exception {
         validUser.setRole(UserRole.PHOTOGRAPHER);
         when(authService.authenticate(any(LoginRequest.class))).thenReturn(validUser);

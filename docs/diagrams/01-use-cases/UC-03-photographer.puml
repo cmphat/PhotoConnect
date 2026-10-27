@@ -1,0 +1,39 @@
+@startuml UC-03
+!include ../theme.puml
+title UC-03 — Studio Nhiếp ảnh gia
+left to right direction
+actor "Nhiếp ảnh gia" as Photographer
+actor Cloudinary
+rectangle PhotoConnect {
+  usecase "Quản lý hồ sơ chuyên nghiệp" as Profile
+  usecase "Quản lý portfolio" as Portfolio
+  usecase "Quản lý gói dịch vụ" as Packages
+  usecase "Quản lý ngày không sẵn sàng" as Schedule
+  usecase "Xem yêu cầu booking" as Requests
+  usecase "Chấp nhận / từ chối booking" as Decision
+  usecase "Cập nhật phiên chụp" as Session
+  usecase "Phản hồi đổi lịch" as Reschedule
+  usecase "Chat với khách hàng" as Chat
+  usecase "Tải ảnh giao riêng tư" as Upload
+  usecase "Giao lại sau yêu cầu chỉnh sửa" as Redeliver
+  usecase "Xem dashboard / phân tích" as Analytics
+  usecase "Quản lý ghi chú khách hàng" as Notes
+}
+Photographer --> Profile
+Photographer --> Portfolio
+Photographer --> Packages
+Photographer --> Schedule
+Photographer --> Requests
+Photographer --> Decision
+Photographer --> Session
+Photographer --> Reschedule
+Photographer --> Chat
+Photographer --> Upload
+Photographer --> Redeliver
+Photographer --> Analytics
+Photographer --> Notes
+Portfolio --> Cloudinary : public upload
+Upload --> Cloudinary : authenticated upload
+Redeliver ..> Upload : <<include>>
+@enduml
+

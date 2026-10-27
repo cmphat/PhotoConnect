@@ -1,0 +1,26 @@
+@startuml ARCH-08
+!include ../theme.puml
+title ARCH-08 — Sơ đồ triển khai logic (chưa xác minh production)
+node "Client device" {
+  artifact "Browser\nHTML/CSS/JS" as Browser
+}
+node "Java runtime" {
+  artifact "PhotoConnect WAR\nSpring Boot 3.3.0" as App
+  artifact "JSP compiler / SiteMesh" as JSP
+}
+database "Microsoft SQL Server" as DB
+cloud "Cloudinary SaaS" as Cloudinary
+cloud "Google OAuth 2.0 / OpenID Connect" as OAuth
+cloud "SMTP server" as SMTP
+Browser --> App : HTTPS / WebSocket
+App --> JSP
+App --> DB : JDBC + JPA + Flyway
+App --> Cloudinary : HTTPS API
+App --> OAuth : HTTPS OAuth2/OIDC
+App --> SMTP : SMTP/TLS
+note right of App
+  Mô hình suy ra từ pom.xml và cấu hình.
+  Host, proxy, TLS termination và secrets
+  production chưa được xác minh.
+end note
+@enduml

@@ -23,6 +23,12 @@ public class ServicePackageDto {
     private String formattedDuration;
     private Integer editedPhotoCount;
     private Integer deliveryDays;
+    private BigDecimal nightSurchargeRate;
+    private Integer includedTravelKm;
+    private BigDecimal excessTravelRate;
+    private BigDecimal additionalHourFee;
+    private BigDecimal extraEditedPhotoFee;
+    private BigDecimal assistantFee;
     private boolean active;
     private boolean recommended;
     private LocalDateTime createdAt;
@@ -63,6 +69,12 @@ public class ServicePackageDto {
         }
         dto.setEditedPhotoCount(entity.getEditedPhotoCount());
         dto.setDeliveryDays(entity.getDeliveryDays());
+        dto.setNightSurchargeRate(entity.getNightSurchargeRate());
+        dto.setIncludedTravelKm(entity.getIncludedTravelKm());
+        dto.setExcessTravelRate(entity.getExcessTravelRate());
+        dto.setAdditionalHourFee(entity.getAdditionalHourFee());
+        dto.setExtraEditedPhotoFee(entity.getExtraEditedPhotoFee());
+        dto.setAssistantFee(entity.getAssistantFee());
         dto.setActive(entity.isActive());
         dto.setCreatedAt(entity.getCreatedAt());
         return dto;
@@ -173,6 +185,19 @@ public class ServicePackageDto {
     public void setDeliveryDays(Integer deliveryDays) {
         this.deliveryDays = deliveryDays;
     }
+
+    public BigDecimal getNightSurchargeRate() { return nightSurchargeRate; }
+    public void setNightSurchargeRate(BigDecimal value) { this.nightSurchargeRate = value; }
+    public Integer getIncludedTravelKm() { return includedTravelKm; }
+    public void setIncludedTravelKm(Integer value) { this.includedTravelKm = value; }
+    public BigDecimal getExcessTravelRate() { return excessTravelRate; }
+    public void setExcessTravelRate(BigDecimal value) { this.excessTravelRate = value; }
+    public BigDecimal getAdditionalHourFee() { return additionalHourFee; }
+    public void setAdditionalHourFee(BigDecimal value) { this.additionalHourFee = value; }
+    public BigDecimal getExtraEditedPhotoFee() { return extraEditedPhotoFee; }
+    public void setExtraEditedPhotoFee(BigDecimal value) { this.extraEditedPhotoFee = value; }
+    public BigDecimal getAssistantFee() { return assistantFee; }
+    public void setAssistantFee(BigDecimal value) { this.assistantFee = value; }
 
     public boolean isActive() {
         return active;

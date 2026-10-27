@@ -1,0 +1,29 @@
+@startuml SITE-02
+!include ../theme.puml
+title SITE-02 — Sitemap Khách hàng
+rectangle "/customer/dashboard\ncustomer-dashboard.jsp" as Dashboard
+rectangle "/profile/me và /profile/edit\nuser-profile.jsp" as Profile
+rectangle "/profile/security/*\nPOST actions; redirect profile#security" as Security
+rectangle "/saved-photographers\nsaved-photographers.jsp" as Saved
+rectangle "/photographers/{id}/book\nbooking-form.jsp" as Book
+rectangle "/bookings\nbookings.jsp" as Bookings
+rectangle "/bookings/{id}\nbooking-detail.jsp" as Detail
+rectangle "/bookings/{id}/deposit\ndeposit*.jsp" as Deposit
+rectangle "/bookings/{id}/chat\nchat.jsp" as Chat
+rectangle "/bookings/{id}/delivery\ncustomer-delivery.jsp" as Delivery
+rectangle "/bookings/{id}/review\nreview-form.jsp" as Review
+rectangle "/notifications\nnotifications.jsp" as Notifications
+Dashboard --> Profile
+Dashboard --> Saved
+Dashboard --> Bookings
+Dashboard --> Notifications
+Profile --> Security
+Saved --> Book
+Book --> Bookings
+Bookings --> Detail
+Detail --> Deposit
+Detail --> Chat
+Detail --> Delivery
+Detail --> Review
+@enduml
+

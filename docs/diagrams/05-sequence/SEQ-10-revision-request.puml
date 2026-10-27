@@ -1,0 +1,26 @@
+@startuml SEQ-10
+!include ../theme.puml
+title SEQ-10 — Yêu cầu chỉnh sửa ảnh
+actor Customer
+participant CustomerDeliveryController
+participant DeliveryServiceImpl
+participant DeliveryAlbumRepository
+participant BookingStateMachineServiceImpl
+participant NotificationServiceImpl
+database "SQL Server" as DB
+Customer -> CustomerDeliveryController : POST /bookings/{id}/delivery/request-revision
+CustomerDeliveryController -> DeliveryServiceImpl : requestRevision(id,userId,notes)
+DeliveryServiceImpl -> DeliveryServiceImpl : owner + album DELIVERED checks
+group @Transactional
+  DeliveryServiceImpl -> DeliveryAlbumRepository : status=REVISION_REQUESTED, notes
+  DeliveryAlbumRepository -> DB
+  DeliveryServiceImpl -> BookingStateMachineServiceImpl : DELIVERED -> POST_PROCESSING
+  DeliveryServiceImpl -> NotificationServiceImpl : notify photographer
+end
+CustomerDeliveryController --> Customer : revision accepted
+note right of DeliveryAlbumRepository
+  Không có revision number/history riêng;
+  trạng thái và notes bị cập nhật trên cùng album.
+end note
+@enduml
+

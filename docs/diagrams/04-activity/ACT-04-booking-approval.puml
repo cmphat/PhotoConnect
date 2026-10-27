@@ -1,0 +1,31 @@
+@startuml ACT-04
+!include ../theme.puml
+title ACT-04 — Tạo và duyệt Booking
+start
+:Customer chọn package/ngày/giờ;
+:Kiểm tra photographer APPROVED và package active;
+:Kiểm tra ngày unavailable + slot conflict;
+if (Slot hợp lệ?) then (có)
+  :Snapshot package và tạo PENDING;
+  :Ghi BookingHistory + thông báo photographer;
+  :Photographer xem yêu cầu;
+  if (Chấp nhận?) then (có)
+    :Khóa/kiểm tra conflict lần nữa;
+    if (Không collision?) then (có)
+      :PENDING -> ACCEPTED;
+      :Customer có thể mở checkout;
+      :Deposit PENDING được tạo/lấy khi mở checkout;
+      :Thông báo customer;
+    else (không)
+      :Từ chối thao tác do trùng lịch;
+    endif
+  else (từ chối)
+    :PENDING -> REJECTED;
+    :Thông báo customer;
+  endif
+else (không)
+  :Hiển thị lỗi lịch/gói;
+endif
+stop
+@enduml
+

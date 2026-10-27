@@ -18,7 +18,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Controller
 public class DepositController {
@@ -28,6 +34,15 @@ public class DepositController {
     private final DemoQrCodeService qrCodeService;
     private final com.photoconnect.service.BookingStateMachineService bookingStateMachineService;
     private final com.photoconnect.service.NotificationService notificationService;
+
+    @Value("${photoconnect.payment.vietqr.bank-id:MB}")
+    private String bankId;
+
+    @Value("${photoconnect.payment.vietqr.account-no:999988887777}")
+    private String accountNo;
+
+    @Value("${photoconnect.payment.vietqr.account-name:PHOTOCONNECT VIETNAM}")
+    private String accountName;
 
     @org.springframework.beans.factory.annotation.Autowired
     public DepositController(DepositService depositService,
@@ -153,12 +168,38 @@ public class DepositController {
         return "deposit-receipt";
     }
 
+    @GetMapping("/bookings/{id}/deposit/status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkPaymentStatus(@PathVariable("id") Long bookingId, HttpSession session) {
+        String redirect = requireCustomer(session);
+        if (redirect != null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+        Long userId = SessionSecurityUtils.userId(session);
+        DepositViewDto deposit = depositService.getCustomerDeposit(bookingId, userId);
+        if (deposit == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Deposit not found"));
+        }
+        return ResponseEntity.ok(Map.of(
+                "bookingId", bookingId,
+                "status", deposit.getStatus().name(),
+                "isPaid", deposit.getStatus() == DepositStatus.PAID,
+                "paidAt", deposit.getPaidAt() != null ? deposit.getPaidAt().toString() : "",
+                "paymentReference", deposit.getPaymentReference() != null ? deposit.getPaymentReference() : ""
+        ));
+    }
+
     private void addPaymentModel(Model model, Booking booking, DepositViewDto deposit) {
         BookingViewDto bookingView = BookingViewDto.from(booking);
         BigDecimal remainingBalance = bookingView.getAgreedPrice().subtract(deposit.getAmount());
         model.addAttribute("booking", bookingView);
         model.addAttribute("deposit", deposit);
         model.addAttribute("remainingBalance", remainingBalance);
+        model.addAttribute("bankId", bankId);
+        model.addAttribute("accountNo", accountNo);
+        model.addAttribute("accountName", accountName);
+        model.addAttribute("paymentMode", deposit.getPaymentMode() != null ? deposit.getPaymentMode() : "DEMO");
+        model.addAttribute("qrCodeUrl", deposit.getQrCodeUrl());
     }
 
     private String requireCustomer(HttpSession session) {

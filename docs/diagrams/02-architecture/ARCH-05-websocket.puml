@@ -1,0 +1,25 @@
+@startuml ARCH-05
+!include ../theme.puml
+title ARCH-05 — WebSocket/STOMP chat và thông báo
+actor "Authenticated browser" as Browser
+component "Handshake/JWT auth" as Handshake
+component "STOMP ChannelInterceptor" as Interceptor
+component "ChatWebSocketController\n/chat.send" as ChatController
+component "ChatServiceImpl" as ChatService
+component "NotificationServiceImpl" as Notify
+component "SimpleBroker\n/topic, /queue" as Broker
+database "messages / notifications" as DB
+Browser -> Handshake : /ws or /ws-raw
+Handshake -> Interceptor : CONNECT principal
+Browser -> Interceptor : SUBSCRIBE destination
+Interceptor -> Interceptor : user queue or booking participant check
+Interceptor --> Browser : unauthorized => reject STOMP frame
+Browser -> ChatController : authorized SEND /app/chat.send
+ChatController -> ChatService : validate participant + persist
+ChatService -> DB
+ChatService -> Broker : booking destination
+Notify -> DB
+Notify -> Broker : /user/{id}/queue/notifications
+Broker --> Browser : isolated event
+@enduml
+

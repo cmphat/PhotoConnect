@@ -1,0 +1,17 @@
+@startuml STATE-06
+!include ../theme.puml
+title STATE-06 — Vòng đời UserReport
+[*] --> PENDING : submitReport
+PENDING --> INVESTIGATING : manager nhận xử lý
+PENDING --> RESOLVED : admin /resolve
+PENDING --> DISMISSED : admin /dismiss
+INVESTIGATING --> RESOLVED : manager kết luận
+INVESTIGATING --> DISMISSED : manager bác báo cáo
+RESOLVED --> [*]
+DISMISSED --> [*]
+note bottom of PENDING
+  Manager phải tự nhận báo cáo trước khi kết luận.
+  Legacy Admin service chỉ cho phép RESOLVED/DISMISSED
+  từ PENDING hoặc INVESTIGATING.
+end note
+@enduml

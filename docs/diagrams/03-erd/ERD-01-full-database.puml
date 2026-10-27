@@ -1,0 +1,155 @@
+@startuml ERD-01
+!include ../theme.puml
+title ERD-01 — ERD toàn bộ cơ sở dữ liệu
+hide methods
+hide stereotypes
+entity users {
+  * id : bigint <<PK>>
+  --
+  email : varchar <<UQ>>
+  password : varchar
+  role : varchar
+  status : varchar
+}
+entity photographer_profiles {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK,UQ>>
+  display_name : varchar
+  verification_status : varchar
+  reviewed_by_admin_id : bigint <<scalar>>
+}
+entity service_packages {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  name : varchar
+  price : decimal
+  duration_minutes : int
+}
+entity portfolio_images {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  image_url : varchar
+  public_id : varchar
+}
+entity photographer_unavailable_dates {
+  * id : bigint <<PK>>
+  photographer_profile_id : bigint <<FK>>
+  unavailable_date : date
+}
+entity bookings {
+  * id : bigint <<PK>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+  service_package_id : bigint <<FK,nullable>>
+  agreed_price : decimal
+  status : varchar
+}
+entity deposits {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  amount : decimal
+  status : varchar
+}
+entity booking_history {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  changed_by_user_id : bigint <<FK>>
+  old_status : varchar
+  new_status : varchar
+}
+entity reschedule_requests {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  requested_by_user_id : bigint <<FK>>
+  status : varchar
+}
+entity delivery_albums {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  status : varchar
+}
+entity delivered_photos {
+  * id : bigint <<PK>>
+  album_id : bigint <<FK>>
+  cloudinary_public_id : varchar
+  secure_url : varchar
+}
+entity reviews {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK,UQ>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+}
+entity messages {
+  * id : bigint <<PK>>
+  booking_id : bigint <<FK>>
+  sender_id : bigint <<FK>>
+  receiver_id : bigint <<FK>>
+}
+entity notifications {
+  * id : bigint <<PK>>
+  recipient_id : bigint <<FK>>
+  type : varchar
+}
+entity saved_photographers {
+  * id : bigint <<PK>>
+  customer_id : bigint <<FK>>
+  photographer_profile_id : bigint <<FK>>
+}
+entity calendar_events {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK in migration>>
+  start_at : datetime2
+  end_at : datetime2
+}
+entity external_auth_identities {
+  * id : bigint <<PK>>
+  user_id : bigint <<FK>>
+  provider : varchar
+  provider_subject : varchar
+}
+entity email_verification_tokens {
+  * id : bigint <<PK>>
+  email : varchar
+  token_hash : varchar
+  purpose : varchar
+}
+entity user_reports {
+  * id : bigint <<PK>>
+  reporter_id : bigint <<FK>>
+  reported_user_id : bigint <<FK,nullable>>
+  booking_id : bigint <<FK,nullable>>
+  resolved_by_admin_id : bigint <<scalar>>
+}
+users ||--o| photographer_profiles
+photographer_profiles ||--o{ service_packages
+photographer_profiles ||--o{ portfolio_images
+photographer_profiles ||--o{ photographer_unavailable_dates
+users ||--o{ bookings : customer
+photographer_profiles ||--o{ bookings
+service_packages |o--o{ bookings
+bookings ||--o| deposits
+bookings ||--o{ booking_history
+users ||--o{ booking_history : changed_by
+bookings ||--o{ reschedule_requests
+users ||--o{ reschedule_requests : requested_by
+bookings ||--o| delivery_albums
+delivery_albums ||--o{ delivered_photos
+bookings ||--o| reviews
+users ||--o{ reviews : customer
+photographer_profiles ||--o{ reviews
+bookings ||--o{ messages
+users ||--o{ messages : sender_receiver
+users ||--o{ notifications
+users ||--o{ saved_photographers
+photographer_profiles ||--o{ saved_photographers
+users ||--o{ calendar_events
+users ||--o{ external_auth_identities
+users ||--o{ user_reports : reporter_reported
+bookings |o--o{ user_reports
+note bottom of saved_photographers
+  V013 có hai đường ON DELETE CASCADE về users,
+  gây lỗi multiple cascade paths trên SQL Server clean install.
+end note
+@enduml
+

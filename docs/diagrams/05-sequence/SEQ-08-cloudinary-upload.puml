@@ -1,0 +1,27 @@
+@startuml SEQ-08
+!include ../theme.puml
+title SEQ-08 — Upload Cloudinary
+actor Browser
+participant PortfolioManagerController
+participant PortfolioServiceImpl
+participant ImageValidationUtils
+participant CloudinaryServiceImpl
+participant Cloudinary <<external>>
+participant PortfolioImageRepository
+database "SQL Server" as DB
+Browser -> PortfolioManagerController : multipart upload
+PortfolioManagerController -> PortfolioServiceImpl : uploadImage(profileId,file,...)
+PortfolioServiceImpl -> PortfolioServiceImpl : photographer ownership
+PortfolioServiceImpl -> ImageValidationUtils : validate binary/MIME/size/dimensions
+alt valid
+  PortfolioServiceImpl -> CloudinaryServiceImpl : upload
+  CloudinaryServiceImpl -> Cloudinary : HTTPS public image upload
+  Cloudinary --> CloudinaryServiceImpl : public_id + secure_url
+  PortfolioServiceImpl -> PortfolioImageRepository : save metadata
+  PortfolioImageRepository -> DB
+  PortfolioManagerController --> Browser : portfolio refreshed
+else invalid
+  PortfolioManagerController --> Browser : reject file
+end
+@enduml
+
