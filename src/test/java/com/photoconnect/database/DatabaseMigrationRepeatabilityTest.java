@@ -214,8 +214,8 @@ class DatabaseMigrationRepeatabilityTest {
 
         assertTrue(content.contains("spring.flyway.enabled=${SPRING_FLYWAY_ENABLED:true}"),
                 "Flyway must be enabled by default via spring.flyway.enabled");
-        assertTrue(content.contains("spring.flyway.baseline-on-migrate=true"),
-                "Flyway must enable baseline-on-migrate for existing database adoption");
+        assertTrue(content.contains("spring.flyway.baseline-on-migrate=${FLYWAY_BASELINE_ON_MIGRATE:false}"),
+                "Flyway must default to rejecting an unversioned populated database until a reviewed baseline is explicitly enabled");
         assertTrue(content.contains("spring.flyway.locations=classpath:db/migration"),
                 "Flyway must point to classpath:db/migration");
     }
