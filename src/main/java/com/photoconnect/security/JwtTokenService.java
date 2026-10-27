@@ -22,6 +22,11 @@ public class JwtTokenService {
             "c2VjdXJlLXBob3RvY29ubmVjdC1qd3Qtc2VjcmV0LWtleS0yMDI2LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=" // secure-photoconnect-jwt-secret-key-2026-must-be-at-least-256-bits
     );
 
+    // SHA-256 fingerprint of a historical, published JWT signing key.
+    // Store the fingerprint rather than repeating the compromised key in production source.
+    private static final String COMPROMISED_HISTORICAL_SECRET_SHA256 =
+            "6884603a91787ad3e86d3b4905a89ff1d936ac5df5c42f232f0b0c0a632cf5be";
+
     private final SecretKey signingKey;
     private final Duration lifetime;
     private final Clock clock;
@@ -34,7 +39,17 @@ public class JwtTokenService {
         if (base64Secret == null || base64Secret.isBlank()) {
             throw new IllegalStateException("JWT_SECRET is required and must be Base64 encoded");
         }
-        if (COMPROMISED_KNOWN_SECRETS.contains(base64Secret.trim())) {
+        String normalizedSecret = base64Secret.trim();
+        String fingerprint;
+        try {
+            fingerprint = java.util.HexFormat.of().formatHex(
+                    java.security.MessageDigest.getInstance("SHA-256")
+                            .digest(normalizedSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 is unavailable", ex);
+        }
+        if (COMPROMISED_KNOWN_SECRETS.contains(normalizedSecret)
+                || COMPROMISED_HISTORICAL_SECRET_SHA256.equals(fingerprint)) {
             throw new IllegalStateException("CRITICAL: The configured JWT_SECRET is a known compromised or default signing key. Application startup aborted.");
         }
         if (lifetime == null || lifetime.isZero() || lifetime.isNegative() || lifetime.compareTo(Duration.ofHours(24)) > 0) {
