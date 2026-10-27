@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-@Profile("demo-seed")
+@Profile("demo-seed & !prod")
 @ConditionalOnProperty(name = "photoconnect.demo.seed-enabled", havingValue = "true")
 public class DemoDataSeeder implements CommandLineRunner {
 
@@ -66,6 +66,11 @@ public class DemoDataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (demoPassword == null || demoPassword.length() < 12 || demoPassword.length() > 72) {
             throw new IllegalStateException("DEMO_PASSWORD must contain 12 to 72 characters.");
+        }
+
+        // Reject credentials previously published in project documentation even when supplied explicitly.
+        if ("PhotoConnectDemo!2026".equals(demoPassword)) {
+            throw new IllegalStateException("Previously published demo password is forbidden; set a unique DEMO_PASSWORD.");
         }
 
         String passwordHash = passwordEncoder.encode(demoPassword);
