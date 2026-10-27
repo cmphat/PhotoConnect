@@ -31,7 +31,7 @@ class DemoDataSeederTest {
     void firstRunCreatesThreeRoleAccountsAndFifteenApprovedPhotographers() {
         AtomicLong ids = new AtomicLong(1);
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("PhotoConnectDemo!2026")).thenReturn("bcrypt-hash");
+        when(passwordEncoder.encode("isolated-test-password-2026!")).thenReturn("bcrypt-hash");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(ids.getAndIncrement());
@@ -39,7 +39,7 @@ class DemoDataSeederTest {
         });
 
         new DemoDataSeeder(userRepository, photographerProfileRepository, passwordEncoder,
-                "PhotoConnectDemo!2026").run();
+                "isolated-test-password-2026!").run();
 
         verify(userRepository, times(18)).save(any(User.class));
         verify(photographerProfileRepository, times(15)).save(any(PhotographerProfile.class));
@@ -48,10 +48,21 @@ class DemoDataSeederTest {
     @Test
     void existingDemoAccountsAreNeverOverwritten() {
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(new User()));
-        when(passwordEncoder.encode("PhotoConnectDemo!2026")).thenReturn("bcrypt-hash");
+        when(passwordEncoder.encode("isolated-test-password-2026!")).thenReturn("bcrypt-hash");
 
         new DemoDataSeeder(userRepository, photographerProfileRepository, passwordEncoder,
-                "PhotoConnectDemo!2026").run();
+                "isolated-test-password-2026!").run();
+
+        verify(userRepository, never()).save(any());
+        verify(photographerProfileRepository, never()).save(any());
+    }
+
+    @Test
+    void publishedDemoPasswordIsRejectedBeforeDatabaseWrites() {
+        assertThatThrownBy(() -> new DemoDataSeeder(
+                userRepository, photographerProfileRepository, passwordEncoder, "PhotoConnectDemo!2026").run())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Previously published");
 
         verify(userRepository, never()).save(any());
         verify(photographerProfileRepository, never()).save(any());
