@@ -95,7 +95,10 @@ class JwtTokenServiceTest {
                 () -> assertThrows(IllegalStateException.class,
                         () -> new JwtTokenService("dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRmb3JwaG90b2Nvbm5lY3QyMDI2", Duration.ofMinutes(30))),
                 () -> assertThrows(IllegalStateException.class,
-                        () -> new JwtTokenService("c2VjdXJlLXBob3RvY29ubmVjdC1qd3Qtc2VjcmV0LWtleS0yMDI2LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=", Duration.ofMinutes(30)))
+                        () -> new JwtTokenService("c2VjdXJlLXBob3RvY29ubmVjdC1qd3Qtc2VjcmV0LWtleS0yMDI2LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=", Duration.ofMinutes(30))),
+                // Regression: the historical key published in the V4 release-blocker report.
+                () -> assertThrows(IllegalStateException.class,
+                        () -> new JwtTokenService("dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9ycGhvdG9jb25uZWN0and0YXV0aGVudGljYXRpb24=", Duration.ofMinutes(30)))
         );
     }
 
