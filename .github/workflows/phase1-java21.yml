@@ -1,0 +1,27 @@
+name: Phase 1 Java 21 verification
+on:
+  push:
+    branches:
+      - refactor/photo-connect-phase1-hardening
+  pull_request:
+    branches:
+      - v5-master-development
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165e # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Verify Java and Maven tests
+        run: mvn -B -ntp clean verify
