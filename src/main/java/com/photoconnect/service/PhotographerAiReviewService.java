@@ -161,6 +161,11 @@ public class PhotographerAiReviewService {
 
         public int getCompleted() { return completed; }
         public int getTotal() { return total; }
+        public String getSuggestedAction() {
+            return completed == total
+                    ? "Có thể chuyển sang bước xác minh thủ công trước khi cân nhắc duyệt."
+                    : "Nên yêu cầu bổ sung thông tin còn thiếu trước khi quyết định.";
+        }
         public List<String> getReady() { return ready; }
         public List<String> getMissing() { return missing; }
         public boolean isAiGenerated() { return aiGenerated; }
