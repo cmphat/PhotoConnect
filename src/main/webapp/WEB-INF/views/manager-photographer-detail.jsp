@@ -15,6 +15,7 @@
   <c:if test="${not empty aiAdvice}">
     <div class="mt-3" role="status">
       <strong>Độ đầy đủ thông tin: <c:out value="${aiAdvice.completed}"/>/<c:out value="${aiAdvice.total}"/> mục</strong>
+      <p class="mb-1"><strong>Gợi ý bước tiếp theo:</strong> <c:out value="${aiAdvice.suggestedAction}"/></p>
       <p class="small text-muted mt-1"><c:out value="${aiAdvice.aiStatus}"/></p>
       <c:if test="${aiAdvice.aiGenerated}">
         <div class="alert alert-info"><strong>Nhận xét AI:</strong> <c:out value="${aiAdvice.aiSummary}"/></div>
