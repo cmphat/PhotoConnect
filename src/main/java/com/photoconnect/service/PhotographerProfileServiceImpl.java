@@ -61,6 +61,9 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
         profile.setCity(request.getCity().trim());
         profile.setExperienceYears(request.getExperienceYears());
         profile.setPriceFrom(request.getPriceFrom());
+        if (request.getEquipmentSummary() != null && !request.getEquipmentSummary().isBlank()) {
+            profile.setEquipmentSummary(request.getEquipmentSummary().trim());
+        }
         profile.setVerificationStatus(PhotographerVerificationStatus.PENDING);
 
         // 5. User retains role CUSTOMER while verification status is PENDING.
@@ -90,6 +93,9 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
         profile.setCity(request.getCity().trim());
         profile.setExperienceYears(request.getExperienceYears());
         profile.setPriceFrom(request.getPriceFrom());
+        if (request.getEquipmentSummary() != null && !request.getEquipmentSummary().isBlank()) {
+            profile.setEquipmentSummary(request.getEquipmentSummary().trim());
+        }
         profile.setVerificationStatus(PhotographerVerificationStatus.PENDING);
         profile.setRejectionReason(null);
         profile.setReviewedAt(null);

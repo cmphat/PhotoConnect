@@ -167,6 +167,15 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="equipmentSummary" class="form-label">Gear &amp; Equipment (Cameras, Lenses, Lighting, Drone)</label>
+                        <form:textarea path="equipmentSummary" id="equipmentSummary" cssClass="form-input" rows="2" placeholder="e.g. Sony A7 IV, 24-70mm f/2.8 GM, Godox V1 Flash, DJI Mini 3 Pro…" />
+                        <form:errors path="equipmentSummary" cssClass="field-error"/>
+                        <small class="text-muted" style="display: block; font-size: 0.8rem; margin-top: 0.25rem;">
+                            Helps PhotoConnect curatorial staff and AI criteria evaluate your application kit.
+                        </small>
+                    </div>
+
                     <button type="submit" class="submit-btn" style="margin-top: 1.5rem;" id="btn-submit-onboarding">
                         <c:choose>
                             <c:when test="${isReapply}">Resubmit Application &rarr;</c:when>

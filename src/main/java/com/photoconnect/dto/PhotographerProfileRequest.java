@@ -27,6 +27,9 @@ public class PhotographerProfileRequest {
     @Digits(integer = 16, fraction = 2, message = "Starting price must have at most 16 integer digits and 2 decimal places.")
     private BigDecimal priceFrom;
 
+    @Size(max = 1000, message = "Equipment details must not exceed 1000 characters.")
+    private String equipmentSummary;
+
     public PhotographerProfileRequest() {
     }
 
@@ -68,5 +71,14 @@ public class PhotographerProfileRequest {
 
     public void setPriceFrom(BigDecimal priceFrom) {
         this.priceFrom = priceFrom;
+    }
+
+
+    public String getEquipmentSummary() {
+        return equipmentSummary;
+    }
+
+    public void setEquipmentSummary(String equipmentSummary) {
+        this.equipmentSummary = equipmentSummary;
     }
 }
