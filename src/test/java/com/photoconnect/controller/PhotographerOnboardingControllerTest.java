@@ -107,7 +107,7 @@ class PhotographerOnboardingControllerTest {
 
         User user = new User();
         user.setId(1L);
-        user.setRole(UserRole.PHOTOGRAPHER);
+        user.setRole(UserRole.CUSTOMER);
 
         PhotographerProfile profile = new PhotographerProfile();
         profile.setUser(user);
@@ -126,8 +126,8 @@ class PhotographerOnboardingControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/photographer/onboarding-status"));
 
-        // Session should be updated to PHOTOGRAPHER
-        org.junit.jupiter.api.Assertions.assertEquals("PHOTOGRAPHER", session.getAttribute("userRole"));
+        // Session should remain CUSTOMER while pending review
+        org.junit.jupiter.api.Assertions.assertEquals("CUSTOMER", session.getAttribute("userRole"));
     }
 
     @Test

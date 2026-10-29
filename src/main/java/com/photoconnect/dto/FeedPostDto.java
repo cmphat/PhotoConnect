@@ -22,11 +22,28 @@ public class FeedPostDto {
     private final String photographerAvatarUrl;
     private final int commentCount;
 
+    // Enhanced author fields to support customer posts alongside photographer posts
+    private final String authorType; // "PHOTOGRAPHER" or "CUSTOMER"
+    private final Long customerId;
+    private final BigDecimal budget;
+
     public FeedPostDto(Long imageId, String imageUrl, String caption, String category,
                        String categoryDisplayName, LocalDateTime createdAt, String timeAgo,
                        Long photographerId, String photographerName, String photographerAvatarUrl,
                        String photographerCity, BigDecimal startingPrice, Double averageRating,
                        Integer reviewCount, int likeCount, boolean isSaved, int commentCount) {
+        this(imageId, imageUrl, caption, category, categoryDisplayName, createdAt, timeAgo,
+             photographerId, photographerName, photographerAvatarUrl, photographerCity,
+             startingPrice, averageRating, reviewCount, likeCount, isSaved, commentCount,
+             "PHOTOGRAPHER", null, null);
+    }
+
+    public FeedPostDto(Long imageId, String imageUrl, String caption, String category,
+                       String categoryDisplayName, LocalDateTime createdAt, String timeAgo,
+                       Long photographerId, String photographerName, String photographerAvatarUrl,
+                       String photographerCity, BigDecimal startingPrice, Double averageRating,
+                       Integer reviewCount, int likeCount, boolean isSaved, int commentCount,
+                       String authorType, Long customerId, BigDecimal budget) {
         this.imageId = imageId;
         this.imageUrl = imageUrl;
         this.caption = caption;
@@ -44,6 +61,9 @@ public class FeedPostDto {
         this.likeCount = likeCount;
         this.isSaved = isSaved;
         this.commentCount = commentCount;
+        this.authorType = authorType != null ? authorType : "PHOTOGRAPHER";
+        this.customerId = customerId;
+        this.budget = budget;
     }
 
     public Long getImageId() { return imageId; }
@@ -64,4 +84,10 @@ public class FeedPostDto {
     public boolean isSaved() { return isSaved; }
     public boolean getIsSaved() { return isSaved; }
     public int getCommentCount() { return commentCount; }
+
+    public String getAuthorType() { return authorType; }
+    public boolean isCustomerPost() { return "CUSTOMER".equalsIgnoreCase(authorType); }
+    public boolean isPhotographerPost() { return "PHOTOGRAPHER".equalsIgnoreCase(authorType); }
+    public Long getCustomerId() { return customerId; }
+    public BigDecimal getBudget() { return budget; }
 }

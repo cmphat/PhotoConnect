@@ -215,7 +215,7 @@
                                             <p class="timeline-content-desc">Unfortunately, your application does not meet our current curation guidelines.</p>
                                             <c:if test="${not empty rejectionReason}">
                                                 <div class="alert alert-warning pc-alert pc-alert-warning mt-2 mb-0" style="font-size: 0.9rem;">
-                                                    <strong>Lý do từ chối:</strong> <c:out value="${rejectionReason}"/>
+                                                    <strong>Rejection Reason:</strong> <c:out value="${rejectionReason}"/>
                                                 </div>
                                             </c:if>
                                         </div>
@@ -312,7 +312,7 @@
                                 </c:when>
                                 <c:when test="${verificationStatus == 'REJECTED'}">
                                     <a href="${pageContext.request.contextPath}/photographer/onboarding/reapply" class="btn btn-primary btn-lg" id="btn-reapply">
-                                        Chỉnh sửa &amp; Nộp lại hồ sơ &rarr;
+                                        Edit &amp; Resubmit Application &rarr;
                                     </a>
                                     <a href="${pageContext.request.contextPath}/" class="btn btn-secondary btn-lg">
                                         &larr; Return to Home

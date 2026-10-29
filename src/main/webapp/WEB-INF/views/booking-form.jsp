@@ -143,8 +143,8 @@
                         <!-- Availability Slots Feedback (Phase 6) -->
                         <div id="availability-feedback" style="display: none; margin-bottom: 2rem; padding: 1.25rem; border-radius: var(--radius-sm, 8px); background: rgba(37, 99, 235, 0.04); border: 1px solid rgba(37, 99, 235, 0.18);">
                             <div style="font-size: 0.88rem; font-weight: 600; color: #1e3a8a; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
-                                <span><i class="bi bi-clock-history me-1"></i> Khung giờ khả dụng / Available Slots</span>
-                                <span id="availability-status-badge" class="badge bg-primary" style="font-size: 0.75rem;">Đang tải...</span>
+                                <span><i class="bi bi-clock-history me-1"></i> Available Time Slots</span>
+                                <span id="availability-status-badge" class="badge bg-primary" style="font-size: 0.75rem;">Loading...</span>
                             </div>
                             <div id="availability-slots-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                             </div>
@@ -171,26 +171,28 @@
 
                         <!-- Notes / Requirements -->
                         <div class="form-group" style="margin-bottom: 2rem;">
-                            <label for="notes" class="form-label">Notes & Requirements (Optional)</label>
+                            <label for="notes" class="form-label">Notes &amp; Requirements (Optional)</label>
                             <textarea id="notes"
                                       name="notes"
                                       rows="3"
                                       maxlength="1000"
                                       placeholder="Share shoot concept, special requests, etc..."
                                       class="form-input"><c:out value='${bookingRequest.notes}'/></textarea>
+                        </div>
+
                         <!-- V6 Surcharges & Extras Configuration -->
                         <div class="card mb-4 border" style="background: var(--surface); border-color: rgba(37,99,235,0.2);">
                             <div class="card-header bg-transparent py-3 border-bottom" style="border-color: rgba(37,99,235,0.15);">
                                 <h3 class="h6 fw-bold mb-0 text-dark">
-                                    <i class="bi bi-sliders me-1 text-primary"></i> Phụ phí & Gói dịch vụ bổ sung / Surcharges & Extras
+                                    <i class="bi bi-sliders me-1 text-primary"></i> Surcharges &amp; Extra Add-ons
                                 </h3>
-                                <small class="text-muted">Tùy chỉnh khoảng cách di chuyển, khung giờ chụp đêm và các tùy chọn bổ sung</small>
+                                <small class="text-muted">Customize travel distance, night session surcharge, and extra services</small>
                             </div>
                             <div class="card-body p-3">
                                 <div class="row g-3 mb-3">
                                     <div class="col-12 col-md-6">
                                         <label for="travelDistanceKm" class="form-label fw-semibold" style="font-size: 0.88rem;">
-                                            Khoảng cách di chuyển (km)
+                                            Travel Distance (km)
                                         </label>
                                         <div class="input-group">
                                             <input type="number" id="travelDistanceKm" name="travelDistanceKm" min="0" max="500"
@@ -198,7 +200,7 @@
                                             <span class="input-group-text bg-light">km</span>
                                         </div>
                                         <div class="form-text" style="font-size: 0.78rem; color: #2563eb;">
-                                            <i class="bi bi-info-circle me-1"></i> Mức phí được lấy từ gói đã chọn và được xác minh lại trên máy chủ.
+                                            <i class="bi bi-info-circle me-1"></i> Rates are defined by the selected package and verified on the server.
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6 d-flex align-items-center">
@@ -206,10 +208,10 @@
                                             <input class="form-check-input" type="checkbox" id="nightShoot" name="nightShoot" value="true"
                                                    ${bookingRequest.nightShoot ? 'checked' : ''}>
                                             <label class="form-check-label fw-semibold" for="nightShoot" style="font-size: 0.88rem;">
-                                                Chụp đêm / Thiếu sáng (theo mức của gói đã chọn)
+                                                Night / Low-Light Shoot (per package rate)
                                             </label>
                                             <div class="form-text" style="font-size: 0.78rem;">
-                                                Áp dụng khi chụp từ 18:00 đến 06:00 sáng hoặc yêu cầu đèn chụp đêm chuyên dụng.
+                                                Applies between 18:00 and 06:00 or when specialized lighting is requested.
                                             </div>
                                         </div>
                                     </div>
@@ -218,14 +220,14 @@
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
                                         <label for="extraHours" class="form-label fw-semibold" style="font-size: 0.85rem;">
-                                            Thêm giờ chụp (+200.000đ/giờ)
+                                            Extra Shoot Hours (+200,000 VND/hr)
                                         </label>
                                         <input type="number" id="extraHours" name="extraHours" min="0" max="10"
                                                class="form-input" placeholder="0" value="<c:out value='${bookingRequest.extraHours != null ? bookingRequest.extraHours : 0}'/>">
                                     </div>
                                     <div class="col-12 col-md-4">
                                         <label for="extraPhotos" class="form-label fw-semibold" style="font-size: 0.85rem;">
-                                            Thêm ảnh sửa (+50.000đ/ảnh)
+                                            Extra Edited Photos (+50,000 VND/ea)
                                         </label>
                                         <input type="number" id="extraPhotos" name="extraPhotos" min="0" max="100"
                                                class="form-input" placeholder="0" value="<c:out value='${bookingRequest.extraPhotos != null ? bookingRequest.extraPhotos : 0}'/>">
@@ -235,7 +237,7 @@
                                             <input class="form-check-input" type="checkbox" id="additionalPhotographer" name="additionalPhotographer" value="true"
                                                    ${bookingRequest.additionalPhotographer ? 'checked' : ''}>
                                             <label class="form-check-label fw-semibold" for="additionalPhotographer" style="font-size: 0.85rem;">
-                                                Thợ chụp phụ / Trợ lý (+500.000đ)
+                                                Second Shooter / Assistant (+500,000 VND)
                                             </label>
                                         </div>
                                     </div>
@@ -247,45 +249,45 @@
                         <div class="card mb-4 border" style="background: #f8fafc; border-color: #cbd5e1;">
                             <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center">
                                 <h3 class="h6 fw-bold mb-0 text-dark">
-                                    <i class="bi bi-receipt me-1 text-primary"></i> Chi tiết giá & Đặt cọc 30% / Price Breakdown
+                                    <i class="bi bi-receipt me-1 text-primary"></i> Price Breakdown &amp; 30% Escrow Deposit
                                 </h3>
-                                <span class="badge bg-primary">Xác thực hệ thống</span>
+                                <span class="badge bg-primary" style="color: #ffffff !important; font-weight: 600; background-color: #2563eb !important;">Server Verified</span>
                             </div>
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between py-1" style="font-size: 0.9rem;">
-                                    <span class="text-muted">Giá gói chụp cơ bản (Base Package):</span>
+                                    <span class="text-muted">Base Package Rate:</span>
                                     <strong id="displayBasePrice">0 VND</strong>
                                 </div>
                                 <div class="d-flex justify-content-between py-1" id="rowNightFee" style="font-size: 0.9rem; display: none;">
-                                    <span class="text-muted">Phụ phí chụp đêm (+20%):</span>
+                                    <span class="text-muted">Night Shoot Surcharge (+20%):</span>
                                     <span id="displayNightFee" class="text-primary">+0 VND</span>
                                 </div>
                                 <div class="d-flex justify-content-between py-1" id="rowTravelFee" style="font-size: 0.9rem; display: none;">
-                                    <span class="text-muted">Phụ phí di chuyển (> 30 km):</span>
+                                    <span class="text-muted">Travel Surcharge (> 30 km):</span>
                                     <span id="displayTravelFee" class="text-primary">+0 VND</span>
                                 </div>
                                 <div class="d-flex justify-content-between py-1" id="rowExtrasFee" style="font-size: 0.9rem; display: none;">
-                                    <span class="text-muted">Tùy chọn bổ sung (Giờ/Ảnh/Trợ lý):</span>
+                                    <span class="text-muted">Add-on Options (Hours/Photos/Assistant):</span>
                                     <span id="displayExtrasFee" class="text-primary">+0 VND</span>
                                 </div>
                                 <hr class="my-2">
                                 <div class="d-flex justify-content-between py-1" style="font-size: 1.05rem;">
-                                    <span class="fw-bold text-dark">Tổng cộng chi phí (Total Agreed):</span>
+                                    <span class="fw-bold text-dark">Total Agreed Price:</span>
                                     <strong id="displayTotalPrice" class="text-dark">0 VND</strong>
                                 </div>
                                 <div class="p-3 my-2 rounded" style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="fw-bold text-primary" style="font-size: 1rem;">
-                                            <i class="bi bi-shield-check me-1"></i> Tiền đặt cọc bắt buộc (30% Deposit):
+                                            <i class="bi bi-shield-check me-1"></i> Required Escrow Deposit (30%):
                                         </span>
-                                        <span class="badge bg-primary fs-6 px-3 py-2" id="displayDepositAmount">0 VND</span>
+                                        <span class="badge bg-primary fs-6 px-3 py-2" id="displayDepositAmount" style="color: #ffffff !important; font-weight: 700; background-color: #2563eb !important;">0 VND</span>
                                     </div>
                                     <small class="text-muted d-block" style="font-size: 0.78rem;">
-                                        Thanh toán qua quét mã VietQR sau khi nhiếp ảnh gia chấp nhận lịch. Tiền được giữ bảo đảm an toàn.
+                                        Payable via VietQR once the photographer accepts. Funds are held in escrow.
                                     </small>
                                 </div>
                                 <div class="d-flex justify-content-between py-1 text-muted" style="font-size: 0.88rem;">
-                                    <span>Còn lại thanh toán sau buổi chụp (70% Balance):</span>
+                                    <span>Remaining Balance Due at Session (70%):</span>
                                     <strong id="displayRemainingBalance">0 VND</strong>
                                 </div>
                             </div>
@@ -296,17 +298,17 @@
                             <div class="card-header bg-transparent py-3" style="cursor: pointer;" onclick="var b = document.getElementById('shootBriefBody'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h3 class="h6 fw-bold mb-0 text-dark"><i class="bi bi-camera me-1 text-primary"></i> Shoot Brief & Creative Vision (Optional)</h3>
-                                        <small class="text-muted">Chi tiết concept, trang phục, moodboard và danh sách góc chụp mong muốn</small>
+                                        <h3 class="h6 fw-bold mb-0 text-dark"><i class="bi bi-camera me-1 text-primary"></i> Shoot Brief &amp; Creative Vision (Optional)</h3>
+                                        <small class="text-muted">Specify concept details, outfits, moodboards, and desired shot list</small>
                                     </div>
-                                    <span class="badge bg-light text-primary border">Chi tiết</span>
+                                    <span class="badge bg-light text-primary border">Details</span>
                                 </div>
                             </div>
                             <div class="card-body" id="shootBriefBody">
                                 <div class="form-group mb-3">
-                                    <label for="conceptDescription" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Concept Description / Mô tả ý tưởng</label>
+                                    <label for="conceptDescription" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Concept Description</label>
                                     <textarea id="conceptDescription" name="conceptDescription" rows="3" maxlength="1000"
-                                              placeholder="Chia sẻ concept chi tiết, phong cách ánh sáng, vibe nghệ thuật..."
+                                              placeholder="Share concept details, lighting style, artistic mood..."
                                               class="form-input"><c:out value='${bookingRequest.conceptDescription}'/></textarea>
                                 </div>
 
@@ -314,43 +316,43 @@
                                     <div class="col-12 col-md-6">
                                         <label for="moodboardUrl" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Moodboard / Reference Link</label>
                                         <input type="url" id="moodboardUrl" name="moodboardUrl" maxlength="500"
-                                               placeholder="https://pinterest.com/... hoặc link Google Drive"
+                                               placeholder="https://pinterest.com/... or Google Drive folder link"
                                                class="form-input" value="<c:out value='${bookingRequest.moodboardUrl}'/>">
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="backupLocation" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Backup Location / Địa điểm dự phòng</label>
+                                        <label for="backupLocation" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Backup Location (Rain / Weather)</label>
                                         <input type="text" id="backupLocation" name="backupLocation" maxlength="255"
-                                               placeholder="Phòng khi trời mưa hoặc đổi địa điểm..."
+                                               placeholder="Alternative indoor/sheltered location in case of weather..."
                                                class="form-input" value="<c:out value='${bookingRequest.backupLocation}'/>">
                                     </div>
                                 </div>
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-12 col-md-6">
-                                        <label for="outfitCount" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Number of Outfits / Số set đồ</label>
+                                        <label for="outfitCount" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Number of Outfits</label>
                                         <input type="number" id="outfitCount" name="outfitCount" min="1" max="20"
-                                               placeholder="Ví dụ: 2 set"
+                                               placeholder="e.g. 2 outfits"
                                                class="form-input" value="<c:out value='${bookingRequest.outfitCount}'/>">
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="participantCount" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Number of Participants / Số người chụp</label>
+                                        <label for="participantCount" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Number of Participants</label>
                                         <input type="number" id="participantCount" name="participantCount" min="1" max="50"
-                                               placeholder="Ví dụ: 1 hoặc 2 người"
+                                               placeholder="e.g. 1 or 2 people"
                                                class="form-input" value="<c:out value='${bookingRequest.participantCount}'/>">
                                     </div>
                                 </div>
 
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
-                                        <label for="shotList" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Shot List / Góc chụp mong muốn</label>
+                                        <label for="shotList" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Shot List &amp; Key Poses</label>
                                         <textarea id="shotList" name="shotList" rows="2" maxlength="1500"
-                                                  placeholder="Ví dụ: Chân dung cận cảnh, toàn cảnh ngoại cảnh, góc nghiêng..."
+                                                  placeholder="e.g. Close-up portraits, wide environmental shots, 3/4 profiles..."
                                                   class="form-input"><c:out value='${bookingRequest.shotList}'/></textarea>
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="propsNeeded" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Props & Accessories / Đạo cụ cần có</label>
+                                        <label for="propsNeeded" class="form-label" style="font-size: 0.85rem; font-weight: 600;">Props &amp; Accessories</label>
                                         <textarea id="propsNeeded" name="propsNeeded" rows="2" maxlength="500"
-                                                  placeholder="Ví dụ: Bó hoa tươi, máy ảnh film, mũ cói, đèn led mini..."
+                                                  placeholder="e.g. Floral bouquet, vintage film camera, straw hat..."
                                                   class="form-input"><c:out value='${bookingRequest.propsNeeded}'/></textarea>
                                     </div>
                                 </div>
@@ -399,8 +401,8 @@
 
             feedbackBox.style.display = 'block';
             statusBadge.className = 'badge bg-secondary';
-            statusBadge.textContent = 'Kiểm tra...';
-            slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: var(--text-muted);">Đang tải lịch của nhiếp ảnh gia...</span>';
+            statusBadge.textContent = 'Checking...';
+            slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: var(--text-muted);">Loading creator schedule...</span>';
             noticeEl.textContent = '';
 
             fetch('${pageContext.request.contextPath}/api/photographers/' + photographerId + '/availability?date=' + encodeURIComponent(dateVal))
@@ -408,22 +410,22 @@
                 .then(data => {
                     if (!data.wholeDayAvailable) {
                         statusBadge.className = 'badge bg-danger';
-                        statusBadge.textContent = 'Bận cả ngày';
-                        slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: #dc2626;">Nhiếp ảnh gia bận hoặc đã khóa lịch vào ngày này. Vui lòng chọn ngày khác.</span>';
-                        noticeEl.textContent = 'Bạn vẫn có thể gửi yêu cầu nếu đã trao đổi trước.';
+                        statusBadge.textContent = 'Unavailable';
+                        slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: #dc2626;">Photographer is unavailable or has blocked this date. Please choose another date.</span>';
+                        noticeEl.textContent = 'You may still submit a request if discussed in advance.';
                         return;
                     }
 
                     const slots = data.slots || [];
                     if (slots.length === 0) {
                         statusBadge.className = 'badge bg-warning text-dark';
-                        statusBadge.textContent = 'Lịch tự do';
-                        slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: var(--text-muted);">Không có khung giờ giới hạn cố định. Bạn có thể chọn giờ tùy ý.</span>';
+                        statusBadge.textContent = 'Open Schedule';
+                        slotsContainer.innerHTML = '<span style="font-size: 0.82rem; color: var(--text-muted);">No fixed time constraints. You may choose any preferred session time.</span>';
                         return;
                     }
 
                     statusBadge.className = 'badge bg-success';
-                    statusBadge.textContent = 'Có thể đặt';
+                    statusBadge.textContent = 'Available';
                     slotsContainer.innerHTML = '';
                     let availableCount = 0;
 
@@ -442,7 +444,7 @@
                                 btn.classList.add('btn-primary', 'text-white');
                             };
                         } else {
-                            btn.title = slot.reason || 'Khung giờ bị trùng lịch';
+                            btn.title = slot.reason || 'Slot already booked';
                             btn.disabled = true;
                             btn.style.opacity = '0.5';
                         }
@@ -450,11 +452,11 @@
                     });
 
                     if (availableCount > 0) {
-                        noticeEl.textContent = 'Nhấn vào khung giờ phía trên để tự động điền giờ chụp.';
+                        noticeEl.textContent = 'Click an available time slot above to auto-fill the session start time.';
                     } else {
                         statusBadge.className = 'badge bg-danger';
-                        statusBadge.textContent = 'Hết chỗ trống';
-                        noticeEl.textContent = 'Tất cả các khung giờ tiêu chuẩn trong ngày đã có lịch hẹn.';
+                        statusBadge.textContent = 'Fully Booked';
+                        noticeEl.textContent = 'All standard time slots on this date are reserved.';
                     }
                 })
                 .catch(() => {

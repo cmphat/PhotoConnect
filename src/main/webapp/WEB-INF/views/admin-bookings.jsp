@@ -10,7 +10,6 @@
     <main class="pc-page pc-page-compact">
         <div class="editorial-container pc-container-admin">
 
-            <jsp:include page="fragments/admin-navbar.jsp" />
 
             <div class="pc-page-header pc-stack-mobile">
                 <div>

@@ -178,8 +178,11 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         PhotographerProfile profile = photographerProfileRepository.findByUserIdWithUser(userId)
                 .orElseThrow(() -> new UnauthorizedException("Photographer profile not found for user: " + userId));
 
-        if (profile.getUser() == null || profile.getUser().getRole() != UserRole.PHOTOGRAPHER || profile.getUser().getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException("Only active photographers can manage service packages.");
+        if (profile.getUser() == null || profile.getUser().getRole() != UserRole.PHOTOGRAPHER
+                || profile.getUser().getStatus() != UserStatus.ACTIVE
+                || profile.getVerificationStatus() == com.photoconnect.entity.PhotographerVerificationStatus.SUSPENDED
+                || profile.getVerificationStatus() == com.photoconnect.entity.PhotographerVerificationStatus.REJECTED) {
+            throw new UnauthorizedException("Only active and approved photographers can manage service packages.");
         }
         return profile;
     }

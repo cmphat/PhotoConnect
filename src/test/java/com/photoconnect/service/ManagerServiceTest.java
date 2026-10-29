@@ -91,6 +91,20 @@ class ManagerServiceTest {
         verify(notifications).sendNotification(eq(22L), eq(NotificationType.MODERATION_UPDATE), anyString(), anyString(), eq(10L), anyString());
     }
 
+    @Test
+    void recentActivityOnlyReturnsActorLogsForManager() {
+        service.recentActivity(50L, 10);
+        verify(audit).recentForActor(50L, 10);
+        verify(audit, never()).recent(anyInt());
+    }
+
+    @Test
+    void recentActivityReturnsAllLogsForAdmin() {
+        User admin = user(99L, UserRole.ADMIN);
+        when(users.findById(99L)).thenReturn(Optional.of(admin));
+        service.recentActivity(99L, 10);
+        verify(audit).recent(10);
+    }
 
     private User user(Long id, UserRole role) {
         User user = new User(); user.setId(id); user.setRole(role); user.setStatus(UserStatus.ACTIVE); user.setFullName(role.name()); return user;

@@ -93,6 +93,14 @@ class ManagerControllerTest {
         verify(operations).suspendPhotographer(7L, 15L, "Severe conduct infraction", "Investigation verified");
     }
 
+    @Test
+    void managerAuditRedirectsToDashboard() throws Exception {
+        mvc.perform(get("/manager/audit").session(session(7L, UserRole.MANAGER)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/manager/dashboard"));
+        verifyNoInteractions(operations);
+    }
+
 
     private MockHttpSession session(Long id, UserRole role) {
         MockHttpSession session = new MockHttpSession();

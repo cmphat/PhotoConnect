@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <head>
-    <title>Quên Mật Khẩu — PhotoConnect</title>
+    <title>Forgot Password — PhotoConnect</title>
     <style>
         .auth-split-layout {
             display: flex;
@@ -93,7 +93,7 @@
                  alt="Landscape Photographer Sunset"
                  loading="eager">
             <div class="auth-overlay-quote">
-                <blockquote>&ldquo;Khôi phục quyền truy cập một cách an toàn và bảo mật cho tài khoản của bạn.&rdquo;</blockquote>
+                <blockquote>&ldquo;Recover access to your account securely with end-to-end verification.&rdquo;</blockquote>
                 <cite>PhotoConnect Identity Security</cite>
             </div>
         </div>
@@ -102,12 +102,12 @@
         <div class="auth-form-pane">
             <div class="auth-form-card">
 
-                <span class="section-index">Khôi phục tài khoản</span>
+                <span class="section-index">Account Recovery</span>
                 <h1 class="editorial-title" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin: 0 0 0.5rem 0;">
-                    Quên mật khẩu?
+                    Forgot Password?
                 </h1>
                 <p class="pc-lead" style="font-size: 0.95rem; margin-bottom: 2rem;">
-                    Nhập địa chỉ email tài khoản của bạn. Chúng tôi sẽ gửi mã OTP 6 chữ số để đặt lại mật khẩu mới.
+                    Enter your registered email address. We will send a 6-digit OTP code to reset your password.
                 </p>
 
                 <!-- Feedback Alert -->
@@ -121,7 +121,7 @@
                     <%@ include file="fragments/csrf-input.jsp" %>
 
                     <div class="form-group mb-4">
-                        <label for="email" class="form-label text-muted small fw-bold">ĐỊA CHỈ EMAIL</label>
+                        <label for="email" class="form-label text-muted small fw-bold">EMAIL ADDRESS</label>
                         <input type="email"
                                name="email"
                                id="email"
@@ -133,13 +133,13 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary submit-btn w-100 py-3" id="btn-request-reset">
-                        Gửi mã xác thực OTP &rarr;
+                        Send Verification Code &rarr;
                     </button>
                 </form>
 
                 <div class="text-center pt-3 border-top">
                     <a href="${pageContext.request.contextPath}/login" class="small text-muted text-decoration-none">
-                        &larr; Quay lại trang Đăng nhập
+                        &larr; Back to Sign In
                     </a>
                 </div>
 

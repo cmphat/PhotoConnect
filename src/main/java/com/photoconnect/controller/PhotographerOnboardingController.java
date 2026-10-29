@@ -40,6 +40,9 @@ public class PhotographerOnboardingController {
         if (UserRole.ADMIN.name().equals(userRole)) {
             return "redirect:/admin/dashboard";
         }
+        if (UserRole.PHOTOGRAPHER.name().equals(userRole)) {
+            return "redirect:/photographer/dashboard";
+        }
 
         if (photographerProfileService.findByUserId(userId).isPresent()) {
             return "redirect:/photographer/onboarding-status";
@@ -65,6 +68,9 @@ public class PhotographerOnboardingController {
         if (UserRole.ADMIN.name().equals(userRole)) {
             return "redirect:/admin/dashboard";
         }
+        if (UserRole.PHOTOGRAPHER.name().equals(userRole)) {
+            return "redirect:/photographer/dashboard";
+        }
 
         if (bindingResult.hasErrors()) {
             return "photographer-onboarding";
@@ -72,9 +78,8 @@ public class PhotographerOnboardingController {
 
         try {
             PhotographerProfile profile = photographerProfileService.createProfile(userId, profileRequest);
-            // The persisted role changed, so rotate the cookie immediately; the old role claim is never trusted.
-            jwtCookieService.issue(request, response, profile.getUser());
-            session.setAttribute("userRole", UserRole.PHOTOGRAPHER.name());
+            // User retains CUSTOMER role while application is PENDING.
+            session.setAttribute("userRole", UserRole.CUSTOMER.name());
             return "redirect:/photographer/onboarding-status";
         } catch (PhotographerProfileAlreadyExistsException e) {
             return "redirect:/photographer/onboarding-status";

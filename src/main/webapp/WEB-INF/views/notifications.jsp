@@ -11,7 +11,16 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
             <h1 class="h3 fw-bold mb-1">Notification Center</h1>
-            <p class="text-muted mb-0">Stay updated on your booking requests, deliverables, messages, and reviews</p>
+            <p class="text-muted mb-0">
+                <c:choose>
+                    <c:when test="${sessionScope.userRole == 'MANAGER'}">
+                        Operational escalations, safety reports, and dispute alerts
+                    </c:when>
+                    <c:otherwise>
+                        Stay updated on your booking requests, deliverables, messages, and reviews
+                    </c:otherwise>
+                </c:choose>
+            </p>
         </div>
         <c:if test="${unreadCount > 0}">
             <form action="${pageContext.request.contextPath}/notifications/read-all" method="post" style="margin: 0;">
@@ -46,7 +55,16 @@
                     <div class="text-center py-5">
                         <i class="bi bi-bell-slash text-muted" style="font-size: 3rem;"></i>
                         <h6 class="mt-3 fw-bold text-dark">No notifications yet</h6>
-                        <p class="text-muted small mb-0">When you receive booking updates, photos, or messages, they will appear here.</p>
+                        <p class="text-muted small mb-0">
+                            <c:choose>
+                                <c:when test="${sessionScope.userRole == 'MANAGER'}">
+                                    No operational alerts or safety reports pending at this time.
+                                </c:when>
+                                <c:otherwise>
+                                    When you receive booking updates, photos, or messages, they will appear here.
+                                </c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
                 </c:when>
                 <c:otherwise>

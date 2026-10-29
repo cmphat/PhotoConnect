@@ -117,43 +117,48 @@
                         <c:out value="${authError}"/>
                     </div>
                 </c:if>
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert alert-warning pc-alert" role="alert">
+                        <c:out value="${errorMessage}"/>
+                    </div>
+                </c:if>
                 <c:if test="${param.verified == 'true'}">
                     <div class="alert alert-success pc-alert pc-alert-success" role="alert">
-                        Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.
+                        Email verified successfully! You may now sign in.
                     </div>
                 </c:if>
                 <c:if test="${param.reset == 'true'}">
                     <div class="alert alert-success pc-alert pc-alert-success" role="alert">
-                        Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập bằng mật khẩu mới.
+                        Password reset successfully! Please sign in with your new password.
                     </div>
                 </c:if>
                 <c:if test="${param.deactivated == 'true'}">
                     <div class="alert alert-info pc-alert" role="alert">
-                        Tài khoản của bạn đã được vô hiệu hóa thành công.
+                        Your account has been deactivated successfully.
                     </div>
                 </c:if>
                 <c:if test="${param.oauth == 'expired'}">
-                    <div class="alert alert-warning pc-alert" role="alert">Phiên đăng nhập Google đã hết hạn. Vui lòng thử lại.</div>
+                    <div class="alert alert-warning pc-alert" role="alert">Google sign-in session expired. Please try again.</div>
                 </c:if>
                 <c:if test="${param.oauth == 'cancelled'}">
-                    <div class="alert alert-info pc-alert" role="alert">Bạn đã hủy đăng nhập bằng Google.</div>
+                    <div class="alert alert-info pc-alert" role="alert">Google sign-in was cancelled.</div>
                 </c:if>
                 <c:if test="${param.oauth == 'unlinked-email'}">
-                    <div class="alert alert-warning pc-alert" role="alert">Email Google này đã thuộc một tài khoản PhotoConnect chưa liên kết. Vui lòng đăng nhập bằng mật khẩu; hệ thống không tự động hợp nhất tài khoản.</div>
+                    <div class="alert alert-warning pc-alert" role="alert">This Google email belongs to an existing unlinked PhotoConnect account. Please sign in with password.</div>
                 </c:if>
                 <c:if test="${param.oauth == 'account-disabled'}">
-                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Tài khoản PhotoConnect đã bị khóa hoặc không hoạt động. Vui lòng liên hệ hỗ trợ.</div>
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Your PhotoConnect account is suspended or inactive. Please contact support.</div>
                 </c:if>
                 <c:if test="${param.oauth == 'invalid-identity' || param.oauth == 'identity-conflict' || param.oauth == 'error'}">
-                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng nhập bằng email.</div>
+                    <div class="alert alert-danger pc-alert pc-alert-danger" role="alert">Unable to authenticate with Google. Please try again or sign in with email.</div>
                 </c:if>
 
                 <c:if test="${googleOAuthEnabled}">
                     <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/oauth2/authorization/google">
-                        Đăng nhập bằng Google
+                        Sign in with Google
                     </a>
                     <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
-                        <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc dùng email</span><span class="border-top flex-grow-1"></span>
+                        <span class="border-top flex-grow-1"></span><span class="text-muted small">or continue with email</span><span class="border-top flex-grow-1"></span>
                     </div>
                 </c:if>
 
@@ -169,7 +174,7 @@
                     <div class="form-group mb-4" style="margin-bottom: 2.5rem;">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label for="password" class="form-label mb-0">Password</label>
-                            <a href="${pageContext.request.contextPath}/forgot-password" class="small text-muted text-decoration-none">Quên mật khẩu?</a>
+                            <a href="${pageContext.request.contextPath}/forgot-password" class="small text-muted text-decoration-none">Forgot password?</a>
                         </div>
                         <form:password path="password" class="form-control form-input" id="password" autocomplete="current-password" required="true" placeholder="••••••••" />
                         <form:errors path="password" cssClass="field-error" />

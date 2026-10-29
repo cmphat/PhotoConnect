@@ -21,9 +21,17 @@ import java.util.List;
 public class AdminPhotographerController {
 
     private final AdminPhotographerService adminPhotographerService;
+    private com.photoconnect.service.PhotographerEvaluationService evaluationService = new com.photoconnect.service.PhotographerEvaluationServiceImpl();
 
     public AdminPhotographerController(AdminPhotographerService adminPhotographerService) {
         this.adminPhotographerService = adminPhotographerService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setEvaluationService(com.photoconnect.service.PhotographerEvaluationService evaluationService) {
+        if (evaluationService != null) {
+            this.evaluationService = evaluationService;
+        }
     }
 
     // ── GET /admin/photographers ──────────────────────────────────────────
@@ -69,6 +77,7 @@ public class AdminPhotographerController {
         try {
             PhotographerProfile profile = adminPhotographerService.getApplicationById(id);
             model.addAttribute("profile", profile);
+            model.addAttribute("evaluation", evaluationService.evaluate(profile));
             return "admin-photographer-detail";
         } catch (IllegalArgumentException e) {
             return "redirect:/admin/photographers";

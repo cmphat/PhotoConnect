@@ -42,7 +42,7 @@ class AdminPhotographerServiceTest {
         photographerUser.setId(1L);
         photographerUser.setEmail("photographer@example.com");
         photographerUser.setFullName("Test Photographer");
-        photographerUser.setRole(UserRole.PHOTOGRAPHER);
+        photographerUser.setRole(UserRole.CUSTOMER);
         photographerUser.setStatus(UserStatus.ACTIVE);
 
         pendingProfile = new PhotographerProfile();
@@ -54,7 +54,11 @@ class AdminPhotographerServiceTest {
         pendingProfile.setVerificationStatus(PhotographerVerificationStatus.PENDING);
 
         approvedProfile = new PhotographerProfile();
-        approvedProfile.setUser(photographerUser);
+        User approvedUser = new User();
+        approvedUser.setId(2L);
+        approvedUser.setRole(UserRole.PHOTOGRAPHER);
+        approvedUser.setStatus(UserStatus.ACTIVE);
+        approvedProfile.setUser(approvedUser);
         approvedProfile.setDisplayName("Studio Beta");
         approvedProfile.setVerificationStatus(PhotographerVerificationStatus.APPROVED);
     }
@@ -134,6 +138,7 @@ class AdminPhotographerServiceTest {
         PhotographerProfile result = adminPhotographerService.approve(1L);
 
         assertThat(result.getVerificationStatus()).isEqualTo(PhotographerVerificationStatus.APPROVED);
+        assertThat(pendingProfile.getUser().getRole()).isEqualTo(UserRole.PHOTOGRAPHER);
         verify(photographerProfileRepository).save(pendingProfile);
     }
 
@@ -157,8 +162,8 @@ class AdminPhotographerServiceTest {
         PhotographerProfile result = adminPhotographerService.reject(1L);
 
         assertThat(result.getVerificationStatus()).isEqualTo(PhotographerVerificationStatus.REJECTED);
-        // User.role must remain PHOTOGRAPHER even after rejection
-        assertThat(photographerUser.getRole()).isEqualTo(UserRole.PHOTOGRAPHER);
+        // User.role must remain CUSTOMER upon rejection
+        assertThat(photographerUser.getRole()).isEqualTo(UserRole.CUSTOMER);
         verify(photographerProfileRepository).save(pendingProfile);
     }
 

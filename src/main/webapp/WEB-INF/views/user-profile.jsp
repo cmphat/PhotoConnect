@@ -586,10 +586,12 @@
 
                 <!-- Tab Headers -->
                 <div class="profile-nav-tabs" role="tablist">
-                    <button type="button" class="profile-nav-tab active btn" id="tab-calendar" onclick="switchProfileTab('calendar')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        Schedule &amp; Availability
-                    </button>
+                    <c:if test="${profile.role == 'PHOTOGRAPHER'}">
+                        <button type="button" class="profile-nav-tab active btn" id="tab-calendar" onclick="switchProfileTab('calendar')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Schedule &amp; Availability
+                        </button>
+                    </c:if>
 
                     <c:if test="${profile.role == 'PHOTOGRAPHER' && not empty profile.portfolioImages}">
                         <button type="button" class="profile-nav-tab btn" id="tab-portfolio" onclick="switchProfileTab('portfolio')">
@@ -600,71 +602,73 @@
                     </c:if>
 
                     <c:if test="${isOwner}">
-                        <button type="button" class="profile-nav-tab btn" id="tab-security" onclick="switchProfileTab('security')">
+                        <button type="button" class="profile-nav-tab ${profile.role != 'PHOTOGRAPHER' ? 'active' : ''} btn" id="tab-security" onclick="switchProfileTab('security')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            Bảo Mật Tài Khoản
+                            Security &amp; Account
                         </button>
                     </c:if>
                 </div>
 
-                <!-- Tab Pane 1: Interactive FullCalendar Component -->
-                <div id="pane-calendar" class="calendar-card-shell">
-                    <div class="calendar-header-strip">
-                        <div>
-                            <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-strong); margin: 0 0 0.25rem 0;">
-                                Interactive Availability Calendar
-                            </h2>
-                            <p style="font-size: 0.88rem; color: var(--muted); margin: 0;">
-                                <c:choose>
-                                    <c:when test="${isOwner}">Manage your shoot availability, blocked hours, and personal schedule.</c:when>
-                                    <c:otherwise>View public open shoot slots and booked dates.</c:otherwise>
-                                </c:choose>
-                            </p>
+                <!-- Tab Pane 1: Interactive FullCalendar Component (PHOTOGRAPHER ONLY) -->
+                <c:if test="${profile.role == 'PHOTOGRAPHER'}">
+                    <div id="pane-calendar" class="calendar-card-shell">
+                        <div class="calendar-header-strip">
+                            <div>
+                                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-strong); margin: 0 0 0.25rem 0;">
+                                    Schedule &amp; Availability
+                                </h2>
+                                <p style="font-size: 0.88rem; color: var(--muted); margin: 0;">
+                                    <c:choose>
+                                        <c:when test="${isOwner}">Manage your shooting calendar, blocked hours, and personal sessions.</c:when>
+                                        <c:otherwise>View open slots and reserved booking dates.</c:otherwise>
+                                    </c:choose>
+                                </p>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <c:if test="${isOwner}">
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
+                                            onclick="openAddEventModal()"
+                                            id="btn-add-event-manual">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Add Event
+                                    </button>
+                                </c:if>
+                            </div>
                         </div>
 
-                        <div class="d-flex align-items-center gap-2">
+                        <!-- Calendar Legend Bar -->
+                        <div class="calendar-legend-bar mb-3">
+                            <span class="fw-semibold">Legend:</span>
+                            <div class="legend-indicator">
+                                <span class="legend-dot" style="background:#10B981;"></span>
+                                <span>Available Slots</span>
+                            </div>
+                            <div class="legend-indicator">
+                                <span class="legend-dot" style="background:#2563EB;"></span>
+                                <span>Photo Session</span>
+                            </div>
+                            <div class="legend-indicator">
+                                <span class="legend-dot" style="background:#0F172A;"></span>
+                                <span>Confirmed / Deposit Paid</span>
+                            </div>
+                            <div class="legend-indicator">
+                                <span class="legend-dot" style="background:#94A3B8;"></span>
+                                <span>Blocked / Off</span>
+                            </div>
                             <c:if test="${isOwner}">
-                                <button type="button"
-                                        class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
-                                        onclick="openAddEventModal()"
-                                        id="btn-add-event-manual">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    Add Event
-                                </button>
+                                <div class="legend-indicator">
+                                    <span class="legend-dot" style="background:#6366F1;"></span>
+                                    <span>Personal Event</span>
+                                </div>
                             </c:if>
                         </div>
-                    </div>
 
-                    <!-- Calendar Legend Bar -->
-                    <div class="calendar-legend-bar mb-3">
-                        <span class="fw-semibold">Legend:</span>
-                        <div class="legend-indicator">
-                            <span class="legend-dot" style="background:#10B981;"></span>
-                            <span>Available Slot</span>
-                        </div>
-                        <div class="legend-indicator">
-                            <span class="legend-dot" style="background:#2563EB;"></span>
-                            <span>Session / Shoot</span>
-                        </div>
-                        <div class="legend-indicator">
-                            <span class="legend-dot" style="background:#0F172A;"></span>
-                            <span>Confirmed / Booked</span>
-                        </div>
-                        <div class="legend-indicator">
-                            <span class="legend-dot" style="background:#94A3B8;"></span>
-                            <span>Blocked / Day Off</span>
-                        </div>
-                        <c:if test="${isOwner}">
-                            <div class="legend-indicator">
-                                <span class="legend-dot" style="background:#6366F1;"></span>
-                                <span>Personal Event</span>
-                            </div>
-                        </c:if>
+                        <!-- FullCalendar Canvas -->
+                        <div id="calendarMount" style="min-height: 580px;"></div>
                     </div>
-
-                    <!-- FullCalendar Canvas -->
-                    <div id="calendarMount" style="min-height: 580px;"></div>
-                </div>
+                </c:if>
 
                 <!-- Tab Pane 2: Portfolio Works Grid (if Photographer) -->
                 <c:if test="${profile.role == 'PHOTOGRAPHER' && not empty profile.portfolioImages}">
@@ -689,9 +693,19 @@
 
                 <!-- Tab Pane 3: Security & Account Management (if Owner) -->
                 <c:if test="${isOwner}">
-                    <div id="pane-security" class="calendar-card-shell" style="display: none;">
+                    <div id="pane-security" class="calendar-card-shell" style="${profile.role != 'PHOTOGRAPHER' ? 'display: block;' : 'display: none;'}">
+                        <c:if test="${profile.role == 'ADMIN'}">
+                            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center justify-content-between p-3 mb-4 rounded-3" style="background: rgba(37, 99, 235, 0.08); color: #1e3a8a;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                    <span>Super Administrator Account. You have full platform governance access.</span>
+                                </div>
+                                <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn btn-primary btn-sm">Go to Admin Console</a>
+                            </div>
+                        </c:if>
+
                         <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-strong); margin: 0 0 1.5rem 0;">
-                            Bảo Mật &amp; Cài Đặt Tài Khoản
+                            Security &amp; Account Settings
                         </h2>
 
                         <div class="row g-4">
@@ -700,23 +714,23 @@
                                 <div class="card h-100 border p-4 rounded-3 shadow-none bg-light">
                                     <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                        Đổi Mật Khẩu
+                                        Change Password
                                     </h5>
                                     <form action="${pageContext.request.contextPath}/profile/security/password" method="post">
                                         <%@ include file="fragments/csrf-input.jsp" %>
                                         <div class="mb-3">
-                                            <label class="form-label small fw-semibold">Mật khẩu hiện tại</label>
+                                            <label class="form-label small fw-semibold">Current Password</label>
                                             <input type="password" name="currentPassword" class="form-control" required placeholder="••••••••" />
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label small fw-semibold">Mật khẩu mới (tối thiểu 8 ký tự)</label>
+                                            <label class="form-label small fw-semibold">New Password (min 8 characters)</label>
                                             <input type="password" name="newPassword" minlength="8" class="form-control" required placeholder="••••••••" />
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label small fw-semibold">Xác nhận mật khẩu mới</label>
+                                            <label class="form-label small fw-semibold">Confirm New Password</label>
                                             <input type="password" name="confirmPassword" minlength="8" class="form-control" required placeholder="••••••••" />
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-sm">Lưu Mật Khẩu</button>
+                                        <button type="submit" class="btn btn-primary btn-sm">Update Password</button>
                                     </form>
                                 </div>
                             </div>
@@ -726,31 +740,31 @@
                                 <div class="card h-100 border p-4 rounded-3 shadow-none bg-light">
                                     <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                        Cập Nhật Email
+                                        Update Email Address
                                     </h5>
-                                    <p class="small text-muted mb-3">Email hiện tại: <strong><c:out value="${profile.email}"/></strong></p>
+                                    <p class="small text-muted mb-3">Current Email: <strong><c:out value="${profile.email}"/></strong></p>
 
                                     <c:choose>
                                         <c:when test="${emailChangePending}">
                                             <form action="${pageContext.request.contextPath}/profile/security/email/confirm" method="post">
                                                 <%@ include file="fragments/csrf-input.jsp" %>
                                                 <div class="mb-3">
-                                                    <label class="form-label small fw-semibold">Nhập mã OTP 6 chữ số gửi tới email</label>
+                                                    <label class="form-label small fw-semibold">Enter 6-digit OTP code sent to your email</label>
                                                     <input type="text" name="otpCode" maxlength="6" class="form-control font-monospace text-center fw-bold fs-5" required placeholder="••••••" />
-                                                    <div class="form-text small">Mã OTP đã được gửi tới email cũ của bạn để xác nhận cập nhật thành: <strong><c:out value="${targetNewEmail}"/></strong>.</div>
+                                                    <div class="form-text small">An OTP verification code was sent to your current email to confirm updating to: <strong><c:out value="${targetNewEmail}"/></strong>.</div>
                                                 </div>
-                                                <button type="submit" class="btn btn-primary btn-sm">Xác Nhận Đổi Email</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">Confirm Email Change</button>
                                             </form>
                                         </c:when>
                                         <c:otherwise>
                                             <form action="${pageContext.request.contextPath}/profile/security/email/request" method="post">
                                                 <%@ include file="fragments/csrf-input.jsp" %>
                                                 <div class="mb-3">
-                                                    <label class="form-label small fw-semibold">Địa chỉ email mới</label>
+                                                    <label class="form-label small fw-semibold">New Email Address</label>
                                                     <input type="email" name="newEmail" class="form-control" required placeholder="new.email@example.com" />
-                                                    <div class="form-text small">Hệ thống sẽ gửi mã OTP xác nhận tới email của bạn.</div>
+                                                    <div class="form-text small">We will send a 6-digit verification code to confirm this email.</div>
                                                 </div>
-                                                <button type="submit" class="btn btn-outline-primary btn-sm">Gửi Mã Xác Thực OTP</button>
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">Send OTP Verification Code</button>
                                             </form>
                                         </c:otherwise>
                                     </c:choose>
@@ -760,13 +774,13 @@
                             <!-- Section 3: Deactivate Account -->
                             <div class="col-12">
                                 <div class="card border border-danger p-4 rounded-3 shadow-none bg-white">
-                                    <h5 class="fw-bold text-danger mb-2">Vùng Nguy Hiểm: Vô Hiệu Hóa Tài Khoản</h5>
+                                    <h5 class="fw-bold text-danger mb-2">Danger Zone: Deactivate Account</h5>
                                     <p class="small text-muted mb-3">
-                                        Khi vô hiệu hóa tài khoản, bạn sẽ bị đăng xuất khỏi hệ thống ngay lập tức và hồ sơ sẽ bị tạm ẩn khỏi danh mục tìm kiếm. Bạn có thể liên hệ quản trị viên để mở lại.
+                                        Deactivating your account will immediately sign you out and hide your profile from search listings. Contact support to reactivate.
                                     </p>
-                                    <form action="${pageContext.request.contextPath}/profile/security/deactivate" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn vô hiệu hóa tài khoản này? Bạn sẽ bị đăng xuất ngay lập tức.');">
+                                    <form action="${pageContext.request.contextPath}/profile/security/deactivate" method="post" onsubmit="return confirm('Are you sure you want to deactivate your account? You will be signed out immediately.');">
                                         <%@ include file="fragments/csrf-input.jsp" %>
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Vô Hiệu Hóa Tài Khoản</button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Deactivate Account</button>
                                     </form>
                                 </div>
                             </div>
@@ -842,7 +856,7 @@
 
                             <!-- Social Links Section -->
                             <div class="col-12 mt-4">
-                                <h6 class="fw-bold border-bottom pb-2">Social &amp; Web Links</h6>
+                                <h6 class="fw-bold border-bottom pb-2">Social Links &amp; Website</h6>
                             </div>
 
                             <div class="col-12 col-md-6">
@@ -1007,8 +1021,10 @@
     let calendarInstance = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        initFullCalendar();
-        if (window.location.hash === '#security') {
+        if (document.getElementById('calendarMount')) {
+            initFullCalendar();
+        }
+        if (window.location.hash === '#security' || !document.getElementById('tab-calendar')) {
             switchProfileTab('security');
         }
     });

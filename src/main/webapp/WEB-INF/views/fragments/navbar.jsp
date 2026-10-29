@@ -14,7 +14,7 @@
 </script>
 <header class="nav-container" id="site-header">
     <div class="nav-brand-wrap">
-        <a class="nav-brand" href="${pageContext.request.contextPath}/" aria-label="PhotoConnect Home">
+        <a class="nav-brand" href="<c:choose><c:when test="${sessionScope.userRole == 'ADMIN'}">${pageContext.request.contextPath}/admin/dashboard</c:when><c:when test="${sessionScope.userRole == 'MANAGER'}">${pageContext.request.contextPath}/manager/dashboard</c:when><c:otherwise>${pageContext.request.contextPath}/</c:otherwise></c:choose>" aria-label="PhotoConnect Home">
             <span class="brand-mark">●</span> PhotoConnect
         </a>
     </div>
@@ -25,40 +25,47 @@
             <c:when test="${not empty sessionScope.userId}">
                 <c:choose>
                     <c:when test="${sessionScope.userRole == 'ADMIN'}">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/">Home</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/feed">Feed</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard">Admin</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard">Dashboard</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/users">Users</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/photographers?status=ALL">Photographers</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/bookings">Bookings</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/payments">Payments</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/admin/platform-fees">Platform Fees</a>
+                    </c:when>
+                    <c:when test="${sessionScope.userRole == 'MANAGER'}">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/dashboard">Overview</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/photographers?status=PENDING">Approvals</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/reports">Reports</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/bookings?status=DISPUTED">Disputes</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/support">Support</a>
                     </c:when>
                     <c:when test="${sessionScope.userRole == 'PHOTOGRAPHER'}">
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/dashboard">Studio</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/analytics">Analytics</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photo-coach">AI Coach</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/bookings">Bookings</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/portfolio">Portfolio</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/packages">Packages</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographer/schedule">Availability</a>
-                    </c:when>
-                    <c:when test="${sessionScope.userRole == 'MANAGER'}">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/dashboard">Tổng quan</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/photographers?status=PENDING">Hồ sơ</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/reports">Báo cáo</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/bookings?status=DISPUTED">Tranh chấp</a>
-                        <a class="nav-link" href="${pageContext.request.contextPath}/manager/support">Hỗ trợ</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photographer/finance">Finance</a>
                     </c:when>
                     <c:otherwise>
                         <a class="nav-link" href="${pageContext.request.contextPath}/customer/dashboard">Dashboard</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/photo-coach">AI Coach</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/customer/saved-photographers">Saved</a>
                         <a class="nav-link" href="${pageContext.request.contextPath}/bookings">Bookings</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/become-photographer" style="color: #2563eb; font-weight: 600;">Become a Photographer</a>
                     </c:otherwise>
                 </c:choose>
             </c:when>
             <c:otherwise>
                 <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Explore</a>
-                <a class="nav-link" href="${pageContext.request.contextPath}/photographers">Photographers</a>
                 <a class="nav-link" href="${pageContext.request.contextPath}/feed">Collections</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/photo-coach">AI Coach</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/become-photographer" style="color: #2563eb; font-weight: 600;">Become a Photographer</a>
             </c:otherwise>
         </c:choose>
     </nav>

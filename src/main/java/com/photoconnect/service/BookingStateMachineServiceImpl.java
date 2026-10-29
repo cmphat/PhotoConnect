@@ -93,6 +93,7 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
     private final BookingHistoryRepository bookingHistoryRepository;
     private final UserRepository userRepository;
     private final DepositRepository depositRepository;
+    private PlatformFeeService platformFeeService;
 
     public BookingStateMachineServiceImpl(BookingRepository bookingRepository,
                                           BookingHistoryRepository bookingHistoryRepository,
@@ -102,6 +103,11 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.userRepository = userRepository;
         this.depositRepository = depositRepository;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPlatformFeeService(PlatformFeeService platformFeeService) {
+        this.platformFeeService = platformFeeService;
     }
 
     @Override
@@ -162,6 +168,21 @@ public class BookingStateMachineServiceImpl implements BookingStateMachineServic
                 reason != null ? reason.trim() : null
         );
         bookingHistoryRepository.save(history);
+
+        // 7. Platform fee ledger: accrue on COMPLETED, cancel on CANCELLED
+        if (targetStatus == BookingStatus.COMPLETED && platformFeeService != null) {
+            try {
+                platformFeeService.recordFeeForCompletedBooking(savedBooking);
+            } catch (Exception ex) {
+                log.error("Failed to record platform fee for completed booking [{}]: {}", bookingId, ex.getMessage(), ex);
+            }
+        } else if (targetStatus == BookingStatus.CANCELLED && platformFeeService != null) {
+            try {
+                platformFeeService.cancelFeeForBooking(savedBooking, reason);
+            } catch (Exception ex) {
+                log.warn("Failed to cancel platform fee for cancelled booking [{}]: {}", bookingId, ex.getMessage());
+            }
+        }
 
         log.info("Booking [{}] transitioned successfully: [{}] -> [{}] by user [{}] ({})",
                 bookingId, currentStatus, targetStatus, actor.getId(), actor.getRole());

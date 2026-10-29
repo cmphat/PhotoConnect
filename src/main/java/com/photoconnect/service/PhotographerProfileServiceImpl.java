@@ -63,12 +63,8 @@ public class PhotographerProfileServiceImpl implements PhotographerProfileServic
         profile.setPriceFrom(request.getPriceFrom());
         profile.setVerificationStatus(PhotographerVerificationStatus.PENDING);
 
-        // 5. Promote the user's role to PHOTOGRAPHER
-        //    Note: This does NOT mean the profile is publicly approved.
-        //    verificationStatus=PENDING is a separate concept from the account role.
-        user.setRole(UserRole.PHOTOGRAPHER);
-        userRepository.save(user);
-
+        // 5. User retains role CUSTOMER while verification status is PENDING.
+        // Role promotion to PHOTOGRAPHER will only happen upon manager/admin approval.
         return photographerProfileRepository.save(profile);
     }
 

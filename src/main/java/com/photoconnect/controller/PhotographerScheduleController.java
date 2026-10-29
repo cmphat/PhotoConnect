@@ -46,7 +46,11 @@ public class PhotographerScheduleController {
             return null;
         }
         Optional<PhotographerProfile> profileOpt = photographerProfileService.findByUserId(userId);
-        return profileOpt.map(PhotographerProfile::getId).orElse(null);
+        return profileOpt
+                .filter(p -> p.getVerificationStatus() != com.photoconnect.entity.PhotographerVerificationStatus.SUSPENDED
+                        && p.getVerificationStatus() != com.photoconnect.entity.PhotographerVerificationStatus.REJECTED)
+                .map(PhotographerProfile::getId)
+                .orElse(null);
     }
 
     @GetMapping

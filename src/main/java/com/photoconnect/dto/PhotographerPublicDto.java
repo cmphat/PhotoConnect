@@ -40,6 +40,8 @@ public class PhotographerPublicDto {
     private final String websiteUrl;
     private final String instagramUrl;
     private final String facebookUrl;
+    private final String tiktokUrl;
+    private final String youtubeUrl;
     private final String equipmentSummary;
     private final String languages;
     private final boolean travelAvailable;
@@ -57,15 +59,16 @@ public class PhotographerPublicDto {
                                   BigDecimal priceFrom, String specialties,
                                   List<String> specialtyDisplayNames,
                                   String websiteUrl, String instagramUrl, String facebookUrl,
+                                  String tiktokUrl, String youtubeUrl,
                                   String equipmentSummary, String languages,
                                   boolean travelAvailable,
                                   LocalDateTime createdAt,
                                   String coverImageUrl, Double averageRating,
                                   Integer reviewCount, Integer profileCompleteness) {
         this(id, displayName, headline, bio, city, country, experienceYears, priceFrom, specialties,
-             specialtyDisplayNames, websiteUrl, instagramUrl, facebookUrl, equipmentSummary,
-             languages, travelAvailable, createdAt, coverImageUrl, averageRating, reviewCount,
-             profileCompleteness, null, null, null);
+             specialtyDisplayNames, websiteUrl, instagramUrl, facebookUrl, tiktokUrl, youtubeUrl,
+             equipmentSummary, languages, travelAvailable, createdAt, coverImageUrl, averageRating,
+             reviewCount, profileCompleteness, null, null, null);
     }
 
     private PhotographerPublicDto(Long id, String displayName, String headline, String bio,
@@ -73,6 +76,7 @@ public class PhotographerPublicDto {
                                   BigDecimal priceFrom, String specialties,
                                   List<String> specialtyDisplayNames,
                                   String websiteUrl, String instagramUrl, String facebookUrl,
+                                  String tiktokUrl, String youtubeUrl,
                                   String equipmentSummary, String languages,
                                   boolean travelAvailable,
                                   LocalDateTime createdAt,
@@ -94,6 +98,8 @@ public class PhotographerPublicDto {
         this.websiteUrl = websiteUrl;
         this.instagramUrl = instagramUrl;
         this.facebookUrl = facebookUrl;
+        this.tiktokUrl = tiktokUrl;
+        this.youtubeUrl = youtubeUrl;
         this.equipmentSummary = equipmentSummary;
         this.languages = languages;
         this.travelAvailable = travelAvailable;
@@ -152,6 +158,8 @@ public class PhotographerPublicDto {
                 profile.getWebsiteUrl(),
                 profile.getInstagramUrl(),
                 profile.getFacebookUrl(),
+                profile.getTiktokUrl(),
+                profile.getYoutubeUrl(),
                 profile.getEquipmentSummary(),
                 profile.getLanguages(),
                 profile.isTravelAvailable(),
@@ -222,6 +230,14 @@ public class PhotographerPublicDto {
 
     public String getFacebookUrl() {
         return facebookUrl;
+    }
+
+    public String getTiktokUrl() {
+        return tiktokUrl;
+    }
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
     }
 
     public String getEquipmentSummary() {

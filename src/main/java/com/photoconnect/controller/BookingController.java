@@ -181,6 +181,10 @@ public class BookingController {
     @GetMapping("/bookings")
     public String listCustomerBookings(@RequestParam(value = "status", required = false) String statusStr,
                                        HttpSession session, Model model) {
+        Object role = session.getAttribute("userRole");
+        if (role != null && "MANAGER".equalsIgnoreCase(role.toString())) {
+            return "redirect:/manager/bookings?status=DISPUTED";
+        }
         String redirect = requireCustomer(session);
         if (redirect != null) return redirect;
         Long userId = com.photoconnect.util.SessionSecurityUtils.userId(session);

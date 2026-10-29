@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface FeedService {
     List<FeedPostDto> getFeedPosts(String category, Long currentUserId, int limit);
+    List<FeedPostDto> getFeedPosts(String category, String authorType, Long currentUserId, boolean isPhotographer, int limit);
     List<FeedCreatorDto> getFeaturedCreators();
 }

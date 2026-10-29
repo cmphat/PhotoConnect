@@ -524,19 +524,19 @@
                                    list="vietnam-cities"
                                    maxlength="100"
                                    class="form-control search-input-control"
-                                   placeholder="Hà Nội, TP. Hồ Chí Minh, Đà Nẵng..."
+                                   placeholder="Hanoi, Ho Chi Minh City, Da Nang..."
                                    value="<c:out value='${searchRequest.city}'/>">
                             <datalist id="vietnam-cities">
-                                <option value="Hà Nội">
-                                <option value="TP. Hồ Chí Minh">
-                                <option value="Đà Nẵng">
-                                <option value="Cần Thơ">
-                                <option value="Hải Phòng">
+                                <option value="Hanoi">
+                                <option value="Ho Chi Minh City">
+                                <option value="Da Nang">
+                                <option value="Can Tho">
+                                <option value="Hai Phong">
                                 <option value="Nha Trang">
-                                <option value="Đà Lạt">
-                                <option value="Huế">
-                                <option value="Vũng Tàu">
-                                <option value="Hội An">
+                                <option value="Da Lat">
+                                <option value="Hue">
+                                <option value="Vung Tau">
+                                <option value="Hoi An">
                             </datalist>
                         </div>
                     </div>
@@ -666,11 +666,11 @@
 
                 <!-- Quick Budget Chips -->
                 <div class="quick-tags-scroller mt-2">
-                    <span class="quick-tag-label">Ngân sách:</span>
-                    <a href="${pageContext.request.contextPath}/photographers?maxPrice=2000000" class="quick-filter-chip <c:if test='${searchRequest.maxPrice == 2000000 and empty searchRequest.minPrice}'>active</c:if>">&lt; 2 triệu</a>
-                    <a href="${pageContext.request.contextPath}/photographers?minPrice=2000000&maxPrice=5000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 2000000 and searchRequest.maxPrice == 5000000}'>active</c:if>">2 - 5 triệu</a>
-                    <a href="${pageContext.request.contextPath}/photographers?minPrice=5000000&maxPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 5000000 and searchRequest.maxPrice == 10000000}'>active</c:if>">5 - 10 triệu</a>
-                    <a href="${pageContext.request.contextPath}/photographers?minPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 10000000 and empty searchRequest.maxPrice}'>active</c:if>">&gt; 10 triệu</a>
+                    <span class="quick-tag-label">Budget:</span>
+                    <a href="${pageContext.request.contextPath}/photographers?maxPrice=2000000" class="quick-filter-chip <c:if test='${searchRequest.maxPrice == 2000000 and empty searchRequest.minPrice}'>active</c:if>">&lt; 2M VND</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=2000000&maxPrice=5000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 2000000 and searchRequest.maxPrice == 5000000}'>active</c:if>">2M - 5M VND</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=5000000&maxPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 5000000 and searchRequest.maxPrice == 10000000}'>active</c:if>">5M - 10M VND</a>
+                    <a href="${pageContext.request.contextPath}/photographers?minPrice=10000000" class="quick-filter-chip <c:if test='${searchRequest.minPrice == 10000000 and empty searchRequest.maxPrice}'>active</c:if>">&gt; 10M VND</a>
                 </div>
             </form>
         </div>
@@ -779,7 +779,7 @@
                                                              (${p.reviewCount})
                                                         </c:if>
                                                     </c:when>
-                                                    <c:otherwise>Mới tham gia</c:otherwise>
+                                                    <c:otherwise>New Creator</c:otherwise>
                                                 </c:choose>
                                             </span>
                                         </div>

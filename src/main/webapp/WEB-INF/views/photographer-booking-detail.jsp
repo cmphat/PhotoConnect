@@ -206,12 +206,12 @@
                             <c:choose>
                                 <c:when test="${not empty booking.pastCompletedShootsWithClient and booking.pastCompletedShootsWithClient > 0}">
                                     <span class="badge bg-success" style="font-size: 0.78rem; vertical-align: middle; margin-left: 0.5rem;">
-                                        ★ Khách quen (${booking.pastCompletedShootsWithClient} buổi đã hoàn thành)
+                                        ★ Repeat Client (${booking.pastCompletedShootsWithClient} completed sessions)
                                     </span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="badge bg-light text-dark" style="font-size: 0.78rem; vertical-align: middle; margin-left: 0.5rem; border: 1px solid var(--border);">
-                                        Khách hàng mới
+                                        New Client
                                     </span>
                                 </c:otherwise>
                             </c:choose>
@@ -285,10 +285,10 @@
                                     </div>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <c:if test="${not empty booking.outfitCount}">
-                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} set đồ / outfits</span>
+                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} outfits</span>
                                         </c:if>
                                         <c:if test="${not empty booking.participantCount}">
-                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} người / participants</span>
+                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} participants</span>
                                         </c:if>
                                     </div>
                                 </div>
@@ -308,7 +308,7 @@
                                             <div class="spec-item-label">Moodboard / Visual References</div>
                                             <div>
                                                 <a href="<c:out value='${booking.moodboardUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.75rem;">
-                                                    <i class="bi bi-link-45deg me-1"></i> Xem Moodboard / Reference Link &nearr;
+                                                    <i class="bi bi-link-45deg me-1"></i> View Moodboard / Reference &nearr;
                                                 </a>
                                             </div>
                                         </div>
@@ -345,22 +345,22 @@
                         </div>
                     </c:if>
 
-                    <!-- V6 Photographer Financial & Deposit Status Card -->
+                    <!-- Photographer Financial & Deposit Status Card -->
                     <div style="grid-column: span 2; margin-top: 1.25rem;">
                         <div style="background: #ffffff; border: 1px solid rgba(37,99,235,0.2); border-radius: var(--radius-sm, 8px); padding: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;">
                                 <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
-                                    <i class="bi bi-wallet2 text-primary"></i> Thông tin tài chính &amp; Đặt cọc 30% / Financial Summary
+                                    <i class="bi bi-wallet2 text-primary"></i> Financial Breakdown &amp; 30% Deposit
                                 </div>
                                 <c:choose>
                                     <c:when test="${booking.status == 'CONFIRMED' or booking.status == 'SHOOTING' or booking.status == 'POST_PROCESSING' or booking.status == 'DELIVERED' or booking.status == 'COMPLETED'}">
                                         <span class="badge bg-success" style="font-size: 0.8rem;">
-                                            <i class="bi bi-check-circle-fill me-1"></i> Tiền cọc 30% đã xác nhận (Paid)
+                                            <i class="bi bi-check-circle-fill me-1"></i> 30% Deposit Paid (Escrow Held)
                                         </span>
                                     </c:when>
                                     <c:otherwise>
                                         <span class="badge bg-warning text-dark" style="font-size: 0.8rem;">
-                                            <i class="bi bi-clock-history me-1"></i> Chưa xác nhận thanh toán cọc
+                                            <i class="bi bi-clock-history me-1"></i> Deposit Pending Payment
                                         </span>
                                     </c:otherwise>
                                 </c:choose>
@@ -368,61 +368,61 @@
 
                             <div class="row g-3" style="font-size: 0.9rem;">
                                 <div class="col-12 col-md-4">
-                                    <div class="spec-item-label">Tổng giá trị buổi chụp (Agreed Total)</div>
+                                    <div class="spec-item-label">Agreed Total Session Value</div>
                                     <div style="font-size: 1.2rem; font-weight: 700; color: #0f172a;">
                                         <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
                                     </div>
                                     <c:if test="${booking.basePrice != null}">
                                         <small class="text-muted d-block" style="font-size: 0.78rem;">
-                                            Gói gốc: <fmt:formatNumber value="${booking.basePrice}" pattern="#,##0"/> VND
-                                            <c:if test="${booking.nightSurcharge > 0}"> · Đêm: +<fmt:formatNumber value="${booking.nightSurcharge}" pattern="#,##0"/></c:if>
-                                            <c:if test="${booking.travelSurcharge > 0}"> · Di chuyển: +<fmt:formatNumber value="${booking.travelSurcharge}" pattern="#,##0"/></c:if>
-                                            <c:if test="${booking.extrasFee > 0}"> · Dịch vụ thêm: +<fmt:formatNumber value="${booking.extrasFee}" pattern="#,##0"/></c:if>
+                                            Base: <fmt:formatNumber value="${booking.basePrice}" pattern="#,##0"/> VND
+                                            <c:if test="${booking.nightSurcharge > 0}"> · Night: +<fmt:formatNumber value="${booking.nightSurcharge}" pattern="#,##0"/></c:if>
+                                            <c:if test="${booking.travelSurcharge > 0}"> · Travel: +<fmt:formatNumber value="${booking.travelSurcharge}" pattern="#,##0"/></c:if>
+                                            <c:if test="${booking.extrasFee > 0}"> · Extras: +<fmt:formatNumber value="${booking.extrasFee}" pattern="#,##0"/></c:if>
                                         </small>
                                     </c:if>
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <div class="spec-item-label">Tiền đặt cọc bắt buộc (30% Deposit)</div>
+                                    <div class="spec-item-label">Required 30% Escrow Deposit</div>
                                     <div style="font-size: 1.2rem; font-weight: 700; color: #2563eb;">
                                         <fmt:formatNumber value="${booking.agreedPrice * 0.3}" pattern="#,##0" /> VND
                                     </div>
                                     <small class="text-muted" style="font-size: 0.78rem;">
-                                        Giữ an toàn qua nền tảng PhotoConnect VietQR
+                                        Secured in platform escrow via VietQR
                                     </small>
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <div class="spec-item-label">Số tiền còn lại khi hoàn tất (70% Balance)</div>
+                                    <div class="spec-item-label">Remaining 70% Balance on Delivery</div>
                                     <div style="font-size: 1.2rem; font-weight: 700; color: #16a34a;">
                                         <fmt:formatNumber value="${booking.agreedPrice * 0.7}" pattern="#,##0" /> VND
                                     </div>
                                     <small class="text-muted" style="font-size: 0.78rem;">
-                                        Thu trực tiếp hoặc chuyển khoản sau buổi chụp
+                                        Payable directly or via bank transfer after shoot completion
                                     </small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Private Studio CRM Notes (Phase 13) -->
+                    <!-- Private Studio CRM Notes -->
                     <div style="grid-column: span 2; margin-top: 1.25rem;">
                         <div style="background: rgba(15, 23, 42, 0.02); border: 1px solid var(--border); border-radius: var(--radius-sm, 8px); padding: 1.25rem 1.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                                 <div style="font-weight: 700; font-size: 0.95rem; color: var(--text); display: flex; align-items: center; gap: 0.4rem;">
-                                    <i class="bi bi-journal-bookmark-fill" style="color: var(--accent);"></i> Ghi chú nội bộ Studio / Private CRM Notes
+                                    <i class="bi bi-journal-bookmark-fill" style="color: var(--accent);"></i> Private Studio CRM Notes
                                 </div>
                                 <span style="font-size: 0.75rem; color: var(--muted); font-style: italic;">
-                                    Chỉ bạn nhìn thấy &middot; Ẩn với khách hàng
+                                    Visible only to you &middot; Hidden from client
                                 </span>
                             </div>
                             <form action="${pageContext.request.contextPath}/photographer/bookings/${booking.id}/notes" method="post">
                                 <%@ include file="fragments/csrf-input.jsp" %>
                                 <div class="mb-2">
                                     <textarea name="notes" rows="3" class="form-control" style="font-size: 0.9rem;"
-                                              placeholder="Ghi chú sở thích khách hàng, phong cách ánh sáng, thiết bị cần mang, thanh toán tiền mặt..."><c:out value="${booking.photographerNotes}"/></textarea>
+                                              placeholder="Private notes about client preferences, lighting style, equipment to bring, cash settlement..."><c:out value="${booking.photographerNotes}"/></textarea>
                                 </div>
                                 <div style="display: flex; justify-content: flex-end;">
                                     <button type="submit" class="btn btn-secondary btn-sm" id="btn-save-crm-notes">
-                                        <i class="bi bi-save me-1"></i> Lưu ghi chú / Save Notes
+                                        <i class="bi bi-save me-1"></i> Save Notes
                                     </button>
                                 </div>
                             </form>

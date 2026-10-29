@@ -39,6 +39,9 @@ public class SavedPhotographerController {
         if (userId == null) {
             return "redirect:/login";
         }
+        if (SessionSecurityUtils.hasRole(session, UserRole.MANAGER)) {
+            return "redirect:/manager/dashboard";
+        }
         if (!SessionSecurityUtils.hasRole(session, UserRole.CUSTOMER)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only customers can access saved photographers.");
             return null;

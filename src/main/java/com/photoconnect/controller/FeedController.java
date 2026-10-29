@@ -23,6 +23,7 @@ public class FeedController {
 
     @GetMapping("/feed")
     public String showFeed(@RequestParam(value = "category", required = false) String category,
+                           @RequestParam(value = "authorType", required = false) String authorType,
                            HttpSession session,
                            Model model) {
         Long currentUserId = null;
@@ -31,13 +32,27 @@ public class FeedController {
             currentUserId = num.longValue();
         }
 
-        List<FeedPostDto> posts = feedService.getFeedPosts(category, currentUserId, 30);
+        Object roleObj = session.getAttribute("userRole");
+        if (roleObj != null && "MANAGER".equalsIgnoreCase(roleObj.toString())) {
+            return "redirect:/manager/dashboard";
+        }
+        boolean isPhotographer = roleObj != null && "PHOTOGRAPHER".equalsIgnoreCase(roleObj.toString());
+        boolean isCustomer = roleObj != null && "CUSTOMER".equalsIgnoreCase(roleObj.toString());
+
+        // Feed displays works from photographers and shoot requests from customers.
+        // Users can filter by authorType ("ALL", "PHOTOGRAPHER", "CUSTOMER"). Default is "ALL".
+        String activeAuthorType = (authorType != null && !authorType.isBlank()) ? authorType.trim().toUpperCase() : "ALL";
+
+        List<FeedPostDto> posts = feedService.getFeedPosts(category, activeAuthorType, currentUserId, isPhotographer, 30);
         List<FeedCreatorDto> featuredCreators = feedService.getFeaturedCreators();
 
         model.addAttribute("posts", posts);
         model.addAttribute("featuredCreators", featuredCreators);
         model.addAttribute("categories", PortfolioCategory.values());
         model.addAttribute("activeCategory", category != null && !category.isBlank() ? category.toUpperCase() : "ALL");
+        model.addAttribute("activeAuthorType", activeAuthorType);
+        model.addAttribute("isPhotographer", isPhotographer);
+        model.addAttribute("isCustomer", isCustomer);
 
         return "feed";
     }

@@ -14,16 +14,23 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
     private final OperationalAuditService auditService;
+    private com.photoconnect.repository.NotificationRepository notificationRepository;
 
     public AdminUserServiceImpl(UserRepository userRepository) {
-        this(userRepository, null);
+        this(userRepository, null, null);
+    }
+
+    public AdminUserServiceImpl(UserRepository userRepository, OperationalAuditService auditService) {
+        this(userRepository, auditService, null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
     public AdminUserServiceImpl(UserRepository userRepository,
-                                @org.springframework.beans.factory.annotation.Autowired(required = false) OperationalAuditService auditService) {
+                                @org.springframework.beans.factory.annotation.Autowired(required = false) OperationalAuditService auditService,
+                                @org.springframework.beans.factory.annotation.Autowired(required = false) com.photoconnect.repository.NotificationRepository notificationRepository) {
         this.userRepository = userRepository;
         this.auditService = auditService;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -77,6 +84,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         user.setRole(UserRole.MANAGER);
         User saved = userRepository.save(user);
+        if (notificationRepository != null) {
+            notificationRepository.deleteAllByRecipientId(userId);
+        }
         audit(currentAdminId, "MANAGER_GRANT", userId, "Granted MANAGER role to eligible account");
         return saved;
     }

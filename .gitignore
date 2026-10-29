@@ -19,6 +19,19 @@ target_stale_codex/
 *.iml
 *.ipr
 .vscode/settings.json
+.project
+.classpath
+.settings/
+
+# ── Python & AI ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# ── Backups & Temporary Archives ──────────────────────────────────────────────
+backups/
+*.zip
 
 # ── OS ────────────────────────────────────────────────────────────────────────
 .DS_Store

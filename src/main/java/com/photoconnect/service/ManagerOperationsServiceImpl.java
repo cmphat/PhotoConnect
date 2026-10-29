@@ -64,8 +64,11 @@ public class ManagerOperationsServiceImpl implements ManagerOperationsService {
     @Override
     @Transactional(readOnly = true)
     public List<OperationalAuditLog> recentActivity(Long managerId, int limit) {
-        require(managerId, PlatformPermission.AUDIT_LOG_VIEW);
-        return auditService.recent(limit);
+        User actor = require(managerId, PlatformPermission.OPERATIONAL_ANALYTICS_VIEW);
+        if (actor.getRole() == UserRole.ADMIN) {
+            return auditService.recent(limit);
+        }
+        return auditService.recentForActor(managerId, limit);
     }
 
     @Override

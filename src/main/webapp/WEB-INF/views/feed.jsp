@@ -403,6 +403,19 @@
 <main class="feed-page-region">
     <div class="feed-container">
 
+        <c:if test="${not empty successMessage}">
+            <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                <c:out value="${successMessage}"/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                <c:out value="${errorMessage}"/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
         <!-- Top Header & View Mode Switcher -->
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div>
@@ -448,13 +461,54 @@
             </div>
         </div>
 
+        <!-- ── Author Filter (All vs Photographer vs Customer) ── -->
+        <div class="feed-author-filter-shell mb-3 p-2 bg-surface border rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="small fw-bold text-muted text-uppercase" style="letter-spacing: 0.05em; font-size: 0.75rem;">Feed Source:</span>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Feed source filter">
+                    <a href="${pageContext.request.contextPath}/feed?category=${activeCategory}&authorType=ALL" 
+                       class="btn <c:choose><c:when test="${activeAuthorType == 'ALL'}">btn-primary</c:when><c:otherwise>btn-outline-secondary</c:otherwise></c:choose>">
+                        All Works
+                    </a>
+                    <a href="${pageContext.request.contextPath}/feed?category=${activeCategory}&authorType=PHOTOGRAPHER" 
+                       class="btn <c:choose><c:when test="${activeAuthorType == 'PHOTOGRAPHER'}">btn-primary</c:when><c:otherwise>btn-outline-secondary</c:otherwise></c:choose>">
+                        Photographers
+                    </a>
+                    <a href="${pageContext.request.contextPath}/feed?category=${activeCategory}&authorType=CUSTOMER" 
+                       class="btn <c:choose><c:when test="${activeAuthorType == 'CUSTOMER'}">btn-primary</c:when><c:otherwise>btn-outline-secondary</c:otherwise></c:choose>">
+                        Customer Requests
+                    </a>
+                </div>
+            </div>
+            <span class="badge bg-light text-secondary border small">
+                <c:choose>
+                    <c:when test="${activeAuthorType == 'CUSTOMER'}">Viewing: Customer Requests</c:when>
+                    <c:when test="${activeAuthorType == 'PHOTOGRAPHER'}">Viewing: Photographer Works</c:when>
+                    <c:otherwise>Viewing: Entire Feed</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+
+        <!-- ── Customer Post CTA (Customer role only) ────────────────── -->
+        <c:if test="${sessionScope.userRole == 'CUSTOMER'}">
+            <div class="customer-post-cta-banner p-3 mb-3 rounded-3 border bg-surface d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-left: 4px solid var(--accent, #2563eb) !important;">
+                <div>
+                    <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: var(--text);">Looking for a Custom Photography Session?</h5>
+                    <p class="text-muted small mb-0">Post your photoshoot request (concept, timeline, budget) so verified photographers can connect and assist you.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#createCustomerPostModal">
+                    ✍️ Post Request
+                </button>
+            </div>
+        </c:if>
+
         <!-- ── Category Filter Pills ──────────────────────────────── -->
         <div class="category-pills-row">
-            <a href="${pageContext.request.contextPath}/feed" class="cat-pill <c:if test="${activeCategory == 'ALL'}">active</c:if>">
+            <a href="${pageContext.request.contextPath}/feed?authorType=${activeAuthorType}" class="cat-pill <c:if test="${activeCategory == 'ALL'}">active</c:if>">
                 All Works
             </a>
             <c:forEach var="cat" items="${categories}">
-                <a href="${pageContext.request.contextPath}/feed?category=${cat.name()}" class="cat-pill <c:if test="${activeCategory == cat.name()}">active</c:if>">
+                <a href="${pageContext.request.contextPath}/feed?category=${cat.name()}&authorType=${activeAuthorType}" class="cat-pill <c:if test="${activeCategory == cat.name()}">active</c:if>">
                     <c:out value="${cat.displayName}"/>
                 </a>
             </c:forEach>
@@ -475,86 +529,193 @@
                     <c:otherwise>
                         <c:forEach var="post" items="${posts}">
                             <article class="feed-post-card" id="post-<c:out value='${post.imageId}'/>">
-                                <div class="post-header-bar">
-                                    <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
-                                         <c:choose>
-                                             <c:when test="${not empty post.photographerAvatarUrl}">
-                                                 <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="<c:out value='${post.photographerName}'/>" class="post-author-avatar">
-                                             </c:when>
-                                             <c:otherwise>
-                                                 <div class="post-author-initial">
-                                                     <c:out value="${fn:toUpperCase(fn:substring(post.photographerName, 0, 1))}"/>
+                                <c:choose>
+                                    <c:when test="${post.customerPost}">
+                                        <!-- Post Header for Customer Post -->
+                                        <div class="post-header-bar">
+                                            <div class="post-author-info">
+                                                <c:choose>
+                                                    <c:when test="${not empty post.photographerAvatarUrl}">
+                                                        <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="<c:out value='${post.photographerName}'/>" class="post-author-avatar">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <div class="post-author-initial" style="background: #0284c7;">
+                                                            <c:out value="${fn:toUpperCase(fn:substring(post.photographerName, 0, 1))}"/>
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <div>
+                                                    <div class="post-author-name">
+                                                        <c:out value="${post.photographerName}"/>
+                                                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill ms-1" style="font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.5rem;">
+                                                            Client
+                                                        </span>
+                                                        <c:if test="${post.customerId != null && post.customerId == sessionScope.userId}">
+                                                            <span class="badge bg-primary text-white rounded-pill ms-1" style="font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.5rem;">
+                                                                Your Request
+                                                            </span>
+                                                        </c:if>
+                                                    </div>
+                                                    <div class="post-meta-sub">
+                                                        <span><c:out value="${post.photographerCity}"/></span>
+                                                        <span>•</span>
+                                                        <span><c:out value="${post.timeAgo}"/></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <c:if test="${post.customerId != null && post.customerId == sessionScope.userId}">
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold d-none d-sm-inline" style="font-size: 0.72rem; padding: 0.35rem 0.65rem;">
+                                                        ● Active
+                                                    </span>
+                                                </c:if>
+                                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle fw-semibold" style="font-size: 0.72rem; padding: 0.35rem 0.65rem;">
+                                                    Client Request
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Post Caption -->
+                                        <div class="post-caption-box">
+                                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                                <c:if test="${not empty post.categoryDisplayName}">
+                                                    <a href="${pageContext.request.contextPath}/feed?category=${post.category}&authorType=${activeAuthorType}" class="post-category-tag">
+                                                        #<c:out value="${post.categoryDisplayName}"/>
+                                                    </a>
+                                                </c:if>
+                                                <c:if test="${not empty post.budget}">
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.8rem;">
+                                                        💰 Estimated Budget: <fmt:formatNumber value="${post.budget}" type="number" maxFractionDigits="0"/> VND
+                                                    </span>
+                                                </c:if>
+                                            </div>
+                                            <div><c:out value="${post.caption}"/></div>
+                                        </div>
+
+                                        <!-- Post Image (if any) -->
+                                        <c:choose>
+                                            <c:when test="${not empty post.imageUrl}">
+                                                <div class="post-media-frame post-media-dblclick" data-image-id="<c:out value='${post.imageId}'/>">
+                                                    <img src="<c:out value='${post.imageUrl}'/>" alt="<c:out value='${post.caption}'/>" class="post-media-img" loading="lazy">
+                                                    <div class="heart-float" id="heart-anim-<c:out value='${post.imageId}'/>">❤️</div>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="p-4 bg-light border-top border-bottom text-muted fst-italic small">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                                    Client request (no reference photo attached).
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <!-- Social Interaction Bar for Customer Post -->
+                                        <div class="post-actions-bar">
+                                            <div class="social-left-actions">
+                                                <button type="button" class="action-icon-btn like-btn action-toggle-like" id="like-btn-<c:out value='${post.imageId}'/>" data-image-id="<c:out value='${post.imageId}'/>">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                                    <span id="like-count-<c:out value='${post.imageId}'/>"><c:out value="${post.likeCount}"/></span>
+                                                </button>
+
+                                                <button type="button" class="action-icon-btn action-toggle-comments" data-image-id="<c:out value='${post.imageId}'/>">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                    <span><c:out value="${post.commentCount}"/></span>
+                                                </button>
+                                            </div>
+
+                                            <c:if test="${isPhotographer}">
+                                                <a href="${pageContext.request.contextPath}/customer/posts/${post.imageId}/contact" class="btn-book-cta" style="background: #0284c7;">
+                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                    Contact Client
+                                                </a>
+                                            </c:if>
+                                        </div>
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <!-- Post Header for Photographer Work -->
+                                        <div class="post-header-bar">
+                                            <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="post-author-info">
+                                                 <c:choose>
+                                                     <c:when test="${not empty post.photographerAvatarUrl}">
+                                                         <img src="<c:out value='${post.photographerAvatarUrl}'/>" alt="<c:out value='${post.photographerName}'/>" class="post-author-avatar">
+                                                     </c:when>
+                                                     <c:otherwise>
+                                                         <div class="post-author-initial">
+                                                             <c:out value="${fn:toUpperCase(fn:substring(post.photographerName, 0, 1))}"/>
+                                                         </div>
+                                                     </c:otherwise>
+                                                 </c:choose>
+                                                 <div>
+                                                     <div class="post-author-name">
+                                                         <c:out value="${post.photographerName}"/>
+                                                         <span class="verified-badge" title="Verified Creator">
+                                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                                         </span>
+                                                     </div>
+                                                     <div class="post-meta-sub">
+                                                         <span><c:out value="${post.photographerCity}"/></span>
+                                                         <span>•</span>
+                                                         <span><c:out value="${post.timeAgo}"/></span>
+                                                     </div>
                                                  </div>
-                                             </c:otherwise>
-                                         </c:choose>
-                                         <div>
-                                             <div class="post-author-name">
-                                                 <c:out value="${post.photographerName}"/>
-                                                 <span class="verified-badge" title="Verified Creator">
-                                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                                 </span>
-                                             </div>
-                                             <div class="post-meta-sub">
-                                                 <span><c:out value="${post.photographerCity}"/></span>
-                                                 <span>•</span>
-                                                 <span><c:out value="${post.timeAgo}"/></span>
+                                             </a>
+
+                                             <div class="d-flex align-items-center gap-2">
+                                                 <c:if test="${post.isSaved}">
+                                                     <span class="badge bg-danger-subtle text-danger" style="font-size: 0.72rem;">♥ Saved</span>
+                                                 </c:if>
+                                                 <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="btn btn-sm btn-ghost" title="View Profile">
+                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                                                 </a>
                                              </div>
                                          </div>
-                                     </a>
 
-                                     <div class="d-flex align-items-center gap-2">
-                                         <c:if test="${post.isSaved}">
-                                             <span class="badge bg-danger-subtle text-danger" style="font-size: 0.72rem;">♥ Saved</span>
-                                         </c:if>
-                                         <a href="${pageContext.request.contextPath}/photographers/${post.photographerId}" class="btn btn-sm btn-ghost" title="View Profile">
-                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                                         </a>
-                                     </div>
-                                 </div>
+                                         <!-- Post Caption -->
+                                         <div class="post-caption-box">
+                                             <c:if test="${not empty post.categoryDisplayName}">
+                                                 <a href="${pageContext.request.contextPath}/feed?category=${post.category}&authorType=${activeAuthorType}" class="post-category-tag">
+                                                     #<c:out value="${post.categoryDisplayName}"/>
+                                                 </a>
+                                             </c:if>
+                                             <div><c:out value="${post.caption}"/></div>
+                                         </div>
 
-                                 <!-- Post Caption -->
-                                 <div class="post-caption-box">
-                                     <c:if test="${not empty post.categoryDisplayName}">
-                                         <a href="${pageContext.request.contextPath}/feed?category=${post.category}" class="post-category-tag">
-                                             #<c:out value="${post.categoryDisplayName}"/>
-                                         </a>
-                                     </c:if>
-                                     <div><c:out value="${post.caption}"/></div>
-                                 </div>
+                                         <!-- Post Photography Image (Double-click to Like) -->
+                                         <div class="post-media-frame post-media-dblclick" data-image-id="<c:out value='${post.imageId}'/>">
+                                             <img src="<c:out value='${post.imageUrl}'/>" alt="<c:out value='${post.caption}'/>" class="post-media-img" loading="lazy">
+                                             <div class="heart-float" id="heart-anim-<c:out value='${post.imageId}'/>">❤️</div>
+                                         </div>
 
-                                 <!-- Post Photography Image (Double-click to Like) -->
-                                 <div class="post-media-frame post-media-dblclick" data-image-id="<c:out value='${post.imageId}'/>">
-                                     <img src="<c:out value='${post.imageUrl}'/>" alt="<c:out value='${post.caption}'/>" class="post-media-img" loading="lazy">
-                                     <div class="heart-float" id="heart-anim-<c:out value='${post.imageId}'/>">❤️</div>
-                                 </div>
+                                         <!-- Social Interaction Bar -->
+                                         <div class="post-actions-bar">
+                                             <div class="social-left-actions">
+                                                 <!-- Like Button -->
+                                                 <button type="button" class="action-icon-btn like-btn action-toggle-like" id="like-btn-<c:out value='${post.imageId}'/>" data-image-id="<c:out value='${post.imageId}'/>">
+                                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                                     <span id="like-count-<c:out value='${post.imageId}'/>"><c:out value="${post.likeCount}"/></span>
+                                                 </button>
 
-                                 <!-- Social Interaction Bar -->
-                                 <div class="post-actions-bar">
-                                     <div class="social-left-actions">
-                                         <!-- Like Button -->
-                                         <button type="button" class="action-icon-btn like-btn action-toggle-like" id="like-btn-<c:out value='${post.imageId}'/>" data-image-id="<c:out value='${post.imageId}'/>">
-                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                             <span id="like-count-<c:out value='${post.imageId}'/>"><c:out value="${post.likeCount}"/></span>
-                                         </button>
+                                                 <!-- Comment Toggle Button -->
+                                                 <button type="button" class="action-icon-btn action-toggle-comments" data-image-id="<c:out value='${post.imageId}'/>">
+                                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                     <span><c:out value="${post.commentCount}"/></span>
+                                                 </button>
 
-                                         <!-- Comment Toggle Button -->
-                                         <button type="button" class="action-icon-btn action-toggle-comments" data-image-id="<c:out value='${post.imageId}'/>">
-                                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                             <span><c:out value="${post.commentCount}"/></span>
-                                         </button>
+                                                 <!-- Share Button -->
+                                                 <button type="button" class="action-icon-btn action-share-post" data-photographer-id="<c:out value='${post.photographerId}'/>" title="Share Link">
+                                                     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                                 </button>
+                                             </div>
 
-                                         <!-- Share Button -->
-                                         <button type="button" class="action-icon-btn action-share-post" data-photographer-id="<c:out value='${post.photographerId}'/>" title="Share Link">
-                                             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                                         </button>
-                                     </div>
-
-                                     <!-- Direct Booking Call-To-Action -->
-                                     <a href="${pageContext.request.contextPath}/bookings/new?photographerId=${post.photographerId}" class="btn-book-cta">
-                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                         Book Shoot • From <fmt:formatNumber value="${post.startingPrice}" type="number" maxFractionDigits="0"/> VND
-                                     </a>
-                                 </div>
+                                             <!-- Direct Booking Call-To-Action -->
+                                             <a href="${pageContext.request.contextPath}/bookings/new?photographerId=${post.photographerId}" class="btn-book-cta">
+                                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                 Book Shoot • From <fmt:formatNumber value="${post.startingPrice}" type="number" maxFractionDigits="0"/> VND
+                                             </a>
+                                         </div>
+                                    </c:otherwise>
+                                </c:choose>
 
                                  <!-- Comments Section -->
                                  <div class="post-comments-section" id="comments-section-<c:out value='${post.imageId}'/>">
@@ -618,6 +779,59 @@
                 </div>
             </div>
         </div>
+
+    <!-- Customer Post Creation Modal -->
+    <c:if test="${sessionScope.userRole == 'CUSTOMER'}">
+        <div class="modal fade" id="createCustomerPostModal" tabindex="-1" aria-labelledby="createCustomerPostModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="background: var(--surface); color: var(--text);">
+                    <form action="${pageContext.request.contextPath}/customer/posts" method="post" enctype="multipart/form-data">
+                        <%@ include file="fragments/csrf-input.jsp" %>
+                        <div class="modal-header border-bottom">
+                            <h5 class="modal-title fw-bold" id="createCustomerPostModalLabel">✍️ Post Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label for="postCaption" class="form-label fw-semibold">Shoot Description & Requirements <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="postCaption" name="caption" rows="3" required maxlength="1000" placeholder="E.g. Looking for an editorial or graduation session in HCMC next week, bright and natural style..."></textarea>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label for="postCategory" class="form-label fw-semibold">Category</label>
+                                    <select class="form-select" id="postCategory" name="category">
+                                        <c:forEach var="cat" items="${categories}">
+                                            <option value="${cat.name()}"><c:out value="${cat.displayName}"/></option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label for="postBudget" class="form-label fw-semibold">Estimated Budget (VND)</label>
+                                    <input type="number" class="form-control" id="postBudget" name="budget" min="0" step="100000" placeholder="E.g. 2,000,000">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="postLocation" class="form-label fw-semibold">Shoot Location</label>
+                                <input type="text" class="form-control" id="postLocation" name="location" maxlength="150" placeholder="E.g. Ho Chi Minh City, Hanoi, Da Lat...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="postImageFile" class="form-label fw-semibold">Reference Image / Moodboard (Optional)</label>
+                                <input type="file" class="form-control" id="postImageFile" name="imageFile" accept="image/*">
+                            </div>
+                            <div class="mb-2">
+                                <label for="postImageUrl" class="form-label fw-semibold">Or Online Image URL (Optional)</label>
+                                <input type="url" class="form-control" id="postImageUrl" name="imageUrl" placeholder="https://images.unsplash.com/...">
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </c:if>
 
     </div>
 </main>

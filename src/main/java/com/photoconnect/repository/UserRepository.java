@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
@@ -19,6 +20,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRole(UserRole role);
     long countByRoleAndStatus(UserRole role, UserStatus status);
+
+    @Query("""
+            SELECT YEAR(u.createdAt), MONTH(u.createdAt), u.role, COUNT(u)
+            FROM User u
+            WHERE u.createdAt >= :startAt AND u.createdAt < :endAt
+            GROUP BY YEAR(u.createdAt), MONTH(u.createdAt), u.role
+            ORDER BY YEAR(u.createdAt), MONTH(u.createdAt)
+            """)
+    List<Object[]> countRegistrationsByMonthAndRole(@Param("startAt") LocalDateTime startAt,
+                                                     @Param("endAt") LocalDateTime endAt);
 
     @Query("""
             SELECT u FROM User u

@@ -30,6 +30,9 @@ public class CustomerDashboardController {
         if (currentUser == null) {
             return "redirect:/login";
         }
+        if (currentUser.role() == UserRole.MANAGER) {
+            return "redirect:/manager/dashboard";
+        }
         if (currentUser.role() != UserRole.CUSTOMER) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "Only customers can access the customer workspace.");

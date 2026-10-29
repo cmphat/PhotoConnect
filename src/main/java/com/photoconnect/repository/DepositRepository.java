@@ -43,6 +43,27 @@ public interface DepositRepository extends JpaRepository<Deposit, Long> {
     List<Deposit> findByBookingIdIn(@Param("bookingIds") List<Long> bookingIds);
 
     @Query("""
+            SELECT d FROM Deposit d
+            JOIN FETCH d.booking b
+            JOIN FETCH b.customer c
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user u
+            ORDER BY d.createdAt DESC
+            """)
+    List<Deposit> findAllWithDetails();
+
+    @Query("""
+            SELECT d FROM Deposit d
+            JOIN FETCH d.booking b
+            JOIN FETCH b.customer c
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user u
+            WHERE d.status = :status
+            ORDER BY d.createdAt DESC
+            """)
+    List<Deposit> findByStatusWithDetails(@Param("status") com.photoconnect.entity.DepositStatus status);
+
+    @Query("""
             SELECT COALESCE(SUM(d.amount), 0)
             FROM Deposit d
             WHERE d.booking.photographerProfile.id = :profileId

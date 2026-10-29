@@ -13,6 +13,7 @@ class ManagerRoleAuthorizationTest {
         assertTrue(RolePermissionPolicy.hasPermission(UserRole.MANAGER, PlatformPermission.SUPPORT_TICKET_MANAGE));
         assertFalse(RolePermissionPolicy.hasPermission(UserRole.MANAGER, PlatformPermission.ACCOUNT_ROLE_MANAGE));
         assertFalse(RolePermissionPolicy.hasPermission(UserRole.MANAGER, PlatformPermission.SYSTEM_SETTINGS_MANAGE));
+        assertFalse(RolePermissionPolicy.hasPermission(UserRole.MANAGER, PlatformPermission.AUDIT_LOG_VIEW));
     }
 
     @Test

@@ -266,6 +266,10 @@ public class PhotographerDashboardServiceImpl implements PhotographerDashboardSe
                 || profile.getUser().getStatus() != UserStatus.ACTIVE) {
             throw new UnauthorizedException("Only active photographers can access Studio.");
         }
+        if (profile.getVerificationStatus() == PhotographerVerificationStatus.SUSPENDED
+                || profile.getVerificationStatus() == PhotographerVerificationStatus.REJECTED) {
+            throw new PhotographerStudioProfileNotFoundException("Only approved photographers can access Studio.");
+        }
         return profile;
     }
 

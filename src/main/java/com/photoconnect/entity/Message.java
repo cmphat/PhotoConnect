@@ -39,6 +39,7 @@ public class Message {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "content", nullable = false, length = 2000)
     private String content;
 

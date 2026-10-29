@@ -90,8 +90,8 @@
 
         <!-- Left: Editorial Studio Photography -->
         <div class="auth-image-pane">
-            <img src="https://images.unsplash.com/photo-1554046920-90dc5f3ac6ed?q=80&w=2000&auto=format&fit=crop"
-                 alt="Editorial Photographer in Studio"
+            <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=2000&q=80"
+                 alt="Professional Camera Gear"
                  loading="eager">
             <div class="auth-overlay-quote">
                 <blockquote>&ldquo;Join Vietnam&rsquo;s curated network of visionary commercial and editorial photographers.&rdquo;</blockquote>
@@ -106,20 +106,20 @@
                 <span class="section-index">Creator Application</span>
                 <h1 class="editorial-title" style="font-size: clamp(2.25rem, 4vw, 3.25rem); margin: 0 0 0.5rem 0;">
                     <c:choose>
-                        <c:when test="${isReapply}">Cập nhật &amp; Nộp lại hồ sơ</c:when>
+                        <c:when test="${isReapply}">Update &amp; Reapply Application</c:when>
                         <c:otherwise>Join the Verified Roster</c:otherwise>
                     </c:choose>
                 </h1>
                 <p class="pc-lead" style="font-size: 0.98rem; margin-bottom: 2rem;">
                     <c:choose>
-                        <c:when test="${isReapply}">Chỉnh sửa thông tin hồ sơ của bạn và gửi lại để ban quản trị PhotoConnect xét duyệt.</c:when>
+                        <c:when test="${isReapply}">Update your creator credentials and resubmit for PhotoConnect curatorial review.</c:when>
                         <c:otherwise>Submit your credentials to be featured on the PhotoConnect marketplace and receive client booking inquiries.</c:otherwise>
                     </c:choose>
                 </p>
 
                 <c:if test="${isReapply and not empty rejectionReason}">
                     <div class="alert alert-warning pc-alert pc-alert-warning mb-4" role="alert">
-                        <strong>Lý do từ chối trước đó:</strong> <c:out value="${rejectionReason}"/>
+                        <strong>Previous Rejection Reason:</strong> <c:out value="${rejectionReason}"/>
                     </div>
                 </c:if>
 
@@ -169,7 +169,7 @@
 
                     <button type="submit" class="submit-btn" style="margin-top: 1.5rem;" id="btn-submit-onboarding">
                         <c:choose>
-                            <c:when test="${isReapply}">Nộp lại hồ sơ xét duyệt &rarr;</c:when>
+                            <c:when test="${isReapply}">Resubmit Application &rarr;</c:when>
                             <c:otherwise>Submit Application &rarr;</c:otherwise>
                         </c:choose>
                     </button>

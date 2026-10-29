@@ -297,10 +297,10 @@
                                     </div>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <c:if test="${not empty booking.outfitCount}">
-                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} set đồ / outfits</span>
+                                            <span class="badge bg-primary" style="font-size: 0.75rem;">${booking.outfitCount} outfits</span>
                                         </c:if>
                                         <c:if test="${not empty booking.participantCount}">
-                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} người / participants</span>
+                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">${booking.participantCount} participants</span>
                                         </c:if>
                                     </div>
                                 </div>
@@ -320,7 +320,7 @@
                                             <div class="spec-item-label">Moodboard / Visual References</div>
                                             <div>
                                                 <a href="<c:out value='${booking.moodboardUrl}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.75rem;">
-                                                    <i class="bi bi-link-45deg me-1"></i> Xem Moodboard / Reference Link &nearr;
+                                                    <i class="bi bi-link-45deg me-1"></i> View Moodboard / Reference &nearr;
                                                 </a>
                                             </div>
                                         </div>
@@ -416,6 +416,8 @@
                             </c:when>
                         </c:choose>
                     </div>
+                </c:if>
+
                 <!-- ── Finished Photography Delivery Section ──────────────── -->
                 <c:if test="${booking.status == 'DELIVERED' || booking.status == 'COMPLETED'}">
                     <div class="review-workspace-box" style="margin-top: 1.5rem; background: rgba(37, 99, 235, 0.04); border-color: rgba(37, 99, 235, 0.2);">
@@ -597,10 +599,10 @@
                 <!-- ── Trust & Safety / Report Issue (Phase 14) ── -->
                 <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div style="font-size: 0.85rem; color: var(--muted);">
-                        <i class="bi bi-shield-check me-1"></i> Gặp sự cố hoặc tranh chấp? Đội ngũ hỗ trợ PhotoConnect luôn sẵn sàng can thiệp bảo vệ quyền lợi của bạn.
+                        <i class="bi bi-shield-check me-1"></i> Encountered an issue or dispute? PhotoConnect Trust &amp; Safety is here to mediate and protect your rights.
                     </div>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-open-report-modal" data-bs-toggle="modal" data-bs-target="#reportIssueModal">
-                        <i class="bi bi-flag me-1"></i> Báo cáo sự cố / Report Dispute
+                        <i class="bi bi-flag me-1"></i> Report Dispute
                     </button>
                 </div>
 
@@ -615,7 +617,7 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header border-bottom">
                     <h5 class="modal-title fw-bold" id="reportIssueModalLabel">
-                        <i class="bi bi-flag-fill text-danger me-2"></i> Báo cáo sự cố / Report Dispute
+                        <i class="bi bi-flag-fill text-danger me-2"></i> Report Dispute
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -623,32 +625,32 @@
                     <%@ include file="fragments/csrf-input.jsp" %>
                     <div class="modal-body p-4">
                         <p class="text-muted small mb-3">
-                            Nếu đối tác có hành vi thiếu chuyên nghiệp, vắng mặt không lý do hoặc vi phạm chính sách PhotoConnect, vui lòng chia sẻ thông tin để chúng tôi can thiệp xử lý.
+                            If your session counterpart exhibited unprofessional behavior, failed to attend, or violated PhotoConnect policies, please submit details for mediation.
                         </p>
 
                         <div class="mb-3">
-                            <label for="reportCategory" class="form-label fw-semibold small">Loại vi phạm / Violation Category *</label>
+                            <label for="reportCategory" class="form-label fw-semibold small">Violation Category *</label>
                             <select id="reportCategory" name="category" class="form-select form-select-sm" required>
-                                <option value="">-- Chọn danh mục vi phạm --</option>
-                                <option value="UNPROFESSIONAL_BEHAVIOR">Hành vi thiếu chuyên nghiệp (Unprofessional Behavior)</option>
-                                <option value="NO_SHOW">Vắng mặt không báo trước (No-Show)</option>
-                                <option value="HARASSMENT">Quấy rối hoặc ngôn từ thô lỗ (Harassment)</option>
-                                <option value="SCAM_OR_FRAUD">Lừa đảo hoặc gian lận thanh toán (Scam or Fraud)</option>
-                                <option value="COPYRIGHT_INFRINGEMENT">Vi phạm bản quyền hình ảnh (Copyright Infringement)</option>
-                                <option value="OTHER">Lý do khác (Other)</option>
+                                <option value="">-- Select violation category --</option>
+                                <option value="UNPROFESSIONAL_BEHAVIOR">Unprofessional Behavior</option>
+                                <option value="NO_SHOW">No-Show / Unannounced Absence</option>
+                                <option value="HARASSMENT">Harassment or Inappropriate Conduct</option>
+                                <option value="SCAM_OR_FRAUD">Scam or Payment Fraud</option>
+                                <option value="COPYRIGHT_INFRINGEMENT">Copyright Infringement</option>
+                                <option value="OTHER">Other Violation</option>
                             </select>
                         </div>
 
                         <div class="mb-3">
-                            <label for="reportDetails" class="form-label fw-semibold small">Mô tả chi tiết sự việc / Description *</label>
+                            <label for="reportDetails" class="form-label fw-semibold small">Incident Details &amp; Explanation *</label>
                             <textarea id="reportDetails" name="details" rows="4" maxlength="1500" class="form-control form-control-sm"
-                                      placeholder="Mô tả cụ thể thời gian, diễn biến sự việc, bằng chứng hoặc thiệt hại phát sinh..." required></textarea>
+                                      placeholder="Describe timeline of events, communications, or damages incurred..." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-top bg-light">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-danger btn-sm" id="btn-submit-report">
-                            <i class="bi bi-send me-1"></i> Gửi báo cáo / Submit Report
+                            <i class="bi bi-send me-1"></i> Submit Report
                         </button>
                     </div>
                 </form>

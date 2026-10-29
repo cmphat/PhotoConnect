@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <head>
-    <title>Đặt Lại Mật Khẩu — PhotoConnect</title>
+    <title>Reset Password — PhotoConnect</title>
     <style>
         .auth-split-layout {
             display: flex;
@@ -101,7 +101,7 @@
                  alt="Vintage Camera on Desk"
                  loading="eager">
             <div class="auth-overlay-quote">
-                <blockquote>&ldquo;Mật khẩu mới bảo vệ toàn bộ dữ liệu hợp đồng và album ảnh riêng tư của bạn.&rdquo;</blockquote>
+                <blockquote>&ldquo;A strong new password keeps your contracts and private photography albums safe.&rdquo;</blockquote>
                 <cite>PhotoConnect Identity Security</cite>
             </div>
         </div>
@@ -110,12 +110,12 @@
         <div class="auth-form-pane">
             <div class="auth-form-card">
 
-                <span class="section-index">Đặt lại mật khẩu</span>
+                <span class="section-index">Password Reset</span>
                 <h1 class="editorial-title" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin: 0 0 0.5rem 0;">
-                    Tạo mật khẩu mới
+                    Create New Password
                 </h1>
                 <p class="pc-lead" style="font-size: 0.95rem; margin-bottom: 2rem;">
-                    Nhập mã xác thực OTP đã nhận trong email cùng mật khẩu mới của bạn.
+                    Enter the 6-digit OTP code received in your email alongside your new password.
                 </p>
 
                 <!-- Feedback Alerts -->
@@ -134,7 +134,7 @@
                     <%@ include file="fragments/csrf-input.jsp" %>
 
                     <div class="form-group mb-3">
-                        <label for="email" class="form-label text-muted small fw-bold">EMAIL TÀI KHOẢN</label>
+                        <label for="email" class="form-label text-muted small fw-bold">ACCOUNT EMAIL</label>
                         <input type="email"
                                name="email"
                                id="email"
@@ -145,7 +145,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="otpCode" class="form-label text-muted small fw-bold">MÃ OTP (6 CHỮ SỐ)</label>
+                        <label for="otpCode" class="form-label text-muted small fw-bold">OTP CODE (6 DIGITS)</label>
                         <input type="text"
                                name="otpCode"
                                id="otpCode"
@@ -160,7 +160,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="newPassword" class="form-label text-muted small fw-bold">MẬT KHẨU MỚI (TỐI THIỂU 8 KÝ TỰ)</label>
+                        <label for="newPassword" class="form-label text-muted small fw-bold">NEW PASSWORD (MIN 8 CHARACTERS)</label>
                         <input type="password"
                                name="newPassword"
                                id="newPassword"
@@ -171,7 +171,7 @@
                     </div>
 
                     <div class="form-group mb-4">
-                        <label for="confirmPassword" class="form-label text-muted small fw-bold">XÁC NHẬN MẬT KHẨU MỚI</label>
+                        <label for="confirmPassword" class="form-label text-muted small fw-bold">CONFIRM NEW PASSWORD</label>
                         <input type="password"
                                name="confirmPassword"
                                id="confirmPassword"
@@ -182,25 +182,25 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary submit-btn w-100 py-3" id="btn-submit-reset">
-                        Cập nhật mật khẩu &rarr;
+                        Update Password &rarr;
                     </button>
                 </form>
 
                 <!-- Resend Reset OTP -->
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                    <span class="small text-muted">Chưa nhận được mã?</span>
+                    <span class="small text-muted">Didn't receive the code?</span>
                     <form action="${pageContext.request.contextPath}/reset-password/resend" method="post" class="d-inline m-0">
                         <%@ include file="fragments/csrf-input.jsp" %>
                         <input type="hidden" name="email" value="<c:out value='${email}'/>" />
                         <button type="submit" class="btn btn-link p-0 small text-primary text-decoration-none fw-semibold">
-                            Gửi lại mã OTP
+                            Resend OTP Code
                         </button>
                     </form>
                 </div>
 
                 <div class="mt-4 text-center">
                     <a href="${pageContext.request.contextPath}/login" class="small text-muted text-decoration-none">
-                        &larr; Quay lại trang Đăng nhập
+                        &larr; Back to Sign In
                     </a>
                 </div>
 

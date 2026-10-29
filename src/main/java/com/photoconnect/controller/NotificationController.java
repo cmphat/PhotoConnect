@@ -32,7 +32,15 @@ public class NotificationController {
         }
 
         List<NotificationDto> notifications = notificationService.getNotificationsForUser(userId);
-        long unreadCount = notificationService.getUnreadCount(userId);
+        Object roleObj = session.getAttribute("userRole");
+        if (roleObj != null && "MANAGER".equalsIgnoreCase(roleObj.toString())) {
+            notifications = notifications.stream()
+                    .filter(n -> n.type() != null && !n.type().name().startsWith("BOOKING_")
+                            && !n.type().name().startsWith("DELIVERY_")
+                            && !n.type().name().startsWith("DEPOSIT_"))
+                    .toList();
+        }
+        long unreadCount = notifications.stream().filter(n -> !n.read()).count();
 
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);

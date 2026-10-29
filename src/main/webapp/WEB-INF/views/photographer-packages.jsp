@@ -218,8 +218,8 @@
             <h1 class="package-mgmt-title">Service Packages</h1>
             <p class="package-mgmt-sub">Define structured photography offerings, turnaround times, and clear deliverables for clients.</p>
             <div class="mt-2">
-                <span class="badge ${activeCount >= 10 ? 'bg-danger' : 'bg-primary'} text-white px-3 py-2" style="font-size: 0.82rem; font-weight: 600; border-radius: 6px;">
-                    Đang kích hoạt: <c:out value="${not empty activeCount ? activeCount : 0}"/> / tối đa 10 gói
+                <span class="badge ${activeCount >= 10 ? 'bg-danger' : 'bg-primary'} text-white px-3 py-2" style="font-size: 0.82rem; font-weight: 600; border-radius: 6px; letter-spacing: 0.04em;">
+                    ACTIVE: <c:out value="${not empty activeCount ? activeCount : 0}"/> / MAX 10 PACKAGES
                 </span>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <head>
-    <title>Xác thực Email — PhotoConnect</title>
+    <title>Email Verification — PhotoConnect</title>
     <style>
         .auth-split-layout {
             display: flex;
@@ -101,7 +101,7 @@
                  alt="Camera Lens Editorial"
                  loading="eager">
             <div class="auth-overlay-quote">
-                <blockquote>&ldquo;Bảo vệ tài khoản và tính xác thực của cộng đồng nhiếp ảnh gia PhotoConnect.&rdquo;</blockquote>
+                <blockquote>&ldquo;Protecting account integrity and authentic visual artists in PhotoConnect.&rdquo;</blockquote>
                 <cite>PhotoConnect Security Protocol</cite>
             </div>
         </div>
@@ -110,12 +110,12 @@
         <div class="auth-form-pane">
             <div class="auth-form-card">
 
-                <span class="section-index">Bước 2: Xác thực tài khoản</span>
+                <span class="section-index">Step 2: Account Verification</span>
                 <h1 class="editorial-title" style="font-size: clamp(2rem, 3.5vw, 2.75rem); margin: 0 0 0.5rem 0;">
-                    Nhập mã xác thực OTP
+                    Enter Verification Code
                 </h1>
                 <p class="pc-lead" style="font-size: 0.95rem; margin-bottom: 2rem;">
-                    Mã xác thực gồm 6 chữ số đã được gửi tới email:
+                    A 6-digit verification code was sent to:
                     <strong class="text-dark"><c:out value="${email}"/></strong>
                 </p>
 
@@ -135,7 +135,7 @@
                 <form action="${pageContext.request.contextPath}/verify-otp" method="post" class="mb-4">
                     <%@ include file="fragments/csrf-input.jsp" %>
                     <div class="form-group mb-4">
-                        <label for="otpCode" class="form-label text-muted small fw-bold">MÃ XÁC THỰC (6 CHỮ SỐ)</label>
+                        <label for="otpCode" class="form-label text-muted small fw-bold">VERIFICATION CODE (6 DIGITS)</label>
                         <input type="text"
                                name="otpCode"
                                id="otpCode"
@@ -148,29 +148,29 @@
                                required
                                autofocus />
                         <div class="form-text mt-2 small text-muted">
-                            Mã có hiệu lực trong 5 phút. Tối đa 5 lần thử.
+                            Code expires in 5 minutes. Maximum 5 attempts.
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary submit-btn w-100 py-3" id="btn-verify-otp">
-                        Xác nhận và kích hoạt &rarr;
+                        Verify and Activate &rarr;
                     </button>
                 </form>
 
                 <!-- Resend Form -->
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                    <span class="small text-muted">Chưa nhận được mã?</span>
+                    <span class="small text-muted">Didn't receive the code?</span>
                     <form action="${pageContext.request.contextPath}/resend-otp" method="post" class="d-inline m-0">
                         <%@ include file="fragments/csrf-input.jsp" %>
                         <button type="submit" class="btn btn-link p-0 small text-primary text-decoration-none fw-semibold">
-                            Gửi lại mã OTP
+                            Resend OTP Code
                         </button>
                     </form>
                 </div>
 
                 <div class="mt-4 text-center">
                     <a href="${pageContext.request.contextPath}/login" class="small text-muted text-decoration-none">
-                        &larr; Quay lại trang Đăng nhập
+                        &larr; Back to Sign In
                     </a>
                 </div>
 

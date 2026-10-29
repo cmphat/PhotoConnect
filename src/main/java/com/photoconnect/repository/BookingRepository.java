@@ -14,6 +14,28 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
+            SELECT YEAR(b.createdAt), MONTH(b.createdAt), COUNT(b),
+                   COALESCE(SUM(CASE WHEN b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+                                     THEN b.agreedPrice ELSE 0 END), 0)
+            FROM Booking b
+            WHERE b.createdAt >= :startAt AND b.createdAt < :endAt
+            GROUP BY YEAR(b.createdAt), MONTH(b.createdAt)
+            ORDER BY YEAR(b.createdAt), MONTH(b.createdAt)
+            """)
+    List<Object[]> summarizeByCreatedMonth(@Param("startAt") java.time.LocalDateTime startAt,
+                                           @Param("endAt") java.time.LocalDateTime endAt);
+
+    @Query("""
+            SELECT b.status, COUNT(b)
+            FROM Booking b
+            WHERE b.createdAt >= :startAt AND b.createdAt < :endAt
+            GROUP BY b.status
+            ORDER BY b.status
+            """)
+    List<Object[]> countByStatusInCreatedRange(@Param("startAt") java.time.LocalDateTime startAt,
+                                               @Param("endAt") java.time.LocalDateTime endAt);
+
+    @Query("""
             SELECT b FROM Booking b
             JOIN FETCH b.customer
             JOIN FETCH b.photographerProfile p
@@ -242,4 +264,38 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     long countCompletedShootsForCustomerAndPhotographer(@Param("profileId") Long profileId,
                                                         @Param("customerId") Long customerId);
+
+    @Query("""
+            SELECT p.id, p.displayName, u.email,
+                   COUNT(b),
+                   COALESCE(SUM(b.agreedPrice), 0)
+            FROM Booking b
+            JOIN b.photographerProfile p
+            JOIN p.user u
+            WHERE b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            GROUP BY p.id, p.displayName, u.email
+            ORDER BY COALESCE(SUM(b.agreedPrice), 0) DESC
+            """)
+    List<Object[]> summarizePhotographerCompletedRevenue();
+
+    @Query("""
+            SELECT COALESCE(SUM(b.agreedPrice), 0) FROM Booking b
+            WHERE b.photographerProfile.user.id = :userId
+              AND b.status = com.photoconnect.entity.BookingStatus.COMPLETED
+            """)
+    java.math.BigDecimal sumAgreedPriceByPhotographerUserId(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.customer
+            JOIN FETCH b.photographerProfile p
+            JOIN FETCH p.user
+            WHERE b.customer.id = :customerId
+              AND b.photographerProfile.id = :profileId
+              AND b.notes LIKE CONCAT('%Post #', :postId, '%')
+            ORDER BY b.createdAt DESC
+            """)
+    List<Booking> findByCustomerAndProfileAndPostId(@Param("customerId") Long customerId,
+                                                   @Param("profileId") Long profileId,
+                                                   @Param("postId") Long postId);
 }

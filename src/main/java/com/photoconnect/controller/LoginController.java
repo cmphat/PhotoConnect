@@ -42,6 +42,13 @@ public class LoginController {
     @GetMapping("/login")
     public String showLoginForm(Model model, HttpSession session) {
         if (session.getAttribute("userId") != null) {
+            String role = (String) session.getAttribute("userRole");
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                return "redirect:/admin/dashboard";
+            }
+            if ("MANAGER".equalsIgnoreCase(role)) {
+                return "redirect:/manager/dashboard";
+            }
             return "redirect:/";
         }
         
@@ -79,6 +86,12 @@ public class LoginController {
             session.setAttribute("userRole", user.getRole().name());
             jwtCookieService.issue(httpRequest, httpResponse, user);
 
+            if (user.getRole() == com.photoconnect.entity.UserRole.ADMIN) {
+                return "redirect:/admin/dashboard";
+            }
+            if (user.getRole() == com.photoconnect.entity.UserRole.MANAGER) {
+                return "redirect:/manager/dashboard";
+            }
             return "redirect:/";
         } catch (InvalidCredentialsException | AccountDisabledException e) {
             loginRateLimiter.recordFailure(loginRequest.getEmail(), clientIp);

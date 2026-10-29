@@ -77,6 +77,9 @@ public class PhotographerController {
     public String listPhotographers(@ModelAttribute("searchRequest") PhotographerSearchRequest searchRequest,
                                     HttpSession session,
                                     Model model) {
+        if (session != null && "MANAGER".equalsIgnoreCase((String) session.getAttribute("userRole"))) {
+            return "redirect:/manager/photographers?status=PENDING";
+        }
         Page<PhotographerPublicDto> photographerPage;
         PhotographerSearchRequest effectiveSearchRequest = searchRequest;
 

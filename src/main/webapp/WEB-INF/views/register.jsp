@@ -104,10 +104,10 @@
                 <c:if test="${param.success != null}">
                     <div class="alert alert-success pc-alert pc-alert-success d-flex align-items-center justify-content-between flex-wrap gap-2" role="status">
                         <div>
-                            <strong>Đăng ký thành công!</strong> Mã xác thực OTP 6 chữ số đã được gửi tới email của bạn. Vui lòng kích hoạt tài khoản để đăng nhập.
+                            <strong>Registration successful!</strong> A 6-digit OTP verification code has been sent to your email. Please activate your account to sign in.
                         </div>
                         <a href="${pageContext.request.contextPath}/verify-otp" class="btn btn-primary btn-sm text-nowrap">
-                            Xác thực ngay
+                            Verify Now
                         </a>
                     </div>
                 </c:if>
@@ -124,10 +124,10 @@
 
                 <c:if test="${googleOAuthEnabled}">
                     <a class="btn btn-outline-secondary w-100 mb-3" href="${pageContext.request.contextPath}/oauth2/authorization/google">
-                        Đăng ký bằng Google
+                        Sign up with Google
                     </a>
                     <div class="d-flex align-items-center gap-3 mb-3" aria-hidden="true">
-                        <span class="border-top flex-grow-1"></span><span class="text-muted small">hoặc đăng ký bằng email</span><span class="border-top flex-grow-1"></span>
+                        <span class="border-top flex-grow-1"></span><span class="text-muted small">or register with email</span><span class="border-top flex-grow-1"></span>
                     </div>
                 </c:if>
 

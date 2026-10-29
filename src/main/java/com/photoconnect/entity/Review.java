@@ -46,6 +46,7 @@ public class Review {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "comment", length = 1000)
     private String comment;
 

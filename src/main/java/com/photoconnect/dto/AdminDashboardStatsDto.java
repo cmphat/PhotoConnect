@@ -10,6 +10,7 @@ public class AdminDashboardStatsDto {
     private long totalUsers;
     private long totalCustomers;
     private long totalPhotographers;
+    private long totalManagers;
     private long pendingPhotographerApprovals;
     private long approvedPhotographers;
     private long totalBookings;
@@ -79,6 +80,14 @@ public class AdminDashboardStatsDto {
 
     public void setTotalPhotographers(long totalPhotographers) {
         this.totalPhotographers = totalPhotographers;
+    }
+
+    public long getTotalManagers() {
+        return totalManagers;
+    }
+
+    public void setTotalManagers(long totalManagers) {
+        this.totalManagers = totalManagers;
     }
 
     public long getPendingPhotographerApprovals() {
@@ -218,6 +227,8 @@ public class AdminDashboardStatsDto {
     }
 
     private long pendingReportsCount;
+    private BigDecimal platformFeeCollected = BigDecimal.ZERO;
+    private BigDecimal platformFeeOutstanding = BigDecimal.ZERO;
 
     public long getPendingReportsCount() {
         return pendingReportsCount;
@@ -225,5 +236,21 @@ public class AdminDashboardStatsDto {
 
     public void setPendingReportsCount(long pendingReportsCount) {
         this.pendingReportsCount = pendingReportsCount;
+    }
+
+    public BigDecimal getPlatformFeeCollected() {
+        return platformFeeCollected;
+    }
+
+    public void setPlatformFeeCollected(BigDecimal platformFeeCollected) {
+        this.platformFeeCollected = platformFeeCollected != null ? platformFeeCollected : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getPlatformFeeOutstanding() {
+        return platformFeeOutstanding;
+    }
+
+    public void setPlatformFeeOutstanding(BigDecimal platformFeeOutstanding) {
+        this.platformFeeOutstanding = platformFeeOutstanding != null ? platformFeeOutstanding : BigDecimal.ZERO;
     }
 }

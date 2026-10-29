@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,16 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Model model, HttpSession session) {
+        if (session != null) {
+            String role = (String) session.getAttribute("userRole");
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                return "redirect:/admin/dashboard";
+            }
+            if ("MANAGER".equalsIgnoreCase(role)) {
+                return "redirect:/manager/dashboard";
+            }
+        }
         List<PhotographerPublicDto> allApproved = publicPhotographerService.listApprovedPhotographers();
         List<PhotographerPublicDto> featured = allApproved.stream().limit(3).collect(Collectors.toList());
         model.addAttribute("featuredPhotographers", featured);

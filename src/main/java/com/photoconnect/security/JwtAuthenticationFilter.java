@@ -146,8 +146,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.equals("/manager") || path.startsWith("/manager/")) {
             return UserRole.MANAGER;
         }
+        if (path.matches("^/customer/posts/\\d+/contact$")) {
+            return UserRole.PHOTOGRAPHER;
+        }
         if (path.equals("/customer") || path.startsWith("/customer/")) {
             return UserRole.CUSTOMER;
+        }
+        if (path.equals("/photographer/onboarding-status") || path.startsWith("/photographer/onboarding/")) {
+            return null;
         }
         if (path.equals("/photographer") || path.startsWith("/photographer/")) {
             return UserRole.PHOTOGRAPHER;
@@ -164,6 +170,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     static boolean requiresAnyAuthenticatedUser(String path) {
         return path.equals("/bookings") || path.startsWith("/bookings/")
                 || path.equals("/api/bookings") || path.startsWith("/api/bookings/")
+                || path.equals("/photographer/onboarding-status")
+                || path.startsWith("/photographer/onboarding/")
                 || path.equals("/profile/me")
                 || path.equals("/profile/edit")
                 || path.equals("/profile/avatar")

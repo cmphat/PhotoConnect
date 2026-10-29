@@ -13,8 +13,7 @@ public final class RolePermissionPolicy {
             PlatformPermission.BOOKING_OPERATIONAL_VIEW,
             PlatformPermission.BOOKING_DISPUTE_RESOLVE,
             PlatformPermission.SUPPORT_TICKET_MANAGE,
-            PlatformPermission.OPERATIONAL_ANALYTICS_VIEW,
-            PlatformPermission.AUDIT_LOG_VIEW
+            PlatformPermission.OPERATIONAL_ANALYTICS_VIEW
     );
 
     private RolePermissionPolicy() {

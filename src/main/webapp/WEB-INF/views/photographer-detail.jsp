@@ -464,16 +464,19 @@
                                     </c:forEach>
                                 </div>
                             </c:otherwise>
+                        </c:choose>
+                    </div>
+
                     <!-- Service Packages Section -->
                     <div style="margin-top: 3.5rem;" id="service-packages-section">
                         <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
                             <div>
                                 <span class="section-index">Curated Offerings</span>
-                                <h2 class="section-headline">Gói Dịch Vụ</h2>
+                                <h2 class="section-headline">Service Packages</h2>
                             </div>
                             <c:if test="${fn:length(packages) >= 2}">
                                 <button type="button" class="btn btn-sm btn-outline-primary" id="btn-trigger-compare" onclick="openComparisonModalFromSelection()" style="font-weight: 600;">
-                                    ⚖ So Sánh Gói Dịch Vụ
+                                    ⚖ Compare Packages
                                 </button>
                             </c:if>
                         </div>
@@ -490,7 +493,7 @@
                                                     </span>
                                                     <c:if test="${pkg.recommended}">
                                                         <span style="font-size: 0.72rem; font-weight: 700; color: #FFFFFF; background: var(--accent); padding: 0.2rem 0.55rem; border-radius: 4px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">
-                                                            ★ Phổ biến nhất
+                                                            ★ Most Popular
                                                         </span>
                                                     </c:if>
                                                 </div>
@@ -501,9 +504,9 @@
                                                     <c:out value="${pkg.formattedPrice}"/>
                                                 </div>
                                                 <div style="background: var(--background); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.82rem; color: var(--text); margin-bottom: 0.85rem;">
-                                                    <div>⏱ <strong><c:out value="${pkg.formattedDuration}"/></strong> thời lượng</div>
-                                                    <div style="margin-top: 0.25rem;">📷 <strong><c:out value="${pkg.editedPhotoCount}"/></strong> ảnh chỉnh sửa</div>
-                                                    <div style="margin-top: 0.25rem;">🚚 <strong><c:out value="${pkg.deliveryDays}"/> ngày</strong> bàn giao</div>
+                                                    <div>⏱ <strong><c:out value="${pkg.formattedDuration}"/></strong> duration</div>
+                                                    <div style="margin-top: 0.25rem;">📷 <strong><c:out value="${pkg.editedPhotoCount}"/></strong> edited photos</div>
+                                                    <div style="margin-top: 0.25rem;">🚚 <strong><c:out value="${pkg.deliveryDays}"/> days</strong> turnaround</div>
                                                 </div>
                                                 <c:if test="${not empty pkg.description}">
                                                     <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.25rem;">
@@ -514,7 +517,7 @@
                                             <div>
                                                 <a href="${pageContext.request.contextPath}/photographers/${photographer.id}/book?packageId=${pkg.id}"
                                                    class="btn ${pkg.recommended ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2" style="font-weight: 600; font-size: 0.88rem;">
-                                                    Chọn gói &amp; Đặt lịch →
+                                                    Select Package &amp; Book →
                                                 </a>
                                                 <c:if test="${fn:length(packages) >= 2}">
                                                     <label class="d-flex align-items-center justify-content-center gap-2 cursor-pointer text-muted pt-1 border-top" style="font-size: 0.8rem; cursor: pointer;">
@@ -525,11 +528,11 @@
                                                                data-category="<c:out value='${pkg.categoryDisplayName}'/>"
                                                                data-price="<c:out value='${pkg.formattedPrice}'/>"
                                                                data-duration="<c:out value='${pkg.formattedDuration}'/>"
-                                                               data-photos="<c:out value='${pkg.editedPhotoCount}'/> ảnh"
-                                                               data-delivery="<c:out value='${pkg.deliveryDays}'/> ngày"
+                                                               data-photos="<c:out value='${pkg.editedPhotoCount}'/> photos"
+                                                               data-delivery="<c:out value='${pkg.deliveryDays}'/> days"
                                                                data-desc="<c:out value='${pkg.description}'/>"
                                                                onchange="onPackageCheckboxChanged(this)">
-                                                        <span>Chọn so sánh</span>
+                                                        <span>Select to compare</span>
                                                     </label>
                                                 </c:if>
                                             </div>
@@ -539,7 +542,7 @@
                             </c:when>
                             <c:otherwise>
                                 <div style="background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 2rem; text-align: center; color: var(--muted); margin-top: 1rem;">
-                                    Nhiếp ảnh gia chưa tạo gói dịch vụ cấu trúc sẵn. Quý khách có thể yêu cầu buổi chụp tùy chỉnh thông qua mẫu đặt lịch.
+                                    This creator has not listed standard packages yet. You can submit a custom session request via the booking form.
                                 </div>
                             </c:otherwise>
                         </c:choose>
@@ -693,13 +696,13 @@
     <div id="compareDock" style="display: none; position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 1040; background: #0F172A; border: 1px solid #334155; border-radius: 50px; padding: 0.65rem 1.5rem; box-shadow: 0 12px 36px rgba(0,0,0,0.45); align-items: center; gap: 1rem; color: #FFFFFF;">
         <div style="font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
             <span class="badge bg-primary rounded-pill px-2" id="compareCountBadge">0</span>
-            <span>gói đã chọn (tối đa 3)</span>
+            <span>packages selected (max 3)</span>
         </div>
         <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" id="btnLaunchCompare" onclick="openComparisonModal()" style="font-weight: 600;">
-            So sánh chi tiết →
+            Compare Details →
         </button>
         <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 text-light" onclick="clearComparisonSelection()">
-            Bỏ chọn
+            Clear
         </button>
     </div>
 
@@ -710,9 +713,9 @@
                 <div class="modal-header" style="border-bottom: 1px solid var(--border);">
                     <div>
                         <h4 class="modal-title font-editorial" id="comparisonModalTitle" style="font-weight: 700; color: var(--text);">
-                            So Sánh Gói Dịch Vụ
+                            Compare Service Packages
                         </h4>
-                        <p class="text-muted small mb-0">Đối chiếu chi tiết mức giá, thời lượng, số lượng ảnh và quyền lợi bàn giao.</p>
+                        <p class="text-muted small mb-0">Compare rates, duration, deliverable counts, and turnaround times.</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -722,7 +725,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid var(--border);">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -758,13 +761,13 @@
                 duration: checkbox.getAttribute('data-duration'),
                 photos: checkbox.getAttribute('data-photos'),
                 delivery: checkbox.getAttribute('data-delivery'),
-                desc: checkbox.getAttribute('data-desc') || 'Tiêu chuẩn dịch vụ cao cấp'
+                desc: checkbox.getAttribute('data-desc') || 'Standard professional shoot package'
             };
 
             if (checkbox.checked) {
                 if (selectedComparePackages.length >= 3) {
                     checkbox.checked = false;
-                    alert('Bạn chỉ có thể so sánh tối đa 3 gói dịch vụ cùng một lúc.');
+                    alert('You can compare up to 3 service packages at a time.');
                     return;
                 }
                 selectedComparePackages.push(pkgData);
@@ -806,13 +809,13 @@
 
         function openComparisonModal() {
             if (selectedComparePackages.length === 0) {
-                alert('Vui lòng chọn ít nhất 1 gói dịch vụ để so sánh.');
+                alert('Please select at least 1 package to compare.');
                 return;
             }
 
             var tableHtml = '<table class="table table-bordered text-center align-middle mb-0" style="table-layout: fixed; width: 100%; border-color: var(--border);">';
             tableHtml += '<thead style="background: var(--background);">';
-            tableHtml += '<tr><th style="width: 22%; text-align: left; padding: 1rem; color: var(--muted); font-size: 0.85rem; text-transform: uppercase;">Tiêu Chí</th>';
+            tableHtml += '<tr><th style="width: 22%; text-align: left; padding: 1rem; color: var(--muted); font-size: 0.85rem; text-transform: uppercase;">Criteria</th>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 var p = selectedComparePackages[i];
                 tableHtml += '<th style="padding: 1rem;"><div style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 0.25rem;">' + escapeHtml(p.category) + '</div>';
@@ -821,45 +824,45 @@
             tableHtml += '</tr></thead><tbody>';
 
             // Row 1: Giá trọn gói
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Giá Dịch Vụ</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Starting Rate</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 tableHtml += '<td><span style="font-size: 1.25rem; font-weight: 800; color: var(--accent);">' + escapeHtml(selectedComparePackages[i].price) + '</span></td>';
             }
             tableHtml += '</tr>';
 
             // Row 2: Thời lượng
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Thời Lượng Buổi Chụp</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Shoot Duration</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 tableHtml += '<td style="font-weight: 600;">⏱ ' + escapeHtml(selectedComparePackages[i].duration) + '</td>';
             }
             tableHtml += '</tr>';
 
             // Row 3: Ảnh chỉnh sửa
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Số Lượng Ảnh Chỉnh Sửa</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Edited Deliverables</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 tableHtml += '<td style="font-weight: 600; color: #10b981;">📷 ' + escapeHtml(selectedComparePackages[i].photos) + '</td>';
             }
             tableHtml += '</tr>';
 
             // Row 4: Thời gian bàn giao
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Thời Gian Bàn Giao</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Turnaround Time</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 tableHtml += '<td style="font-weight: 600;">🚚 ' + escapeHtml(selectedComparePackages[i].delivery) + '</td>';
             }
             tableHtml += '</tr>';
 
             // Row 5: Mô tả / Inclusions
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Quyền Lợi &amp; Mô Tả</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Included Features</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 tableHtml += '<td style="font-size: 0.88rem; color: var(--muted); text-align: left; padding: 1rem; line-height: 1.5;">' + escapeHtml(selectedComparePackages[i].desc) + '</td>';
             }
             tableHtml += '</tr>';
 
             // Row 6: Đặt lịch ngay
-            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Hành Động</td>';
+            tableHtml += '<tr><td style="text-align: left; font-weight: 600; padding: 0.85rem 1rem;">Action</td>';
             for (var i = 0; i < selectedComparePackages.length; i++) {
                 var bookUrl = '${pageContext.request.contextPath}/photographers/' + '${photographer.id}' + '/book?packageId=' + selectedComparePackages[i].id;
-                tableHtml += '<td style="padding: 1rem;"><a href="' + bookUrl + '" class="btn btn-primary w-100" style="font-weight: 700; font-size: 0.88rem;">Chọn Gói Này →</a></td>';
+                tableHtml += '<td style="padding: 1rem;"><a href="' + bookUrl + '" class="btn btn-primary w-100" style="font-weight: 700; font-size: 0.88rem;">Select This Package →</a></td>';
             }
             tableHtml += '</tr>';
 

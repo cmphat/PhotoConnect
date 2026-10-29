@@ -10,12 +10,11 @@
     <main class="pc-page pc-page-compact">
         <div class="editorial-container pc-container-admin">
 
-            <jsp:include page="fragments/admin-navbar.jsp" />
 
             <div class="pc-page-header pc-stack-mobile">
                 <div>
-                    <span class="section-index">Administration</span>
-                    <h1 class="editorial-title">Trust &amp; Safety Moderation</h1>
+                    <span class="section-index">Content &amp; Safety Moderation</span>
+                    <h1 class="editorial-title">Review Moderation &amp; Trust Safety</h1>
                 </div>
                 <div class="pc-page-meta">
                     <div class="btn-group" role="group">
@@ -277,6 +276,8 @@
                             </tbody>
                         </table>
                     </div>
+                </c:otherwise>
+            </c:choose>
                 </c:otherwise>
             </c:choose>
 

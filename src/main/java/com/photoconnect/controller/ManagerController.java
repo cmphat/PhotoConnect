@@ -19,11 +19,19 @@ import java.util.List;
 public class ManagerController {
     private final ManagerOperationsService operations;
     private final SupportTicketService support;
+    private com.photoconnect.service.PhotographerEvaluationService evaluationService = new com.photoconnect.service.PhotographerEvaluationServiceImpl();
 
     public ManagerController(ManagerOperationsService operations,
                              SupportTicketService support) {
         this.operations = operations;
         this.support = support;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setEvaluationService(com.photoconnect.service.PhotographerEvaluationService evaluationService) {
+        if (evaluationService != null) {
+            this.evaluationService = evaluationService;
+        }
     }
 
     @GetMapping({"", "/dashboard"})
@@ -52,7 +60,9 @@ public class ManagerController {
     @GetMapping("/photographers/{id}")
     public String photographer(@PathVariable Long id, HttpSession session, Model model) {
         String denied = ManagerSecurityUtils.requireManager(session); if (denied != null) return denied;
-        model.addAttribute("profile", operations.photographerApplication(SessionSecurityUtils.userId(session), id));
+        PhotographerProfile profile = operations.photographerApplication(SessionSecurityUtils.userId(session), id);
+        model.addAttribute("profile", profile);
+        model.addAttribute("evaluation", evaluationService.evaluate(profile));
         model.addAttribute("activeTab", "photographers");
         return "manager-photographer-detail";
     }
@@ -198,11 +208,9 @@ public class ManagerController {
     }
 
     @GetMapping("/audit")
-    public String audit(HttpSession session, Model model) {
+    public String audit(HttpSession session) {
         String denied = ManagerSecurityUtils.requireManager(session); if (denied != null) return denied;
-        model.addAttribute("logs", operations.recentActivity(SessionSecurityUtils.userId(session), 100));
-        model.addAttribute("activeTab", "audit");
-        return "manager-audit";
+        return "redirect:/manager/dashboard";
     }
 
     private String action(HttpSession session, RedirectAttributes flash, String redirect,

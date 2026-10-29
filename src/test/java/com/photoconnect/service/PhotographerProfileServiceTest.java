@@ -61,10 +61,9 @@ class PhotographerProfileServiceTest {
     }
 
     @Test
-    void successfulOnboarding_shouldCreateProfileAndPromoteRole() {
+    void successfulOnboarding_shouldCreatePendingProfileAndRetainCustomerRole() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(activeUser));
         when(photographerProfileRepository.existsByUserId(1L)).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(activeUser);
         when(photographerProfileRepository.save(any(PhotographerProfile.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -76,9 +75,8 @@ class PhotographerProfileServiceTest {
         assertThat(result.getExperienceYears()).isEqualTo(5);
         assertThat(result.getPriceFrom()).isEqualByComparingTo(new BigDecimal("1500000"));
         assertThat(result.getVerificationStatus()).isEqualTo(PhotographerVerificationStatus.PENDING);
-        assertThat(activeUser.getRole()).isEqualTo(UserRole.PHOTOGRAPHER);
+        assertThat(activeUser.getRole()).isEqualTo(UserRole.CUSTOMER);
 
-        verify(userRepository).save(activeUser);
         verify(photographerProfileRepository).save(any(PhotographerProfile.class));
     }
 

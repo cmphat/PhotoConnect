@@ -126,8 +126,11 @@
 
     <main class="pc-page">
         <div class="editorial-container chat-container">
-            <div class="pc-stack-mobile" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
-                <a href="${backUrl}" class="text-link" style="font-size: 0.9rem;">&larr; Back to Booking Details</a>
+            <div class="pc-stack-mobile" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <a href="${pageContext.request.contextPath}${backUrl}" class="btn btn-sm btn-outline-primary" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 500;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    View &amp; Manage Booking #${booking.id} (${booking.status})
+                </a>
                 <div id="connStatus" class="connection-indicator">
                     <span id="connDot" class="dot-indicator"></span>
                     <span id="connText">Connecting...</span>

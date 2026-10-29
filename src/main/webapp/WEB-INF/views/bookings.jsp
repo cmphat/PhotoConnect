@@ -6,125 +6,125 @@
     <title>My Bookings — PhotoConnect</title>
 </head>
 
-    <main class="pc-page">
-        <div class="editorial-container pc-container-wide">
+<main class="pc-page">
+    <div class="editorial-container pc-container-wide">
 
-            <div style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
-                <span class="section-index">Client Dashboard</span>
-                <h1 class="editorial-title" style="margin: 0 0 0.4rem 0;">My Bookings</h1>
-                <p class="pc-lead" style="font-size: 1.05rem;">
-                    Manage your upcoming, active, and past photography sessions with verified creators.
-                </p>
+        <div style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+            <span class="section-index">Client Dashboard</span>
+            <h1 class="editorial-title" style="margin: 0 0 0.4rem 0;">My Bookings</h1>
+            <p class="pc-lead" style="font-size: 1.05rem;">
+                Manage your upcoming, active, and past photography sessions with verified creators.
+            </p>
+        </div>
+
+        <!-- Feedback Alerts -->
+        <c:if test="${not empty successMessage}">
+            <div class="pc-alert pc-alert-success" role="status">
+                <c:out value="${successMessage}"/>
             </div>
+        </c:if>
 
-            <!-- Feedback Alerts -->
-            <c:if test="${not empty successMessage}">
-                <div class="pc-alert pc-alert-success" role="status">
-                    <c:out value="${successMessage}"/>
+        <!-- Status Filter Tabs -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+            <a href="${pageContext.request.contextPath}/bookings"
+               class="btn btn-sm ${empty selectedStatus or selectedStatus == 'ALL' ? 'btn-primary' : 'btn-ghost'}">
+                All
+            </a>
+            <a href="${pageContext.request.contextPath}/bookings?status=UPCOMING"
+               class="btn btn-sm ${selectedStatus == 'UPCOMING' ? 'btn-primary' : 'btn-ghost'}">
+                Upcoming
+            </a>
+            <a href="${pageContext.request.contextPath}/bookings?status=PENDING"
+               class="btn btn-sm ${selectedStatus == 'PENDING' ? 'btn-primary' : 'btn-ghost'}">
+                Pending
+            </a>
+            <a href="${pageContext.request.contextPath}/bookings?status=ACCEPTED"
+               class="btn btn-sm ${selectedStatus == 'ACCEPTED' ? 'btn-primary' : 'btn-ghost'}">
+                Accepted
+            </a>
+            <a href="${pageContext.request.contextPath}/bookings?status=COMPLETED"
+               class="btn btn-sm ${selectedStatus == 'COMPLETED' ? 'btn-primary' : 'btn-ghost'}">
+                Completed
+            </a>
+            <a href="${pageContext.request.contextPath}/bookings?status=CANCELLED"
+               class="btn btn-sm ${selectedStatus == 'CANCELLED' ? 'btn-primary' : 'btn-ghost'}">
+                Cancelled
+            </a>
+        </div>
+
+        <c:choose>
+            <c:when test="${empty bookings}">
+                <!-- Intentional Empty State -->
+                <div class="pc-empty-state" style="max-width: 600px; margin: 3rem auto; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent);">✦</div>
+                    <c:choose>
+                        <c:when test="${not empty selectedStatus and selectedStatus != 'ALL'}">
+                            <h2 class="editorial-heading" style="font-size: 1.7rem; margin-bottom: 0.75rem;">No Matching Bookings</h2>
+                            <p style="font-size: 1.05rem; margin-bottom: 2rem; color: var(--muted);">
+                                No photo shoot bookings found with status <strong><c:out value="${selectedStatus}"/></strong>.
+                            </p>
+                            <a href="${pageContext.request.contextPath}/bookings" class="btn btn-secondary">
+                                View All Bookings &rarr;
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <h2 class="editorial-heading" style="font-size: 1.7rem; margin-bottom: 0.75rem;">No Bookings Yet</h2>
+                            <p style="font-size: 1.05rem; margin-bottom: 2rem; color: var(--muted);">
+                                You haven&rsquo;t requested any photography sessions yet. Browse our verified roster to find the ideal artist for your vision.
+                            </p>
+                            <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary btn-lg">
+                                Explore Photographers &rarr;
+                            </a>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-            </c:if>
-
-            <!-- Status Filter Tabs -->
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
-                <a href="${pageContext.request.contextPath}/bookings"
-                   class="btn btn-sm ${empty selectedStatus or selectedStatus == 'ALL' ? 'btn-primary' : 'btn-ghost'}">
-                    Tất cả / All
-                </a>
-                <a href="${pageContext.request.contextPath}/bookings?status=UPCOMING"
-                   class="btn btn-sm ${selectedStatus == 'UPCOMING' ? 'btn-primary' : 'btn-ghost'}">
-                    Sắp diễn ra / Upcoming
-                </a>
-                <a href="${pageContext.request.contextPath}/bookings?status=PENDING"
-                   class="btn btn-sm ${selectedStatus == 'PENDING' ? 'btn-primary' : 'btn-ghost'}">
-                    Chờ duyệt / Pending
-                </a>
-                <a href="${pageContext.request.contextPath}/bookings?status=ACCEPTED"
-                   class="btn btn-sm ${selectedStatus == 'ACCEPTED' ? 'btn-primary' : 'btn-ghost'}">
-                    Đã xác nhận / Accepted
-                </a>
-                <a href="${pageContext.request.contextPath}/bookings?status=COMPLETED"
-                   class="btn btn-sm ${selectedStatus == 'COMPLETED' ? 'btn-primary' : 'btn-ghost'}">
-                    Hoàn thành / Completed
-                </a>
-                <a href="${pageContext.request.contextPath}/bookings?status=CANCELLED"
-                   class="btn btn-sm ${selectedStatus == 'CANCELLED' ? 'btn-primary' : 'btn-ghost'}">
-                    Đã hủy / Cancelled
-                </a>
-            </div>
-
-            <c:choose>
-                <c:when test="${empty bookings}">
-                    <!-- Intentional Empty State -->
-                    <div class="pc-empty-state" style="max-width: 600px; margin: 3rem auto; text-align: center;">
-                        <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent);">✦</div>
-                        <c:choose>
-                            <c:when test="${not empty selectedStatus and selectedStatus != 'ALL'}">
-                                <h2 class="editorial-heading" style="font-size: 1.7rem; margin-bottom: 0.75rem;">Không có lịch chụp phù hợp</h2>
-                                <p style="font-size: 1.05rem; margin-bottom: 2rem; color: var(--muted);">
-                                    Không tìm thấy lịch chụp nào với trạng thái <strong><c:out value="${selectedStatus}"/></strong>.
-                                </p>
-                                <a href="${pageContext.request.contextPath}/bookings" class="btn btn-secondary">
-                                    Xem tất cả lịch chụp / View All &rarr;
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <h2 class="editorial-heading" style="font-size: 1.7rem; margin-bottom: 0.75rem;">No Bookings Yet</h2>
-                                <p style="font-size: 1.05rem; margin-bottom: 2rem; color: var(--muted);">
-                                    You haven&rsquo;t requested any photography sessions yet. Browse our verified roster to find the ideal artist for your vision.
-                                </p>
-                                <a href="${pageContext.request.contextPath}/photographers" class="btn btn-primary btn-lg">
-                                    Explore Photographers &rarr;
-                                </a>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="pc-card-list">
-                        <c:forEach var="booking" items="${bookings}">
-                            <article class="pc-list-card pc-stack-mobile">
-                                <div>
-                                    <div style="margin-bottom: 0.35rem;">
-                                        <span class="status-badge ${booking.status}"><c:out value="${booking.status}"/></span>
-                                    </div>
-                                    <h2 class="editorial-heading" style="margin-bottom: 0.35rem; font-size: 1.35rem;">
-                                        Session with <c:out value="${booking.photographerName}"/>
-                                    </h2>
-                                    <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
-                                    <p style="color: var(--muted); font-size: 0.92rem; margin-bottom: 0.5rem;">
-                                        <fmt:formatDate value="${parsedBookingDate}" pattern="EEEE, MMMM d, yyyy" /> at <c:out value="${booking.bookingTime}"/>
-                                    </p>
-                                    <div style="color: var(--muted); font-size: 0.88rem;">
-                                        Location: <strong style="color: var(--text);"><c:out value="${booking.location}"/></strong>
-                                    </div>
+            </c:when>
+            <c:otherwise>
+                <div class="pc-card-list">
+                    <c:forEach var="booking" items="${bookings}">
+                        <article class="pc-list-card pc-stack-mobile">
+                            <div>
+                                <div style="margin-bottom: 0.35rem;">
+                                    <span class="status-badge ${booking.status}"><c:out value="${booking.status}"/></span>
                                 </div>
-                                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
-                                    <div style="font-family: var(--font-primary); font-weight: 600; font-size: 1.25rem; color: var(--text);">
-                                        <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
-                                    </div>
-                                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="btn btn-ghost btn-sm">
-                                            Open Chat
-                                        </a>
-                                        <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="btn btn-secondary btn-sm">
-                                            View Details &rarr;
-                                        </a>
-                                    </div>
+                                <h2 class="editorial-heading" style="margin-bottom: 0.35rem; font-size: 1.35rem;">
+                                    Session with <c:out value="${booking.photographerName}"/>
+                                </h2>
+                                <fmt:parseDate value="${booking.bookingDate}" pattern="yyyy-MM-dd" var="parsedBookingDate" type="date" />
+                                <p style="color: var(--muted); font-size: 0.92rem; margin-bottom: 0.5rem;">
+                                    <fmt:formatDate value="${parsedBookingDate}" pattern="EEEE, MMMM d, yyyy" /> at <c:out value="${booking.bookingTime}"/>
+                                </p>
+                                <div style="color: var(--muted); font-size: 0.88rem;">
+                                    Location: <strong style="color: var(--text);"><c:out value="${booking.location}"/></strong>
                                 </div>
-                            </article>
-                        </c:forEach>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+                            </div>
+                            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                                <div style="font-family: var(--font-primary); font-weight: 600; font-size: 1.25rem; color: var(--text);">
+                                    <fmt:formatNumber value="${booking.agreedPrice}" pattern="#,##0" /> VND
+                                </div>
+                                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                                    <a href="${pageContext.request.contextPath}/bookings/${booking.id}/chat" class="btn btn-ghost btn-sm">
+                                        Open Chat
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/bookings/${booking.id}" class="btn btn-secondary btn-sm">
+                                        View Details &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    </c:forEach>
+                </div>
+            </c:otherwise>
+        </c:choose>
 
-        </div>
-    </main>
+    </div>
+</main>
 
-    <!-- Editorial Footer -->
-    <footer class="pc-footer">
-        <div class="editorial-container">
-            <div style="color: var(--muted); font-size: 0.85rem;">
-                &copy; 2026 PhotoConnect. Client Session Management.
-            </div>
+<!-- Editorial Footer -->
+<footer class="pc-footer">
+    <div class="editorial-container">
+        <div style="color: var(--muted); font-size: 0.85rem;">
+            &copy; 2026 PhotoConnect. Client Session Management.
         </div>
-    </footer>
+    </div>
+</footer>

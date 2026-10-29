@@ -2,8 +2,11 @@ package com.photoconnect.service;
 
 import com.photoconnect.entity.PhotographerProfile;
 import com.photoconnect.entity.PhotographerVerificationStatus;
+import com.photoconnect.entity.User;
+import com.photoconnect.entity.UserRole;
 import com.photoconnect.exception.InvalidStatusTransitionException;
 import com.photoconnect.repository.PhotographerProfileRepository;
+import com.photoconnect.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,7 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
 
     private final PhotographerProfileRepository photographerProfileRepository;
     private final OperationalAuditService auditService;
+    private UserRepository userRepository;
 
     public AdminPhotographerServiceImpl(PhotographerProfileRepository photographerProfileRepository) {
         this(photographerProfileRepository, null);
@@ -24,6 +28,11 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
                                         @org.springframework.beans.factory.annotation.Autowired(required = false) OperationalAuditService auditService) {
         this.photographerProfileRepository = photographerProfileRepository;
         this.auditService = auditService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     /**
@@ -83,6 +92,16 @@ public class AdminPhotographerServiceImpl implements AdminPhotographerService {
         if (adminNotes != null && !adminNotes.isBlank()) {
             profile.setAdminNotes(adminNotes.trim());
         }
+
+        // Transactional role promotion from CUSTOMER to PHOTOGRAPHER upon approval
+        User user = profile.getUser();
+        if (user != null) {
+            user.setRole(UserRole.PHOTOGRAPHER);
+            if (userRepository != null) {
+                userRepository.save(user);
+            }
+        }
+
         PhotographerProfile saved = photographerProfileRepository.save(profile);
         if (auditService != null && adminId != null) {
             auditService.record(adminId, "PHOTOGRAPHER_APPROVE", "PhotographerProfile", profileId,
